@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520">
+  <style>text{font-family:Arial,'Noto Sans KR',sans-serif;fill:#203455}.title{font-size:30px;font-weight:700}.sub{font-size:18px;fill:#5b6880}.label{font-size:19px;font-weight:700}.edge{stroke:#7891b7;stroke-width:4;fill:none}</style>
+  <rect width="1200" height="520" rx="28" fill="#f7f9fc"/>
+  <text x="52" y="58" class="title">PatchCore: 정상 특징 memory bank와 최근접 거리</text>
+  <text x="52" y="92" class="sub">정상 이미지의 지역 특징을 저장하고 검사 patch가 정상 특징에서 얼마나 먼지 계산합니다.</text>
+  <rect x="70" y="160" width="200" height="120" rx="16" fill="#edf3ff" stroke="#aac1ee" stroke-width="2"/>
+  <text x="170" y="205" text-anchor="middle" class="label">정상 이미지</text><text x="170" y="238" text-anchor="middle" class="sub">normal only</text>
+  <path d="M270 220 H380" class="edge"/><polygon points="380,220 360,207 360,233" fill="#7891b7"/>
+  <rect x="400" y="160" width="220" height="120" rx="16" fill="#fff" stroke="#b9c9e7" stroke-width="2"/>
+  <text x="510" y="205" text-anchor="middle" class="label">CNN feature</text><text x="510" y="238" text-anchor="middle" class="sub">local descriptors</text>
+  <path d="M620 220 H710" class="edge"/><polygon points="710,220 690,207 690,233" fill="#7891b7"/>
+  <rect x="730" y="135" width="200" height="170" rx="16" fill="#e5f5f2" stroke="#8ac7a5" stroke-width="2"/>
+  <text x="830" y="180" text-anchor="middle" class="label">Memory Bank</text>
+  <circle cx="765" cy="215" r="6" fill="#2454d8"/><circle cx="792" cy="215" r="6" fill="#08796f"/><circle cx="819" cy="215" r="6" fill="#08796f"/><circle cx="846" cy="215" r="6" fill="#08796f"/><circle cx="873" cy="215" r="6" fill="#2454d8"/><circle cx="900" cy="215" r="6" fill="#08796f"/><circle cx="765" cy="243" r="6" fill="#08796f"/><circle cx="792" cy="243" r="6" fill="#08796f"/><circle cx="819" cy="243" r="6" fill="#2454d8"/><circle cx="846" cy="243" r="6" fill="#08796f"/><circle cx="873" cy="243" r="6" fill="#08796f"/><circle cx="900" cy="243" r="6" fill="#08796f"/><circle cx="765" cy="271" r="6" fill="#2454d8"/><circle cx="792" cy="271" r="6" fill="#08796f"/><circle cx="819" cy="271" r="6" fill="#08796f"/><circle cx="846" cy="271" r="6" fill="#08796f"/><circle cx="873" cy="271" r="6" fill="#2454d8"/><circle cx="900" cy="271" r="6" fill="#08796f"/>
+  <path d="M830 305 V370 H520" class="edge"/>
+  <rect x="365" y="350" width="310" height="105" rx="16" fill="#182943"/>
+  <text x="520" y="392" text-anchor="middle" font-size="20" font-weight="700" fill="#fff">검사 patch ↔ 최근접 정상 특징</text>
+  <text x="520" y="425" text-anchor="middle" font-size="18" fill="#91afff">distance ↑ → anomaly score ↑</text>
+  <rect x="930" y="350" width="200" height="105" rx="16" fill="#fff0e5" stroke="#d79b66" stroke-width="2"/>
+  <text x="1030" y="392" text-anchor="middle" class="label">Anomaly Map</text><text x="1030" y="425" text-anchor="middle" class="sub">pixel 위치로 복원</text>
+  <path d="M675 402 H925" class="edge"/><polygon points="925,402 905,389 905,415" fill="#7891b7"/>
+</svg>
