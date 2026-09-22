@@ -3,26 +3,37 @@ name: Deploy study notes
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: github-pages
-  cancel-in-progress: false
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and validate
+        run: |
+          python3 scripts/build.py
+          python3 scripts/validate.py
+          node --check assets/site.js
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Build and validate
+      - name: Build static site
         run: |
           python3 scripts/build.py
           python3 scripts/validate.py
