@@ -264,11 +264,17 @@ PAGE_TERMS = {
         ("BGR", "Blue, Green, Red", "OpenCV에서 흔히 사용하는 파랑·초록·빨강 채널 순서"),
         ("NCHW", "Batch, Channel, Height, Width", "딥러닝 텐서의 배치·채널·높이·너비 순서"),
         ("dtype", "data type", "숫자를 저장하는 자료형"),
+        ("Tensor", "Tensor", "여러 축을 가진 숫자 배열"),
     ],
     "cnn": [
         ("CNN", "Convolutional Neural Network", "합성곱 신경망"),
         ("Conv", "Convolution", "합성곱 연산 또는 합성곱 층"),
         ("ReLU", "Rectified Linear Unit", "음수는 0, 양수는 그대로 두는 활성화 함수"),
+        ("Kernel", "Convolution kernel", "입력의 작은 영역에 반복 적용하는 학습 가중치"),
+        ("Stride", "Stride", "커널이 한 번에 이동하는 칸 수"),
+        ("Padding", "Padding", "입력 가장자리에 값을 덧붙여 공간 크기를 조절하는 방법"),
+        ("Feature map", "Feature map", "필터 반응이 공간 위치별로 기록된 출력 배열"),
+        ("Receptive field", "Receptive field", "한 출력 값이 영향을 받을 수 있는 입력 영역"),
     ],
     "vit": [
         ("ViT", "Vision Transformer", "이미지를 패치 토큰으로 처리하는 Transformer 계열 모델"),
@@ -277,29 +283,49 @@ PAGE_TERMS = {
         ("MSA", "Multi-Head Self-Attention", "여러 Attention head를 병렬로 사용하는 연산"),
         ("LN", "Layer Normalization", "한 샘플 내부 특징을 정규화하는 층"),
         ("MLP", "Multi-Layer Perceptron", "여러 완전연결층으로 구성된 신경망 블록"),
+        ("Patch", "Image patch", "이미지를 일정 크기로 잘라 만든 작은 조각"),
+        ("Token", "Token", "Transformer가 한 단위로 처리하는 벡터"),
+        ("Embedding", "Embedding", "원래 데이터를 모델이 계산하기 좋은 벡터 표현으로 바꾼 값"),
+        ("Self-Attention", "Self-Attention", "같은 입력 안의 token들이 서로 어떤 정보를 참고할지 계산하는 연산"),
     ],
     "tasks": [
         ("IoU", "Intersection over Union", "예측 영역과 정답 영역의 교집합을 합집합으로 나눈 값"),
         ("NMS", "Non-Maximum Suppression", "겹치는 검출 상자 중 중복 후보를 제거하는 후처리"),
+        ("Classification", "Classification", "이미지 전체가 어떤 클래스인지 맞히는 문제"),
+        ("Detection", "Object Detection", "객체의 클래스와 위치 상자를 함께 찾는 문제"),
+        ("Segmentation", "Segmentation", "픽셀 단위로 객체 영역을 구분하는 문제"),
     ],
     "training": [
         ("TP / FP / FN / TN", "True Positive / False Positive / False Negative / True Negative", "이진 분류 결과를 네 경우로 나눈 혼동행렬 용어"),
         ("CV", "Cross-Validation", "데이터 분할을 바꾸어 여러 번 평가하는 교차검증"),
         ("ROC", "Receiver Operating Characteristic", "threshold 변화에 따른 TPR과 FPR 관계 곡선"),
         ("AUC", "Area Under the Curve", "곡선 아래 면적을 요약한 값"),
+        ("Threshold", "Decision threshold", "연속 점수를 정상/이상 같은 최종 판단으로 바꾸는 기준값"),
+        ("Precision", "Precision", "이상이라고 예측한 것 중 실제 이상인 비율"),
+        ("Recall", "Recall", "실제 이상 중 모델이 찾아낸 비율"),
+        ("Data leakage", "Data leakage", "평가 데이터 정보가 학습 과정에 새어 들어가는 문제"),
     ],
     "resnet": [
         ("ResNet", "Residual Network", "잔차 연결을 사용하는 신경망"),
         ("BN", "Batch Normalization", "미니배치 통계를 이용하는 정규화 층"),
         ("ReLU", "Rectified Linear Unit", "음수는 0으로 만드는 활성화 함수"),
+        ("Residual", "Residual", "목표 출력에서 입력을 뺀 차이 F(x)"),
+        ("Shortcut", "Shortcut connection", "일부 층을 우회해 입력을 뒤쪽으로 직접 전달하는 경로"),
     ],
     "unet": [
         ("U-Net", "U-shaped Network", "Encoder와 Decoder를 U자 형태로 연결한 분할 구조의 이름"),
         ("Conv", "Convolution", "합성곱 연산 또는 합성곱 층"),
+        ("Encoder", "Encoder", "해상도를 줄이며 의미 특징을 추출하는 경로"),
+        ("Decoder", "Decoder", "해상도를 복원하며 픽셀 단위 출력을 만드는 경로"),
+        ("Skip connection", "Skip connection", "Encoder의 고해상도 특징을 Decoder로 직접 전달하는 연결"),
+        ("Concat", "Concatenation", "텐서를 이어 붙이는 연산"),
     ],
     "patchcore": [
         ("CNN", "Convolutional Neural Network", "지역 특징을 추출하는 합성곱 신경망"),
         ("GB", "Gigabyte", "약 10억 byte 크기의 저장 용량 단위"),
+        ("Memory bank", "Feature memory bank", "정상 데이터에서 추출한 특징 벡터를 저장한 집합"),
+        ("Coreset", "Coreset", "전체 특징을 대표하도록 선택한 작은 부분집합"),
+        ("Nearest neighbor", "Nearest neighbor", "특징 공간에서 가장 가까운 정상 특징"),
     ],
     "cs231n": [
         ("CS231n", "Stanford CS231n: Deep Learning for Computer Vision", "Stanford의 컴퓨터 비전 딥러닝 강의"),
@@ -312,9 +338,17 @@ PAGE_TERMS = {
         ("CLIP", "Contrastive Language–Image Pre-training", "이미지와 텍스트 표현을 함께 학습하는 모델"),
         ("DINO", "self-DIstillation with NO labels", "라벨 없이 teacher–student 방식으로 표현을 학습하는 방법"),
         ("FLOPs", "Floating-Point Operations", "모델 계산량을 나타낼 때 쓰는 부동소수점 연산 수"),
+        ("Logit", "Logit / raw class score", "softmax를 적용하기 전 클래스별 원시 점수"),
+        ("Loss", "Loss function", "예측이 정답과 얼마나 다른지 수치로 표현한 값"),
+        ("Gradient", "Gradient", "파라미터를 조금 바꿨을 때 loss가 어느 방향으로 변하는지 나타내는 값"),
+        ("Backpropagation", "Backpropagation", "chain rule을 이용해 뒤쪽부터 gradient를 계산하는 방법"),
     ],
     "prml": [
         ("PRML", "Pattern Recognition and Machine Learning", "Christopher M. Bishop의 패턴인식·머신러닝 교재"),
+        ("Prior", "Prior distribution", "데이터를 보기 전에 가진 파라미터에 대한 믿음"),
+        ("Likelihood", "Likelihood", "주어진 파라미터에서 관측 데이터가 나타날 가능도를 보는 함수"),
+        ("Posterior", "Posterior distribution", "데이터를 본 뒤 갱신된 파라미터 분포"),
+        ("Latent variable", "Latent variable", "모델에는 존재하지만 직접 관측되지 않는 숨은 변수"),
         ("ML", "Maximum Likelihood", "이 문서 문맥에서는 가능도를 최대화하는 최대우도 추정"),
         ("MAP", "Maximum A Posteriori", "사후확률을 최대화하는 추정"),
         ("RBF", "Radial Basis Function", "거리 기반 방사형 기저 함수"),
@@ -354,9 +388,17 @@ def term_guide(slug):
         '<aside class="term-guide" aria-label="약어와 핵심 용어">'
         '<div class="term-guide-head"><span>BEGINNER GUIDE</span>'
         '<strong>약어·용어 먼저 보기</strong></div>'
-        '<p>이 페이지에서 약어가 나오면 아래 뜻으로 읽으면 됩니다. '
+        '<p>이 페이지에서 낯선 약어와 영어 용어가 나오면 아래 뜻으로 읽으면 됩니다. '
         '처음 배우는 사람을 기준으로 영어 원문과 한국어 의미를 함께 적었습니다.</p>'
-        f'<dl>{rows}</dl></aside>'
+        f'<dl>{rows}</dl>'
+        '<div class="symbol-guide"><strong>수식 기호 읽는 법</strong>'
+        '<span><b>Σ</b> 여러 값을 모두 더함</span>'
+        '<span><b>∈</b> ~에 속함</span>'
+        '<span><b>∂</b> 다른 변수는 고정한 편미분</span>'
+        '<span><b>‖v‖₂</b> 벡터의 L2 길이</span>'
+        '<span><b>≈</b> 대략 같음</span>'
+        '<span><b>∝</b> 비례함</span></div>'
+        '</aside>'
     )
 
 
