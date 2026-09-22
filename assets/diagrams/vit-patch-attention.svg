@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520">
+  <style>text{font-family:Arial,'Noto Sans KR',sans-serif;fill:#203455}.title{font-size:30px;font-weight:700}.sub{font-size:18px;fill:#5b6880}.label{font-size:20px;font-weight:700}.edge{stroke:#7891b7;stroke-width:4;fill:none}</style>
+  <rect width="1200" height="520" rx="28" fill="#f7f9fc"/>
+  <text x="52" y="58" class="title">Vision Transformer: Patch → Token → Attention</text>
+  <text x="52" y="92" class="sub">이미지를 작은 patch sequence로 바꾼 뒤 token 사이 관계를 계산합니다.</text>
+  <g transform="translate(70 150)">
+    <rect width="250" height="250" rx="14" fill="#fff" stroke="#b9c9e7" stroke-width="3"/>
+    <path d="M 62.5 0 V 250 M 0 62.5 H 250" stroke="#759ae6" stroke-width="2"/><path d="M 125 0 V 250 M 0 125 H 250" stroke="#759ae6" stroke-width="2"/><path d="M 187.5 0 V 250 M 0 187.5 H 250" stroke="#759ae6" stroke-width="2"/>
+    <rect x="4" y="4" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="66.5" y="4" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="129" y="4" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="191.5" y="4" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="4" y="66.5" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="66.5" y="66.5" width="54.5" height="54.5" rx="4" fill="#91afff"/><rect x="129" y="66.5" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="191.5" y="66.5" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="4" y="129" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="66.5" y="129" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="129" y="129" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="191.5" y="129" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="4" y="191.5" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="66.5" y="191.5" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="129" y="191.5" width="54.5" height="54.5" rx="4" fill="#e8eef9"/><rect x="191.5" y="191.5" width="54.5" height="54.5" rx="4" fill="#e8eef9"/>
+    <text x="125" y="285" text-anchor="middle" class="label">224×224 → 16×16 patch</text>
+  </g>
+  <path d="M350 275 H420" class="edge"/><polygon points="420,275 400,262 400,288" fill="#7891b7"/>
+  <g transform="translate(460 165)">
+    <rect x="0" y="0" width="44" height="210" rx="9" fill="#08796f"/><rect x="58" y="0" width="44" height="210" rx="9" fill="#2454d8"/><rect x="116" y="0" width="44" height="210" rx="9" fill="#2454d8"/><rect x="174" y="0" width="44" height="210" rx="9" fill="#2454d8"/><rect x="232" y="0" width="44" height="210" rx="9" fill="#2454d8"/><rect x="290" y="0" width="44" height="210" rx="9" fill="#2454d8"/><rect x="348" y="0" width="44" height="210" rx="9" fill="#2454d8"/>
+    <text x="22" y="28" text-anchor="middle" font-size="15" fill="#fff">CLS</text>
+    <text x="175" y="250" text-anchor="middle" class="label">Token sequence [N+1, D]</text>
+  </g>
+  <path d="M855 275 H915" class="edge"/><polygon points="915,275 895,262 895,288" fill="#7891b7"/>
+  <g transform="translate(940 145)">
+    <rect width="200" height="250" rx="18" fill="#182943"/>
+    <text x="100" y="42" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">Self-Attention</text>
+    <circle cx="55" cy="95" r="19" fill="#91afff"/><circle cx="145" cy="95" r="19" fill="#91afff"/>
+    <circle cx="55" cy="180" r="19" fill="#20c4bb"/><circle cx="145" cy="180" r="19" fill="#20c4bb"/>
+    <path d="M70 104 L130 168 M130 104 L70 168 M55 114 V161 M145 114 V161" stroke="#dce7fb" stroke-width="3"/>
+    <text x="100" y="225" text-anchor="middle" font-size="18" fill="#e5edff">Q · K · V</text>
+  </g>
+  <text x="60" y="480" class="sub">ViT-B/16, 224×224 예시: 14×14 = 196 patch + CLS 1개 → 197 token.</text>
+</svg>
