@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500">
+  <style>text{font-family:Arial,'Noto Sans KR',sans-serif;fill:#203455}.title{font-size:30px;font-weight:700}.sub{font-size:18px;fill:#5b6880}.label{font-size:20px;font-weight:700}.edge{stroke:#7891b7;stroke-width:4;fill:none}</style>
+  <rect width="1200" height="500" rx="28" fill="#f7f9fc"/>
+  <text x="52" y="58" class="title">EM Algorithm: 숨은 변수와 파라미터를 번갈아 추정</text>
+  <text x="52" y="92" class="sub">GMM처럼 cluster assignment z가 보이지 않을 때 posterior responsibility와 parameter update를 반복합니다.</text>
+  <circle cx="230" cy="250" r="120" fill="#edf3ff" stroke="#91afff" stroke-width="4"/>
+  <text x="230" y="230" text-anchor="middle" class="label">E-step</text>
+  <text x="230" y="268" text-anchor="middle" class="sub">q(z) = p(z|x, θ)</text>
+  <circle cx="760" cy="250" r="120" fill="#e5f5f2" stroke="#20a99d" stroke-width="4"/>
+  <text x="760" y="230" text-anchor="middle" class="label">M-step</text>
+  <text x="760" y="268" text-anchor="middle" class="sub">θ ← argmax E[log p]</text>
+  <path d="M350 215 C470 140 600 140 640 200" class="edge"/><polygon points="640,200 616,193 628,217" fill="#7891b7"/>
+  <path d="M640 300 C520 375 390 375 350 315" class="edge"/><polygon points="350,315 374,322 362,298" fill="#7891b7"/>
+  <text x="500" y="158" text-anchor="middle" class="label">responsibility</text>
+  <text x="500" y="370" text-anchor="middle" class="label">updated parameters</text>
+  <rect x="930" y="180" width="210" height="140" rx="16" fill="#182943"/>
+  <text x="1035" y="225" text-anchor="middle" font-size="21" font-weight="700" fill="#fff">반복 종료</text>
+  <text x="1035" y="263" text-anchor="middle" font-size="18" fill="#e5edff">likelihood 변화가</text>
+  <text x="1035" y="293" text-anchor="middle" font-size="18" fill="#e5edff">충분히 작을 때</text>
+</svg>
