@@ -1,0 +1,53 @@
+"""Validate local links, fragment targets and document structure in generated pages."""
+from html.parser import HTMLParser
+from pathlib import Path
+from urllib.parse import unquote, urlsplit
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class PageParser(HTMLParser):
+    """Collect identifiers and local resource references from one HTML page."""
+
+    def __init__(self):
+        super().__init__()
+        self.ids = []
+        self.links = []
+        self.h1_count = 0
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if 'id' in attrs:
+            self.ids.append(attrs['id'])
+        if tag == 'h1':
+            self.h1_count += 1
+        for key in ('href', 'src'):
+            if key in attrs:
+                self.links.append(attrs[key])
+
+
+pages = {}
+errors = []
+for path in [ROOT / 'index.html', *sorted((ROOT / 'notes').glob('*.html'))]:
+    parser = PageParser()
+    parser.feed(path.read_text(encoding='utf-8'))
+    pages[path.resolve()] = parser
+    if len(parser.ids) != len(set(parser.ids)):
+        errors.append(f'Duplicate ID: {path.name}')
+    if parser.h1_count != 1:
+        errors.append(f'Expected one h1: {path.name}')
+
+for path, parser in pages.items():
+    for link in parser.links:
+        parsed = urlsplit(link)
+        if parsed.scheme or parsed.netloc:
+            continue
+        target = (path.parent / unquote(parsed.path)).resolve() if parsed.path else path
+        if not target.exists():
+            errors.append(f'Missing resource: {path.name} -> {link}')
+        if parsed.fragment and target in pages and parsed.fragment not in pages[target].ids:
+            errors.append(f'Missing anchor: {path.name} -> {link}')
+
+if errors:
+    raise SystemExit('\n'.join(errors))
+print(f'Validated {len(pages)} pages: local links, IDs, anchors, and headings.')
