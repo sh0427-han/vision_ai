@@ -68,6 +68,7 @@ def register_prml(
 <p>1장은 polynomial curve fitting을 통해 과적합, regularization, model selection을
 소개하고, 이후 책 전체에 쓰이는 확률론·결정이론·정보이론의 언어를 만듭니다.
 데이터를 정확히 맞추는 모델과 새로운 데이터에 잘 일반화하는 모델은 다를 수 있습니다.</p>
+<figure class="study-diagram"><img src="../assets/diagrams/prml-bayes.svg" alt="Prior와 likelihood를 결합해 posterior를 얻고 decision으로 연결하는 Bayesian 흐름" loading="lazy" decoding="async"><figcaption>PRML 전반을 관통하는 prior → likelihood → posterior → decision 구조입니다.</figcaption></figure>
 """
                 + equation(
                     "Bayes theorem:\n"
@@ -274,6 +275,7 @@ CNN과 계산 구조는 다르지만 “지역 일관성과 관측 evidence를 �
 여러 component의 weighted sum으로 모델링합니다. 각 데이터가 어느 component에서
 왔는지 나타내는 latent assignment z가 관측되지 않았기 때문에 직접 최적화가
 복잡해집니다.</p>
+<figure class="study-diagram"><img src="../assets/diagrams/prml-em.svg" alt="E-step과 M-step을 반복해 숨은 변수와 파라미터를 번갈아 추정하는 EM 알고리즘" loading="lazy" decoding="async"><figcaption>E-step의 responsibility 추정과 M-step의 parameter update를 반복하는 흐름입니다.</figcaption></figure>
 """
                 + equation(
                     "p(x) = Σ_k π_k N(x | μ_k, Σ_k)\n"
@@ -362,6 +364,7 @@ autoassociative neural network와 nonlinear manifold modelling까지 이어집�
 <p>정적인 샘플이 아니라 시간 순서 <code>x₁:T</code>를 다루면 현재 상태와 이전 상태의
 dependency를 표현해야 합니다. Markov model은 제한된 과거만으로 다음 상태를 설명하는
 가정을 사용합니다.</p>
+<figure class="study-diagram"><img src="../assets/diagrams/prml-hmm.svg" alt="시간에 따라 전이하는 숨은 상태 z가 각 시점의 관측 x를 생성하는 Hidden Markov Model" loading="lazy" decoding="async"><figcaption>HMM의 state transition과 emission 관계를 시간축 위에 배치했습니다.</figcaption></figure>
 """
                 + equation(
                     "1차 Markov 가정:\n"
