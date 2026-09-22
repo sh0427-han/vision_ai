@@ -4,8 +4,360 @@ from pathlib import Path
 
 from reference_notes import register_reference_notes
 
+
 ROOT = Path(__file__).resolve().parents[1]
 NOTES = []
+
+EQUATION_TEX = {
+    "x_scaled = x_uint8 / 255\nx_normalized = (x_scaled − mean) / std": r"""
+\begin{aligned}
+x_{\mathrm{scaled}} &= \frac{x_{\mathrm{uint8}}}{255} \\
+x_{\mathrm{normalized}} &= \frac{x_{\mathrm{scaled}}-\mu}{\sigma}
+\end{aligned}
+""",
+    "출력[y, x] = Σ 입력[y+i, x+j] × 커널[i, j] + bias\n예시 커널 = [[−1, 0, 1], [−1, 0, 1], [−1, 0, 1]]": r"""
+\begin{aligned}
+Y[y,x] &= \sum_{i=0}^{2}\sum_{j=0}^{2} X[y+i,x+j]K[i,j] + b \\
+K &= \begin{bmatrix}-1&0&1\\-1&0&1\\-1&0&1\end{bmatrix}
+\end{aligned}
+""",
+    "H_out = floor((H + 2P − D(K−1) − 1) / S + 1)\nW_out도 같은 방식으로 계산\nH=224, K=3, P=1, D=1, S=2 → H_out=112": r"""
+\begin{aligned}
+H_{\mathrm{out}} &= \left\lfloor \frac{H+2P-D(K-1)-1}{S}+1 \right\rfloor \\
+H=224,\ K=3,\ P=1,\ D=1,\ S=2 &\Rightarrow H_{\mathrm{out}}=112
+\end{aligned}
+""",
+    "N = (H/P) × (W/P)\npatch_flat: [B, N, P²C]\nembedding = patch_flat × E + bias\nE: [P²C, D] → output: [B, N, D]": r"""
+\begin{aligned}
+N &= \frac{H}{P}\times\frac{W}{P} \\
+X_{\mathrm{patch}} &\in \mathbb{R}^{B\times N\times P^2C} \\
+Z &= X_{\mathrm{patch}}E+b,\qquad E\in\mathbb{R}^{P^2C\times D} \\
+Z &\in \mathbb{R}^{B\times N\times D}
+\end{aligned}
+""",
+    "z₀ = [CLS; patch₁E; …; patch₁₉₆E] + E_position\nshape: [B, 197, 768]": r"""
+z_0 =
+\left[
+x_{\mathrm{CLS}};
+x_p^1E;
+\ldots;
+x_p^{196}E
+\right]
++ E_{\mathrm{pos}},
+\qquad
+z_0\in\mathbb{R}^{B\times197\times768}
+""",
+    "Q = XW_Q,  K = XW_K,  V = XW_V\nAttention(Q,K,V) = softmax(QKᵀ / √d_k) V": r"""
+\begin{aligned}
+Q &= XW_Q,\qquad K=XW_K,\qquad V=XW_V \\
+\operatorname{Attention}(Q,K,V)
+&=
+\operatorname{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V
+\end{aligned}
+""",
+    "z′ = z + MSA(LN(z))\nz_next = z′ + MLP(LN(z′))": r"""
+\begin{aligned}
+z' &= z + \operatorname{MSA}(\operatorname{LN}(z)) \\
+z_{\mathrm{next}} &= z' + \operatorname{MLP}(\operatorname{LN}(z'))
+\end{aligned}
+""",
+    "IoU = |예측 ∩ 정답| / |예측 ∪ 정답|\nDice = 2|예측 ∩ 정답| / (|예측| + |정답|)": r"""
+\begin{aligned}
+\operatorname{IoU} &= \frac{|P\cap G|}{|P\cup G|} \\
+\operatorname{Dice} &= \frac{2|P\cap G|}{|P|+|G|}
+\end{aligned}
+""",
+    "Precision = TP / (TP + FP)\nRecall = TP / (TP + FN)\nF1 = 2TP / (2TP + FP + FN)": r"""
+\begin{aligned}
+\operatorname{Precision} &= \frac{TP}{TP+FP} \\
+\operatorname{Recall} &= \frac{TP}{TP+FN} \\
+F_1 &= \frac{2TP}{2TP+FP+FN}
+\end{aligned}
+""",
+    "합산 전 목표: H(x) = x + F(x)\n단순한 합산 경로의 미분: ∂H/∂x = I + ∂F/∂x": r"""
+\begin{aligned}
+H(x) &= x+F(x) \\
+\frac{\partial H}{\partial x} &= I+\frac{\partial F}{\partial x}
+\end{aligned}
+""",
+    "한 픽셀의 cross-entropy = −log p(정답 클래스)\np=0.8 → loss≈0.223 / p=0.2 → loss≈1.609": r"""
+\begin{aligned}
+\mathcal{L}_{\mathrm{CE}} &= -\log p_y \\
+p_y=0.8 &\Rightarrow \mathcal{L}\approx0.223 \\
+p_y=0.2 &\Rightarrow \mathcal{L}\approx1.609
+\end{aligned}
+""",
+    "Memory ≈ 이미지 수 × 특징 위치 수 × 특징 차원 × 원소 bytes\n1,000 × 784 × 1,024 × 4 ≈ 3.21 GB": r"""
+\begin{aligned}
+M &\approx N_{\mathrm{img}}\times N_{\mathrm{loc}}\times D_{\mathrm{feat}}\times B_{\mathrm{elem}} \\
+1000\times784\times1024\times4 &\approx 3.21\ \mathrm{GB}
+\end{aligned}
+""",
+    "패치 점수 sᵢ = min_{m ∈ M} ||fᵢ − m||₂\nM: 정상 특징 저장소 / fᵢ: 검사 이미지 i번째 지역 특징": r"""
+s_i = \min_{m\in\mathcal{M}}\left\|f_i-m\right\|_2,
+\qquad
+\mathcal{M}=\text{normal feature memory bank}
+""",
+    "L1 거리 = Σᵢ |xᵢ − yᵢ|\nL2 거리 = √(Σᵢ (xᵢ − yᵢ)²)": r"""
+\begin{aligned}
+d_{L1}(x,y) &= \sum_i |x_i-y_i| \\
+d_{L2}(x,y) &= \sqrt{\sum_i (x_i-y_i)^2}
+\end{aligned}
+""",
+    "scores = W x + b\nx: [D] / W: [K, D] / b: [K] / scores: [K]": r"""
+s = Wx+b,
+\qquad
+x\in\mathbb{R}^{D},\
+W\in\mathbb{R}^{K\times D},\
+b\in\mathbb{R}^{K},\
+s\in\mathbb{R}^{K}
+""",
+    "Softmax: p_k = exp(s_k) / Σ_j exp(s_j)\nCross-entropy: L = −log p_y\nSVM hinge: L_i = Σ_{j≠y} max(0, s_j − s_y + Δ)": r"""
+\begin{aligned}
+p_k &= \frac{e^{s_k}}{\sum_j e^{s_j}} \\
+\mathcal{L}_{\mathrm{CE}} &= -\log p_y \\
+\mathcal{L}^{(i)}_{\mathrm{hinge}}
+&= \sum_{j\ne y_i}\max(0,s_j-s_{y_i}+\Delta)
+\end{aligned}
+""",
+    "수치 미분(중앙 차분):\ndf/dx ≈ [f(x+h) − f(x−h)] / (2h)\n\nSGD update:\nW ← W − learning_rate × ∂L/∂W": r"""
+\begin{aligned}
+\frac{df}{dx} &\approx \frac{f(x+h)-f(x-h)}{2h} \\
+W &\leftarrow W-\eta\frac{\partial\mathcal{L}}{\partial W}
+\end{aligned}
+""",
+    "Momentum 예시:\nv_t = μ v_{t−1} − η ∇L(W_t)\nW_{t+1} = W_t + v_t": r"""
+\begin{aligned}
+v_t &= \mu v_{t-1}-\eta\nabla\mathcal{L}(W_t) \\
+W_{t+1} &= W_t+v_t
+\end{aligned}
+""",
+    "H_out = floor((H + 2P − D(K−1) − 1) / S + 1)\nParams = C_out × C_in × K_h × K_w + C_out(bias)": r"""
+\begin{aligned}
+H_{\mathrm{out}}
+&=
+\left\lfloor\frac{H+2P-D(K-1)-1}{S}+1\right\rfloor \\
+N_{\mathrm{params}}
+&=
+C_{\mathrm{out}}C_{\mathrm{in}}K_hK_w+C_{\mathrm{out}}
+\end{aligned}
+""",
+    "DINO teacher update 개념:\nθ_teacher ← τ θ_teacher + (1−τ) θ_student\n\nCLIP contrastive 개념:\nmatched image-text similarity ↑ / mismatched similarity ↓": r"""
+\begin{aligned}
+\theta_{\mathrm{teacher}}
+&\leftarrow
+\tau\theta_{\mathrm{teacher}}
++(1-\tau)\theta_{\mathrm{student}} \\
+\operatorname{sim}(I_i,T_i)&\uparrow,\qquad
+\operatorname{sim}(I_i,T_j)&\downarrow\quad(i\ne j)
+\end{aligned}
+""",
+    "Bayes theorem:\np(w|D) = p(D|w)p(w) / p(D)\n\nposterior ∝ likelihood × prior": r"""
+p(w\mid D)
+=
+\frac{p(D\mid w)p(w)}{p(D)}
+\qquad\Longrightarrow\qquad
+\text{posterior}\propto\text{likelihood}\times\text{prior}
+""",
+    "Entropy: H[p] = −Σ_x p(x) log p(x)\nKL(q || p) = Σ_x q(x) log(q(x)/p(x))": r"""
+\begin{aligned}
+H[p] &= -\sum_x p(x)\log p(x) \\
+D_{\mathrm{KL}}(q\|p)
+&=
+\sum_x q(x)\log\frac{q(x)}{p(x)}
+\end{aligned}
+""",
+    "Beta-Binomial update:\nprior Beta(a,b) + successes m / failures l\n→ posterior Beta(a+m, b+l)": r"""
+\operatorname{Beta}(a,b)
+\;+\;
+(m\ \text{successes},\ \ell\ \text{failures})
+\;\Longrightarrow\;
+\operatorname{Beta}(a+m,b+\ell)
+""",
+    "y(x, w) = wᵀ φ(x)\nt = y(x,w) + ε,   ε ~ N(0, β⁻¹)": r"""
+\begin{aligned}
+y(x,w) &= w^\top\phi(x) \\
+t &= y(x,w)+\varepsilon,\qquad
+\varepsilon\sim\mathcal{N}(0,\beta^{-1})
+\end{aligned}
+""",
+    "Binary logistic regression:\np(C₁|x) = σ(wᵀx + b)\nσ(a) = 1 / (1 + exp(−a))": r"""
+\begin{aligned}
+p(C_1\mid x) &= \sigma(w^\top x+b) \\
+\sigma(a) &= \frac{1}{1+e^{-a}}
+\end{aligned}
+""",
+    "한 hidden layer 예:\na_j = Σ_i w⁽¹⁾_{ji} x_i + b_j\nz_j = h(a_j)\ny_k = Σ_j w⁽²⁾_{kj} z_j + c_k": r"""
+\begin{aligned}
+a_j &= \sum_i w^{(1)}_{ji}x_i+b_j \\
+z_j &= h(a_j) \\
+y_k &= \sum_j w^{(2)}_{kj}z_j+c_k
+\end{aligned}
+""",
+    "k(x, x′) = φ(x)ᵀ φ(x′)\nRBF kernel = exp(−||x−x′||² / (2σ²))": r"""
+\begin{aligned}
+k(x,x') &= \phi(x)^\top\phi(x') \\
+k_{\mathrm{RBF}}(x,x')
+&=
+\exp\left(-\frac{\|x-x'\|^2}{2\sigma^2}\right)
+\end{aligned}
+""",
+    "Binary hinge loss:\nL = max(0, 1 − y f(x)),   y ∈ {−1, +1}": r"""
+\mathcal{L}_{\mathrm{hinge}}
+=
+\max(0,1-yf(x)),
+\qquad
+y\in\{-1,+1\}
+""",
+    "Bayesian network factorization 예:\np(x₁,...,x_K) = ∏_k p(x_k | parents(x_k))": r"""
+p(x_1,\ldots,x_K)
+=
+\prod_{k=1}^{K}
+p\!\left(x_k\mid\operatorname{pa}(x_k)\right)
+""",
+    "p(x) = Σ_k π_k N(x | μ_k, Σ_k)\nresponsibility γ(z_k) = p(z_k=1 | x)": r"""
+\begin{aligned}
+p(x) &= \sum_{k=1}^{K}\pi_k\,
+\mathcal{N}(x\mid\mu_k,\Sigma_k) \\
+\gamma(z_k) &= p(z_k=1\mid x)
+\end{aligned}
+""",
+    "log p(X) = ELBO(q) + KL(q(Z) || p(Z|X))\nELBO(q) ≤ log p(X)": r"""
+\begin{aligned}
+\log p(X)
+&=
+\operatorname{ELBO}(q)
++
+D_{\mathrm{KL}}\!\left(q(Z)\|p(Z\mid X)\right) \\
+\operatorname{ELBO}(q) &\le \log p(X)
+\end{aligned}
+""",
+    "Monte Carlo expectation:\nE_p[f(x)] ≈ (1/N) Σ_{n=1}^N f(x⁽ⁿ⁾),\nx⁽ⁿ⁾ ~ p(x)": r"""
+\mathbb{E}_{p}[f(x)]
+\approx
+\frac{1}{N}\sum_{n=1}^{N}f(x^{(n)}),
+\qquad
+x^{(n)}\sim p(x)
+""",
+    "PPCA 생성 모델:\nz ~ N(0, I)\nx = Wz + μ + ε,   ε ~ N(0, σ²I)": r"""
+\begin{aligned}
+z &\sim \mathcal{N}(0,I) \\
+x &= Wz+\mu+\varepsilon,\qquad
+\varepsilon\sim\mathcal{N}(0,\sigma^2I)
+\end{aligned}
+""",
+    "1차 Markov 가정:\np(z_t | z₁,...,z_{t−1}) = p(z_t | z_{t−1})": r"""
+p(z_t\mid z_1,\ldots,z_{t-1})
+=
+p(z_t\mid z_{t-1})
+""",
+    "Committee 평균 예:\ny_COM(x) = (1/M) Σ_m y_m(x)": r"""
+y_{\mathrm{COM}}(x)
+=
+\frac{1}{M}\sum_{m=1}^{M}y_m(x)
+""",
+}
+
+PAGE_TERMS = {
+    "pixels": [
+        ("RGB", "Red, Green, Blue", "빨강·초록·파랑의 세 색상 채널"),
+        ("BGR", "Blue, Green, Red", "OpenCV에서 흔히 사용하는 파랑·초록·빨강 채널 순서"),
+        ("NCHW", "Batch, Channel, Height, Width", "딥러닝 텐서의 배치·채널·높이·너비 순서"),
+        ("dtype", "data type", "숫자를 저장하는 자료형"),
+    ],
+    "cnn": [
+        ("CNN", "Convolutional Neural Network", "합성곱 신경망"),
+        ("Conv", "Convolution", "합성곱 연산 또는 합성곱 층"),
+        ("ReLU", "Rectified Linear Unit", "음수는 0, 양수는 그대로 두는 활성화 함수"),
+    ],
+    "vit": [
+        ("ViT", "Vision Transformer", "이미지를 패치 토큰으로 처리하는 Transformer 계열 모델"),
+        ("CLS", "Classification token", "이미지 전체 분류 정보를 모으기 위해 추가하는 학습 토큰"),
+        ("Q / K / V", "Query / Key / Value", "Self-Attention에서 비교와 정보 혼합에 사용하는 세 벡터"),
+        ("MSA", "Multi-Head Self-Attention", "여러 Attention head를 병렬로 사용하는 연산"),
+        ("LN", "Layer Normalization", "한 샘플 내부 특징을 정규화하는 층"),
+        ("MLP", "Multi-Layer Perceptron", "여러 완전연결층으로 구성된 신경망 블록"),
+    ],
+    "tasks": [
+        ("IoU", "Intersection over Union", "예측 영역과 정답 영역의 교집합을 합집합으로 나눈 값"),
+        ("NMS", "Non-Maximum Suppression", "겹치는 검출 상자 중 중복 후보를 제거하는 후처리"),
+    ],
+    "training": [
+        ("TP / FP / FN / TN", "True Positive / False Positive / False Negative / True Negative", "이진 분류 결과를 네 경우로 나눈 혼동행렬 용어"),
+        ("CV", "Cross-Validation", "데이터 분할을 바꾸어 여러 번 평가하는 교차검증"),
+        ("ROC", "Receiver Operating Characteristic", "threshold 변화에 따른 TPR과 FPR 관계 곡선"),
+        ("AUC", "Area Under the Curve", "곡선 아래 면적을 요약한 값"),
+    ],
+    "resnet": [
+        ("ResNet", "Residual Network", "잔차 연결을 사용하는 신경망"),
+        ("BN", "Batch Normalization", "미니배치 통계를 이용하는 정규화 층"),
+        ("ReLU", "Rectified Linear Unit", "음수는 0으로 만드는 활성화 함수"),
+    ],
+    "unet": [
+        ("U-Net", "U-shaped Network", "Encoder와 Decoder를 U자 형태로 연결한 분할 구조의 이름"),
+        ("Conv", "Convolution", "합성곱 연산 또는 합성곱 층"),
+    ],
+    "patchcore": [
+        ("CNN", "Convolutional Neural Network", "지역 특징을 추출하는 합성곱 신경망"),
+        ("GB", "Gigabyte", "약 10억 byte 크기의 저장 용량 단위"),
+    ],
+    "cs231n": [
+        ("CS231n", "Stanford CS231n: Deep Learning for Computer Vision", "Stanford의 컴퓨터 비전 딥러닝 강의"),
+        ("kNN", "k-Nearest Neighbors", "가장 가까운 k개 샘플을 이용하는 방법"),
+        ("SVM", "Support Vector Machine", "margin을 이용해 분류 경계를 학습하는 모델"),
+        ("SGD", "Stochastic Gradient Descent", "미니배치 gradient로 파라미터를 갱신하는 최적화 방법"),
+        ("CNN", "Convolutional Neural Network", "합성곱 신경망"),
+        ("BN", "Batch Normalization", "미니배치 통계를 이용하는 정규화 층"),
+        ("SSL", "Self-Supervised Learning", "사람이 붙인 정답 라벨 없이 학습 신호를 만드는 자기지도학습"),
+        ("CLIP", "Contrastive Language–Image Pre-training", "이미지와 텍스트 표현을 함께 학습하는 모델"),
+        ("DINO", "self-DIstillation with NO labels", "라벨 없이 teacher–student 방식으로 표현을 학습하는 방법"),
+        ("FLOPs", "Floating-Point Operations", "모델 계산량을 나타낼 때 쓰는 부동소수점 연산 수"),
+    ],
+    "prml": [
+        ("PRML", "Pattern Recognition and Machine Learning", "Christopher M. Bishop의 패턴인식·머신러닝 교재"),
+        ("ML", "Maximum Likelihood", "이 문서 문맥에서는 가능도를 최대화하는 최대우도 추정"),
+        ("MAP", "Maximum A Posteriori", "사후확률을 최대화하는 추정"),
+        ("RBF", "Radial Basis Function", "거리 기반 방사형 기저 함수"),
+        ("GP", "Gaussian Process", "함수에 대한 확률분포를 정의하는 가우시안 프로세스"),
+        ("SVM", "Support Vector Machine", "support vector와 margin을 이용하는 분류 모델"),
+        ("RVM", "Relevance Vector Machine", "Bayesian 관점의 희소 커널 모델"),
+        ("MRF", "Markov Random Field", "무방향 그래프로 변수 의존성을 표현하는 모델"),
+        ("GMM", "Gaussian Mixture Model", "여러 Gaussian 분포를 섞어 데이터를 표현하는 모델"),
+        ("EM", "Expectation-Maximization", "숨은 변수 추정과 파라미터 갱신을 반복하는 알고리즘"),
+        ("ELBO", "Evidence Lower Bound", "log evidence의 하한"),
+        ("KL", "Kullback–Leibler divergence", "두 확률분포 차이를 나타내는 발산량"),
+        ("VAE", "Variational Autoencoder", "변분 추론을 사용하는 생성 모델"),
+        ("MCMC", "Markov Chain Monte Carlo", "Markov chain을 이용한 Monte Carlo sampling"),
+        ("PCA", "Principal Component Analysis", "주성분 분석"),
+        ("PPCA", "Probabilistic PCA", "PCA의 확률적 잠재변수 모델"),
+        ("ICA", "Independent Component Analysis", "독립 성분 분석"),
+        ("HMM", "Hidden Markov Model", "숨은 Markov 상태와 관측을 연결하는 시계열 모델"),
+        ("LDS", "Linear Dynamical System", "연속 잠재 상태를 갖는 선형 동역학 모델"),
+        ("MoE", "Mixture of Experts", "여러 expert와 gating을 결합하는 구조"),
+    ],
+}
+
+
+def term_guide(slug):
+    terms = PAGE_TERMS.get(slug, [])
+    if not terms:
+        return ""
+    rows = "".join(
+        (
+            f'<div class="term-item"><dt>{escape(short)}</dt>'
+            f'<dd><strong>{escape(full)}</strong>'
+            f'<span>{escape(korean)}</span></dd></div>'
+        )
+        for short, full, korean in terms
+    )
+    return (
+        '<aside class="term-guide" aria-label="약어와 핵심 용어">'
+        '<div class="term-guide-head"><span>BEGINNER GUIDE</span>'
+        '<strong>약어·용어 먼저 보기</strong></div>'
+        '<p>이 페이지에서 약어가 나오면 아래 뜻으로 읽으면 됩니다. '
+        '처음 배우는 사람을 기준으로 영어 원문과 한국어 의미를 함께 적었습니다.</p>'
+        f'<dl>{rows}</dl></aside>'
+    )
 
 
 def table(headers, rows):
@@ -17,7 +369,16 @@ def callout(title, body, warning=False):
 
 
 def equation(body):
-    return f'<div class="equation">{body}</div>'
+    clean = body.strip()
+    tex = EQUATION_TEX.get(clean)
+    if tex is None:
+        plain = "<br>".join(escape(line) for line in clean.splitlines())
+        return f'<div class="equation equation-fallback">{plain}</div>'
+    return (
+        '<div class="equation" aria-label="수학 수식">'
+        f'<div class="math-display">\\[{tex.strip()}\\]</div>'
+        '</div>'
+    )
 
 
 def svg(body, height=250, caption='학습을 위해 직접 작성한 개념도입니다.'):
@@ -69,7 +430,7 @@ section('normalization', '스케일 변환과 정규화는 구분하기', '''<p>
 section('check', '스스로 설명해 보기', '''<details><summary>224 × 224 RGB 이미지의 채널 값은 왜 50,176개가 아닐까?</summary><p>224 × 224 = 50,176은 공간 위치의 수입니다. 각 위치에 3개 채널이 있으므로 150,528개 값입니다.</p></details><details><summary>배치 크기를 16에서 32로 바꾸면 모델 파라미터도 두 배가 될까?</summary><p>파라미터 수는 그대로입니다. 한 번에 처리하는 입력과 중간 활성값의 양이 늘기 때문에 보통 메모리 사용량이 증가합니다.</p></details>''')
 ], [('PyTorch · Tensor basics', 'https://docs.pytorch.org/tutorials/beginner/basics/tensorqs_tutorial.html', '텐서의 형태와 차원 조작을 확인할 수 있습니다.'), ('Torchvision · Models and pre-trained weights', 'https://docs.pytorch.org/vision/stable/models.html', '가중치별 입력 전처리가 다를 수 있습니다.'), ('OpenCV · Color conversions', 'https://docs.opencv.org/4.x/d8/d01/group__imgproc__color__conversions.html', 'BGR/RGB 변환의 공식 API입니다.')])
 
-note('cnn', 'CNN: 작은 계산이 특징이 되는 과정', '합성곱을 한 칸씩 계산하고, 채널·수용영역·다운샘플링이 어떤 역할을 하는지 연결합니다.', '기초 개념', '02 · CONVOLUTION', 22, [
+note('cnn', 'CNN (Convolutional Neural Network): 작은 계산이 특징이 되는 과정', '합성곱을 한 칸씩 계산하고, 채널·수용영역·다운샘플링이 어떤 역할을 하는지 연결합니다.', '기초 개념', '02 · CONVOLUTION', 22, [
 section('overview', '왜 작은 커널을 반복해서 사용할까?', '''<p>CNN은 가까운 픽셀 사이의 패턴을 작은 커널로 계산합니다. 같은 커널을 여러 위치에 적용하는 <strong>가중치 공유</strong> 덕분에 이미지의 모든 위치마다 별도 가중치를 둘 필요가 없습니다. 학습은 어떤 커널 값이 목적에 유용한지를 데이터로 조정하는 과정입니다.</p>''' + flow([('입력', '3 × 224 × 224'), ('Conv + ReLU', '32 × 224 × 224'), ('Downsample', '32 × 112 × 112'), ('분류 Head', 'K개 logits')], '구조를 설명하기 위한 간단한 CNN 예시. 특정 논문의 전체 모델은 아닙니다.') + '''<p>Feature map은 “물체를 그린 지도”로 항상 해석할 수 있는 결과가 아닙니다. 특정 커널과 비선형 연산에 반응한 활성값의 공간 배열입니다. 초기 층에서 경계·방향 같은 반응을 볼 수 있지만, 모든 채널을 한 단어의 의미에 대응시킬 수는 없습니다.</p>'''),
 section('convolution', '3 × 3 합성곱을 손으로 계산하기', '''<p>입력의 3 × 3 영역과 커널의 같은 위치를 각각 곱한 뒤, 9개 값을 더하고 bias를 더합니다. 딥러닝 라이브러리에서 흔히 합성곱이라고 부르는 연산은 커널을 뒤집지 않는 <em>cross-correlation</em>입니다.</p>''' + asset_figure('convolution-step.svg', '5×5 입력의 3×3 영역과 3×3 커널을 곱하고 더해 출력 한 값을 계산하는 과정', '3×3 합성곱 한 위치의 multiply-and-sum 계산을 외부 SVG로 정리했습니다.') + equation('출력[y, x] = Σ 입력[y+i, x+j] × 커널[i, j] + bias\n예시 커널 = [[−1, 0, 1], [−1, 0, 1], [−1, 0, 1]]') + '''<div class="lab"><div class="lab-heading"><h3>커널이 이동하는 위치</h3><span class="lab-badge">INTERACTIVE</span></div><div class="controls"><label for="conv-position">출력 위치 선택</label><input id="conv-position" type="range" min="0" max="8" value="0" step="1"></div><div class="lab-display"><div><p class="small">입력 5 × 5 · 파란 영역이 현재 계산 범위</p><div id="conv-input" class="matrix" style="grid-template-columns:repeat(5,1fr)"></div></div><div><p class="small">출력 3 × 3 · stride 1, padding 0, bias 0</p><div id="conv-output" class="matrix" style="grid-template-columns:repeat(3,1fr)"></div></div></div><div id="conv-value" class="lab-output" aria-live="polite"></div><p class="lab-note">수직 경계에 반응하는 고정 커널입니다. 실제 CNN에서는 대부분의 커널 값을 학습합니다.</p></div><p>첫 위치에서 각 행은 <code>[0, 0, 1] · [−1, 0, 1] = 1</code>이고, 세 행을 더하면 3입니다. 오른쪽 끝의 일정한 <code>[1, 1, 1]</code>은 −1 + 0 + 1 = 0이므로 경계가 없는 영역은 0이 됩니다.</p>'''),
 section('channels', '채널은 어떻게 섞일까?', '''<p>RGB 입력에 출력 채널 32개를 만드는 3 × 3 Conv를 사용하면 커널의 전체 shape는 <code>[32, 3, 3, 3]</code>입니다. 출력 채널 하나는 R·G·B 각각에 대한 계산을 합한 결과입니다. 일반적인 Conv에서 입력 채널마다 완전히 독립적인 최종 결과를 만드는 것은 아닙니다.</p>''' + table(['항목', '수치 예시', '설명'], [('입력', '[B, 3, 224, 224]', '배치 차원은 공간 연산과 별도'), ('가중치', '[32, 3, 3, 3]', '출력 채널 × 입력 채널 × 커널 높이 × 너비'), ('파라미터', '32 × 3 × 3 × 3 + 32 = 896', 'groups=1, bias=True일 때'), ('출력', '[B, 32, 224, 224]', 'stride=1, padding=1, dilation=1')]) + callout('1 × 1 Conv도 학습할 내용이 있다', '1 × 1 커널은 인접 공간을 직접 섞지는 않지만 채널을 섞습니다. 입력 64채널을 출력 128채널로 바꾸면 위치마다 64차원 벡터를 128차원으로 변환합니다.')),
@@ -77,7 +438,7 @@ section('shape', 'Stride · Padding · Receptive field', equation('H_out = floor
 section('nonlinear', '왜 비선형 함수와 학습이 필요할까?', '''<p>ReLU는 <code>max(0, x)</code>를 계산합니다. 예를 들어 [−2, 0.5, 3]은 [0, 0.5, 3]이 됩니다. 비선형성이 전혀 없다면 여러 선형 변환을 쌓아도 하나의 선형 변환으로 합칠 수 있어 표현력에 제약이 생깁니다.</p><p>분류 학습에서는 특징을 이용해 클래스별 logit을 만들고, 정답과 비교한 loss를 역전파합니다. 기울기는 각 가중치를 바꿨을 때 loss가 어떻게 변할지를 나타내며, optimizer가 이 정보를 사용해 파라미터를 갱신합니다. “경계를 찾는 필터”를 사람이 모두 지정하는 것이 아닙니다.</p>''' + callout('한 문장으로 정리', 'CNN은 공유 커널로 지역 패턴을 계산하고, 채널 변환과 비선형 함수를 반복하면서 목적에 맞는 특징을 학습합니다.'))
 ], [('PyTorch · Conv2d', 'https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html', '연산 정의, 가중치 shape, 출력 크기 공식의 기준입니다.'), ('PyTorch · ReLU', 'https://docs.pytorch.org/docs/stable/generated/torch.nn.ReLU.html', 'ReLU의 정의를 확인할 수 있습니다.'), ('ResNet 논문', 'https://arxiv.org/abs/1512.03385', '깊은 CNN을 학습하는 문제는 ResNet 해설에서 이어집니다.')])
 
-note('vit', 'ViT: 이미지를 패치의 관계로 이해하기', 'An Image is Worth 16×16 Words를 바탕으로, 패치부터 Q·K·V와 Transformer encoder까지 설명합니다.', '논문 해설', '03 · VISION TRANSFORMER', 30, [
+note('vit', 'ViT (Vision Transformer): 이미지를 패치의 관계로 이해하기', 'An Image is Worth 16×16 Words를 바탕으로, 패치부터 Q·K·V와 Transformer encoder까지 설명합니다.', '논문 해설', '03 · VISION TRANSFORMER', 30, [
 section('problem', '논문이 던진 질문', '''<p>Transformer를 이미지 분류의 주된 구조로 사용할 수 있을까요? ViT는 이미지를 일정한 크기의 패치로 나누고, 각 패치를 토큰 벡터로 바꿔 Transformer encoder에 넣습니다. 논문의 핵심은 <strong>이미지의 2차원 격자를 토큰 시퀀스로 변환하는 방법</strong>과 대규모 사전학습의 효과입니다.</p><p>원 논문은 대규모 데이터로 사전학습했을 때의 강력한 결과를 보였습니다. 이것을 “작은 데이터에서도 ViT가 항상 CNN보다 좋다”로 일반화하면 안 됩니다. 사전학습 데이터, 입력 해상도, 증강, 학습 설정과 계산 예산을 함께 비교해야 합니다.</p>''' + flow([('이미지', '224 × 224 × 3'), ('패치 임베딩', '196 × 768'), ('Encoder', '197 tokens'), ('분류 Head', 'K개 logits')], 'ViT-B/16의 224 × 224 입력 예시. Encoder 입력의 197은 패치 196개와 CLS 토큰 1개입니다.')),
 section('patches', 'Patch → Flatten → Linear projection', '''<p>패치 크기를 16 × 16으로 정하면 224/16 = 14이므로 총 14 × 14 = <strong>196개 패치</strong>가 생깁니다. 각 RGB 패치를 펼치면 16 × 16 × 3 = 768개의 숫자입니다. 이 벡터에 학습 가능한 선형 변환을 적용해 임베딩 차원 D로 바꿉니다.</p>''' + asset_figure('vit-patch-attention.svg', '이미지를 패치로 나누고 토큰 시퀀스로 만든 뒤 self-attention을 적용하는 Vision Transformer 흐름', '224×224 이미지를 patch sequence로 바꾸고 attention에 전달하는 흐름입니다.') + equation('N = (H/P) × (W/P)\npatch_flat: [B, N, P²C]\nembedding = patch_flat × E + bias\nE: [P²C, D] → output: [B, N, D]') + '''<p>ViT-B/16에서는 패치 벡터 길이와 D가 우연히 모두 768입니다. 따라서 변환이 불필요한 것이 아닙니다. 학습 가능한 768 × 768 행렬은 픽셀 공간을 모델이 쓸 특징 공간으로 바꿉니다. 패치 크기와 D는 서로 독립적으로 설계할 수 있습니다.</p><div class="lab"><div class="lab-heading"><h3>패치 크기와 토큰 수</h3><span class="lab-badge">INTERACTIVE</span></div><div class="controls"><label for="patch-size">패치 한 변</label><select id="patch-size"><option value="8">8 px</option><option value="16" selected>16 px</option><option value="32">32 px</option></select></div><div class="lab-display"><canvas id="patch-canvas" width="224" height="224" aria-label="224 × 224 입력에 적용한 패치 격자"></canvas><div id="patch-result" class="lab-output" aria-live="polite"></div></div><p class="lab-note">D=768로 고정한 크기 계산입니다. 선택값마다 사전학습 모델을 실행하는 데모는 아닙니다.</p></div>'''),
 section('tokens', 'CLS와 위치 임베딩은 왜 더할까?', '''<p><strong>CLS 토큰</strong>은 이미지 전체를 분류하는 데 사용할 학습 가능한 추가 토큰입니다. 입력 단계에서는 이미지의 내용을 이미 알고 있는 벡터가 아닙니다. 여러 encoder 층에서 패치들과 정보를 주고받은 뒤 최종 표현을 분류 head에 전달합니다.</p><p><strong>Position embedding</strong>은 패치 위치에 대한 학습 가능한 정보를 더합니다. 기본 self-attention만으로는 토큰의 원래 격자 위치를 직접 구분하지 못하기 때문입니다. 원 ViT는 1차원 학습 가능한 위치 임베딩을 사용합니다.</p>''' + equation('z₀ = [CLS; patch₁E; …; patch₁₉₆E] + E_position\nshape: [B, 197, 768]') + callout('패치 번호와 픽셀 좌표는 다르다', '2차원 패치를 일정한 순서로 펼쳐도 원래 행·열 배치는 정해져 있습니다. 위치 임베딩은 그 순서에 대응하는 정보를 제공합니다. 입력 해상도를 바꿔 토큰 수가 달라지면 사전학습 위치 임베딩을 보간하는 등의 처리가 필요할 수 있습니다.')),
@@ -101,7 +462,7 @@ section('metrics', 'Threshold를 바꾸면 어떤 오류가 달라질까?', '''<
 section('report', '실험 기록에 남길 최소 정보', table(['항목', '예시', '필요한 이유'], [('데이터', '그룹 목록·클래스별 개수·split 버전', '같은 조건의 재평가'), ('학습', '입력 640, batch 32, seed, 증강', '결과 차이를 해석'), ('모델', '가중치 hash·라이브러리 버전', '실제 사용한 모델 식별'), ('평가', '클래스별 precision/recall·혼동행렬', '희소 클래스 실패 확인'), ('판정', 'threshold·영상 집계 규칙', '프레임 점수와 최종 판정 구분')]) + callout('기억할 핵심', '평가 숫자는 “어떤 데이터에 어떤 규칙으로 평가했는가”와 함께 해석합니다. 데이터 분할, threshold, 후처리를 바꾸면 서로 다른 실험입니다.'))
 ], [('scikit-learn · Cross-validation', 'https://scikit-learn.org/stable/modules/cross_validation.html', 'GroupKFold와 교차검증의 기본 원칙입니다.'), ('scikit-learn · Model evaluation', 'https://scikit-learn.org/stable/modules/model_evaluation.html', 'Precision·recall·F1과 평균 방식의 정의입니다.'), ('PyTorch · Optimization', 'https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html', '학습·검증 반복과 optimizer의 동작을 설명합니다.')])
 
-note('resnet', 'ResNet: 입력을 더하면 무엇이 달라질까?', 'Deep Residual Learning for Image Recognition의 문제의식과 잔차 블록을 수식·구조·예시로 설명합니다.', '논문 해설', '06 · RESIDUAL LEARNING', 20, [
+note('resnet', 'ResNet (Residual Network): 입력을 더하면 무엇이 달라질까?', 'Deep Residual Learning for Image Recognition의 문제의식과 잔차 블록을 수식·구조·예시로 설명합니다.', '논문 해설', '06 · RESIDUAL LEARNING', 20, [
 section('problem', '깊게 쌓았는데 학습 오차가 커지는 문제', '''<p>깊은 모델은 더 복잡한 함수를 표현할 수 있어 보입니다. 그런데 층을 단순히 더 쌓으면 <strong>훈련 오차 자체가 더 나빠지는 degradation 문제</strong>가 나타날 수 있습니다. 이것은 “훈련 성능은 좋은데 test만 나빠지는 과적합”과 구분해야 합니다.</p><p>ResNet은 여러 층이 원하는 출력 전체 H(x)를 직접 만드는 대신, 입력에서 바꿔야 할 부분 F(x)를 학습하고 입력 x를 더하도록 구성합니다. 즉 <code>H(x) = F(x) + x</code>입니다. 잔차는 정답과 예측의 loss를 뜻하는 것이 아니라 블록이 학습하는 변환의 표현입니다.</p>'''),
 section('block', 'Residual block과 shortcut', asset_figure('resnet-skip.svg', '입력 x가 가중치 경로 F(x)를 우회해 출력에서 다시 더해지는 ResNet residual block', 'Residual branch와 identity shortcut의 관계를 단순화한 외부 SVG입니다.') + svg(box(32,115,116,'입력 x','같은 shape') + box(211,115,142,'가중치 층','Conv · BN · ReLU') + box(407,115,142,'가중치 층','Conv · BN') + box(616,115,119,'출력','Add → ReLU','dark') + edge('M 148 148 H 209') + edge('M 353 148 H 405') + edge('M 549 148 H 614') + edge('M 173 148 V 42 H 583 V 135') + '<text x="349" y="30" class="label">shortcut: x 그대로 전달</text><circle cx="583" cy="148" r="13" fill="white" stroke="#7891b7"/><text x="583" y="154" text-anchor="middle" class="label">+</text>',225,'원 ResNet의 basic block을 단순화한 그림. 마지막 합산 뒤 ReLU가 있는 post-activation 구조입니다.') + '''<p>블록이 입력을 그대로 보존하는 것이 유리하다면 F(x)를 0에 가깝게 만들면 됩니다. 예를 들어 x=[2, −1], F(x)=[0.3, 0.2]이면 합산값은 [2.3, −0.8]입니다. 원 basic block의 마지막 ReLU까지 적용하면 [2.3, 0]이 됩니다. “입력을 더한다”와 “출력이 입력과 항상 같다”는 다른 이야기입니다.</p>''' + equation('합산 전 목표: H(x) = x + F(x)\n단순한 합산 경로의 미분: ∂H/∂x = I + ∂F/∂x') + '''<p>미분 식에는 입력에서 출력으로 직접 이어지는 항 I가 있습니다. 이 경로는 깊은 구조를 최적화하는 데 도움이 됩니다. 다만 활성함수·정규화·손실·학습률까지 포함한 전체 최적화가 언제나 안정적이라는 보장은 아닙니다.</p>'''),
 section('projection', '크기가 다르면 그냥 더할 수 없다', '''<p>텐서를 원소별로 더하려면 shape가 맞아야 합니다. <code>[B, 64, 56, 56]</code>과 <code>[B, 128, 28, 28]</code>은 그대로 더할 수 없습니다. 원 논문은 차원이 바뀌는 경우의 shortcut 전략을 논의하며, projection shortcut에서는 1 × 1 Conv 등을 사용해 차원을 맞춥니다.</p>''' + table(['경로', '입력', '변환', '출력'], [('주 경로', '[B,64,56,56]', 'stride 2 블록', '[B,128,28,28]'), ('Shortcut', '[B,64,56,56]', '1 × 1 Conv, stride 2', '[B,128,28,28]'), ('합산', '동일 shape 두 텐서', '원소별 덧셈', '[B,128,28,28]')]) + callout('Concat과 add는 다르다', 'ResNet shortcut은 보통 덧셈입니다. 64채널 두 텐서를 더하면 64채널이고, 채널 방향으로 concatenate하면 128채널입니다. U-Net의 skip connection과 비교할 때 중요한 차이입니다.')),
@@ -150,7 +511,7 @@ def nav(current, prefix):
 
 def page(title, description, current, body, prefix='', toc=''):
     return f'''<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="{escape(description)}"><meta name="theme-color" content="#14213b"><title>{escape(title)} · Vision AI Notes</title><link rel="icon" href="{prefix}assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="{prefix}assets/site.css"><script src="{prefix}assets/site.js" defer></script></head>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="{escape(description)}"><meta name="theme-color" content="#14213b"><title>{escape(title)} · Vision AI Notes</title><link rel="icon" href="{prefix}assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="{prefix}assets/site.css"><script src="{prefix}assets/site.js" defer></script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script></head>
 <body><a class="skip" href="#main">본문으로 이동</a><aside id="sidebar" class="sidebar"><a class="brand" href="{prefix}index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Vision AI Notes</a><p class="sub">이해하고, 연결하고, 쌓아가기.</p><nav aria-label="학습 주제">{nav(current, prefix)}</nav><div class="sidebar-foot">Personal study notebook<br><a href="https://github.com/sh0427-han/vision_ai">GitHub 저장소 ↗</a></div></aside><div class="shell"><header class="topbar"><button class="menu" type="button" aria-label="목차 열기" aria-controls="sidebar" aria-expanded="false">목차</button><span class="trail">Vision AI / {"학습 노트" if current == "home" else "개념과 구조"}</span><a href="{prefix}index.html">전체 자료 보기</a></header><div class="layout{' home' if current == 'home' else ''}"><main id="main">{body}</main>{toc}</div></div></body></html>'''
 
 
@@ -180,7 +541,7 @@ def render():
     (ROOT / 'assets/favicon.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#14213b"/><path d="M7 7h7v7H7zm11 0h7v7h-7zM7 18h7v7H7z" fill="#91afff"/><path d="M18 18h7v7h-7z" fill="#20c4bb"/></svg>', encoding='utf-8')
     for i, item in enumerate(NOTES):
         toc = '<aside class="toc" aria-label="이 페이지 목차"><p>이 페이지에서</p>' + ''.join(f'<a href="#{anchor}">{title}</a>' for anchor,title,_ in item['sections']) + '<a href="#sources">출처와 더 확인할 자료</a></aside>'
-        body = f'<header><p class="eyebrow">{item["label"]}</p><h1>{item["title"]}</h1><p class="lead">{item["subtitle"]}</p><div class="meta"><span class="tag">{item["group"]}</span><span class="tag">예상 학습 {item["minutes"]}분</span><span class="tag">수치 예시 · 직접 그린 도식</span></div></header>'
+        body = f'<header><p class="eyebrow">{item["label"]}</p><h1>{item["title"]}</h1><p class="lead">{item["subtitle"]}</p><div class="meta"><span class="tag">{item["group"]}</span><span class="tag">예상 학습 {item["minutes"]}분</span><span class="tag">수치 예시 · 직접 그린 도식</span></div></header>' + term_guide(item["slug"])
         body += ''.join(f'<section class="article-section" id="{anchor}"><h2>{title}</h2>{content}</section>' for anchor,title,content in item['sections'])
         body += '<section class="article-section" id="sources"><h2>출처와 더 확인할 자료</h2><p class="small">본문은 이해를 위한 한국어 해설입니다. 도식은 직접 재구성했으며, 가상 수치와 단순화한 구조는 해당 위치에 표시했습니다.</p><ol class="references">' + ''.join(f'<li><a href="{url}" target="_blank" rel="noopener noreferrer">{title} ↗</a><small>{description}</small></li>' for title,url,description in item['sources']) + '</ol></section>'
         prev = NOTES[i-1] if i else None
