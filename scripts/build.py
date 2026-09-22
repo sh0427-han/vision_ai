@@ -2,6 +2,8 @@
 from html import escape
 from pathlib import Path
 
+from reference_notes import register_reference_notes
+
 ROOT = Path(__file__).resolve().parents[1]
 NOTES = []
 
@@ -115,14 +117,24 @@ section('limits', '정상과 다르다고 반드시 불량은 아니다', '''<p>
 ], [('Roth et al. · Towards Total Recall in Industrial Anomaly Detection', 'https://arxiv.org/abs/2106.08265', 'CVPR 2022. PatchCore의 지역 특징, coreset, 점수 재가중을 설명하는 원문입니다.'), ('공식 구현 · amazon-science/patchcore-inspection', 'https://github.com/amazon-science/patchcore-inspection', '특징 계층·coreset·검색과 점수 계산을 확인할 수 있습니다.')])
 
 
+register_reference_notes(
+    note=note,
+    section=section,
+    table=table,
+    callout=callout,
+    equation=equation,
+    flow=flow,
+)
+
+
 def nav(current, prefix):
-    groups = ['기초 개념', '논문 해설']
+    groups = ['기초 개념', '논문 해설', '강의·교과서 정리']
     content = f'<a href="{prefix}index.html" {"aria-current=page" if current == "home" else ""}><span>00</span>학습 노트 전체</a>'
     for group in groups:
         content += f'<p class="nav-label">{group}</p>'
         for item in NOTES:
             if item['group'] == group:
-                name = {'pixels':'이미지와 텐서','cnn':'CNN의 원리','vit':'Vision Transformer','tasks':'분류 · 탐지 · 분할','training':'학습과 평가','resnet':'ResNet','unet':'U-Net','patchcore':'PatchCore'}[item['slug']]
+                name = {'pixels':'이미지와 텐서','cnn':'CNN의 원리','vit':'Vision Transformer','tasks':'분류 · 탐지 · 분할','training':'학습과 평가','resnet':'ResNet','unet':'U-Net','patchcore':'PatchCore','cs231n':'CS231n 전체 정리','prml':'PRML 전체 정리'}[item['slug']]
                 content += f'<a href="{prefix}notes/{item["slug"]}.html" {"aria-current=page" if current == item["slug"] else ""}><span>{item["label"][:2]}</span>{name}</a>'
     return content
 
@@ -148,6 +160,10 @@ def miniature(slug):
         return '<svg viewBox="0 0 390 100" aria-hidden="true">' + ''.join(f'<rect x="{28+j*112}" y="{10+i*29}" width="100" height="20" rx="3" fill="{ "#0b9286" if i==j else "#7497e5"}"/>' for i in range(3) for j in range(3)) + '</svg>'
     if slug == 'tasks':
         return '<svg viewBox="0 0 390 100" aria-hidden="true"><rect x="26" y="25" width="92" height="51" rx="6" fill="#2454d8"/><text x="72" y="58" text-anchor="middle" fill="white" font-size="18">class</text><rect x="149" y="17" width="80" height="67" rx="4" fill="none" stroke="#2454d8" stroke-width="3"/><path d="M 286 23 L 338 19 L 355 55 L 330 84 L 284 70 Z" fill="#0b9286"/></svg>'
+    if slug == 'cs231n':
+        return '<svg viewBox="0 0 390 100" aria-hidden="true"><rect x="20" y="34" width="58" height="32" rx="5" fill="#dce7fb"/><rect x="98" y="34" width="58" height="32" rx="5" fill="#b9cdf6"/><rect x="176" y="34" width="58" height="32" rx="5" fill="#759ae6"/><rect x="254" y="34" width="58" height="32" rx="5" fill="#2454d8"/><path d="M78 50 H96 M156 50 H174 M234 50 H252 M312 50 H354" stroke="#7891b7" stroke-width="2"/><text x="49" y="55" text-anchor="middle" fill="#203455" font-size="11">data</text><text x="127" y="55" text-anchor="middle" fill="#203455" font-size="11">loss</text><text x="205" y="55" text-anchor="middle" fill="white" font-size="11">grad</text><text x="283" y="55" text-anchor="middle" fill="white" font-size="11">CNN</text><circle cx="360" cy="50" r="10" fill="#08796f"/></svg>'
+    if slug == 'prml':
+        return '<svg viewBox="0 0 390 100" aria-hidden="true"><circle cx="70" cy="50" r="27" fill="#edf3ff" stroke="#759ae6" stroke-width="2"/><circle cx="195" cy="50" r="27" fill="#e5f5f2" stroke="#08796f" stroke-width="2"/><circle cx="320" cy="50" r="27" fill="#eef1f7" stroke="#14213b" stroke-width="2"/><path d="M98 50 H166 M223 50 H291" stroke="#7891b7" stroke-width="2"/><text x="70" y="55" text-anchor="middle" fill="#203455" font-size="11">p(D)</text><text x="195" y="55" text-anchor="middle" fill="#08796f" font-size="11">p(w|D)</text><text x="320" y="55" text-anchor="middle" fill="#14213b" font-size="11">decision</text></svg>'
     return '<svg viewBox="0 0 390 100" aria-hidden="true">' + ''.join(f'<rect x="{32+i*82+j*6}" y="{30-j*5}" width="45" height="50" rx="4" fill="{["#aac1ee","#759ae6","#2454d8"][j]}" stroke="#fff"/>' for i in range(4) for j in range(3)) + '</svg>'
 
 
@@ -169,9 +185,14 @@ def render():
             counter += 1
             pieces[j] = pieces[j].replace('id="arrow"', f'id="arrow-{counter}"').replace('url(#arrow)', f'url(#arrow-{counter})')
         (ROOT / 'notes' / f'{item["slug"]}.html').write_text('<figure>'.join(pieces), encoding='utf-8')
-    home = '''<div class="home-intro"><p class="eyebrow">VISION AI · STUDY NOTEBOOK</p><h1>이미지에서 시작해,<br>모델의 동작까지.</h1><p class="lead">숫자가 특징이 되고, 특징이 판단이 되는 과정.<br>개념과 논문 속 모델을 도식과 계산으로 이해하는 학습 노트입니다.</p><a class="start-link" href="notes/pixels.html">이미지와 텐서부터 시작하기 <span aria-hidden="true">→</span></a><div class="meta"><span class="tag">8개 학습 자료</span><span class="tag">4개 인터랙티브 예시</span><span class="tag">논문 · 공식 문서 기반</span></div></div>'''
-    for group in ['기초 개념', '논문 해설']:
-        home += f'<div class="section-label"><h2>{group}</h2><span>{"입력 · 특징 · 출력 · 평가" if group == "기초 개념" else "문제 · 구조 · 계산 · 한계"}</span></div><div class="note-grid">'
+    home = f'''<div class="home-intro"><p class="eyebrow">VISION AI · STUDY NOTEBOOK</p><h1>이미지에서 시작해,<br>모델의 동작까지.</h1><p class="lead">숫자가 특징이 되고, 특징이 판단이 되는 과정.<br>개념과 논문·강의·교과서를 도식과 계산으로 이해하는 학습 노트입니다.</p><a class="start-link" href="notes/pixels.html">이미지와 텐서부터 시작하기 <span aria-hidden="true">→</span></a><div class="meta"><span class="tag">{len(NOTES)}개 학습 자료</span><span class="tag">4개 인터랙티브 예시</span><span class="tag">논문 · 공식 자료 기반</span></div></div>'''
+    group_subtitles = {
+        '기초 개념': '입력 · 특징 · 출력 · 평가',
+        '논문 해설': '문제 · 구조 · 계산 · 한계',
+        '강의·교과서 정리': '전체 흐름 · 핵심 수식 · Vision 연결',
+    }
+    for group in ['기초 개념', '논문 해설', '강의·교과서 정리']:
+        home += f'<div class="section-label"><h2>{group}</h2><span>{group_subtitles[group]}</span></div><div class="note-grid">'
         for item in NOTES:
             if item['group'] != group:
                 continue
