@@ -13,7 +13,7 @@ def register_cs231n(
 
     note(
         "cs231n",
-        "Stanford CS231n: 컴퓨터 비전을 학습하는 전체 흐름",
+        "CS231n: 컴퓨터 비전을 학습하는 전체 흐름",
         (
             "Stanford CS231n 공개 노트를 따라 분류의 출발점부터 최적화, "
             "신경망, CNN, 시각화, 전이학습과 현대 Vision 모델까지 연결합니다."
