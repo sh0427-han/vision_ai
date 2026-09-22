@@ -56,7 +56,14 @@ for path, parser in pages.items():
         if parsed.fragment and target in pages and parsed.fragment not in pages[target].ids:
             errors.append(f'Missing anchor: {path.name} -> {link}')
 
-for svg_path in sorted((ROOT / 'assets' / 'diagrams').glob('*.svg')):
+extra_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'extra').glob('*.svg'))
+if len(extra_diagrams) < 60:
+    errors.append(f'Expected at least 60 generated extra diagrams, found {len(extra_diagrams)}')
+
+for svg_path in [
+    *sorted((ROOT / 'assets' / 'diagrams').glob('*.svg')),
+    *extra_diagrams,
+]:
     svg_text = svg_path.read_text(encoding='utf-8')
     if re.search(r'text\s*\{[^}]*fill\s*:', svg_text):
         errors.append(
