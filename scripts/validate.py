@@ -38,8 +38,10 @@ for path in [ROOT / 'index.html', *sorted((ROOT / 'notes').glob('*.html'))]:
     if parser.h1_count != 1:
         errors.append(f'Expected one h1: {path.name}')
     html = path.read_text(encoding='utf-8')
-    if path.name != 'index.html' and 'class="term-guide"' not in html:
-        errors.append(f'Missing beginner term guide: {path.name}')
+    if 'class="term-guide"' in html:
+        errors.append(f'Legacy top term guide remains: {path.name}')
+    if path.name != 'index.html' and 'class="term-inline"' not in html:
+        errors.append(f'Missing inline first-use term explanation: {path.name}')
     if 'equation-fallback' in html:
         errors.append(f'Unmapped plain-text equation: {path.name}')
 
