@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520">
+  <style>
+    text{font-family:Arial,'Noto Sans KR',sans-serif;fill:#203455}
+    .title{font-size:30px;font-weight:700}.sub{font-size:18px;fill:#5b6880}.label{font-size:20px;font-weight:700}
+    .box{fill:#fff;stroke:#c7d5ee;stroke-width:2}.soft{fill:#edf3ff}.edge{stroke:#7891b7;stroke-width:4;fill:none}
+  </style>
+  <rect width="1200" height="520" rx="28" fill="#f7f9fc"/>
+  <text x="52" y="58" class="title">이미지 → RGB 채널 → 텐서</text>
+  <text x="52" y="92" class="sub">사람이 보는 장면이 모델 입력 숫자 배열로 바뀌는 과정</text>
+  <rect x="60" y="140" width="250" height="270" rx="22" class="box"/>
+  <rect x="90" y="175" width="190" height="160" rx="18" fill="#f3d35a"/>
+  <circle cx="185" cy="250" r="58" fill="#d94d3f"/>
+  <rect x="179" y="185" width="12" height="35" rx="5" fill="#5d4b34"/>
+  <path d="M190 195 C220 170 245 178 252 200 C225 205 205 210 190 195Z" fill="#4c9a61"/>
+  <text x="185" y="374" text-anchor="middle" class="label">원본 이미지</text>
+  <path d="M325 275 H390" class="edge"/>
+  <polygon points="390,275 370,262 370,288" fill="#7891b7"/>
+  <g transform="translate(420 145)">
+    <rect x="0" y="0" width="170" height="220" rx="18" fill="#fff" stroke="#ef9a9a" stroke-width="3"/>
+    <rect x="195" y="0" width="170" height="220" rx="18" fill="#fff" stroke="#9bc2ff" stroke-width="3"/>
+    <rect x="390" y="0" width="170" height="220" rx="18" fill="#fff" stroke="#8ac7a5" stroke-width="3"/>
+    <text x="85" y="35" text-anchor="middle" class="label" fill="#c03c34">R</text>
+    <text x="280" y="35" text-anchor="middle" class="label" fill="#2454d8">G</text>
+    <text x="475" y="35" text-anchor="middle" class="label" fill="#08796f">B</text>
+    <g font-size="18" fill="#5b6880">
+      <text x="28" y="82">220  60  30</text><text x="28" y="118">210  55  28</text><text x="28" y="154">190  48  25</text>
+      <text x="223" y="82">72  118  64</text><text x="223" y="118">69  110  59</text><text x="223" y="154">65  101  54</text>
+      <text x="418" y="82">45  70  135</text><text x="418" y="118">51  75  142</text><text x="418" y="154">58  79  149</text>
+    </g>
+  </g>
+  <path d="M995 275 H1045" class="edge"/>
+  <polygon points="1045,275 1025,262 1025,288" fill="#7891b7"/>
+  <rect x="1060" y="160" width="110" height="230" rx="18" class="soft" stroke="#aac1ee" stroke-width="2"/>
+  <text x="1115" y="220" text-anchor="middle" class="label">Tensor</text>
+  <text x="1115" y="266" text-anchor="middle" font-size="18">[B,C,H,W]</text>
+  <text x="1115" y="306" text-anchor="middle" font-size="18">32×3×</text>
+  <text x="1115" y="336" text-anchor="middle" font-size="18">224×224</text>
+  <text x="60" y="468" class="sub">핵심: shape뿐 아니라 channel 순서, dtype, 값 범위와 정규화 조건이 함께 맞아야 합니다.</text>
+</svg>

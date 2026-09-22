@@ -50,6 +50,7 @@ def register_cs231n(
 captioning, self-supervised learning, diffusion, CLIP과 DINO까지 연결합니다.
 따라서 이 문서는 <strong>기초 공개 노트</strong>와 <strong>최근 강의의 확장 주제</strong>를
 구분해 설명합니다.</p>
+<figure class="study-diagram"><img src="../assets/diagrams/cs231n-learning-loop.svg" alt="Data, score, loss, gradient, optimizer, validation으로 이어지는 CS231n 학습 루프" loading="lazy" decoding="async"><figcaption>CS231n에서 반복해서 등장하는 학습 과정을 하나의 루프로 정리했습니다.</figcaption></figure>
 """
                 + callout(
                     "이 문서의 역할",

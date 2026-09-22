@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520">
+  <style>text{font-family:Arial,'Noto Sans KR',sans-serif;fill:#203455}.title{font-size:30px;font-weight:700}.sub{font-size:18px;fill:#5b6880}.label{font-size:18px;font-weight:700}.edge{stroke:#7891b7;stroke-width:4;fill:none}</style>
+  <rect width="1200" height="520" rx="28" fill="#f7f9fc"/>
+  <text x="52" y="58" class="title">U-Net: 문맥을 압축하고 위치 정보를 다시 연결하기</text>
+  <text x="52" y="92" class="sub">Encoder의 고해상도 특징을 Decoder에 skip으로 전달해 dense prediction을 만듭니다.</text>
+  <g>
+    <rect x="70" y="150" width="150" height="90" rx="12" fill="#2454d8"/><text x="145" y="185" text-anchor="middle" fill="#fff" class="label">Encoder 1</text><text x="145" y="213" text-anchor="middle" fill="#e5edff" font-size="16">256² × 64</text>
+    <rect x="240" y="270" width="150" height="90" rx="12" fill="#2454d8"/><text x="315" y="305" text-anchor="middle" fill="#fff" class="label">Encoder 2</text><text x="315" y="333" text-anchor="middle" fill="#e5edff" font-size="16">128² × 128</text>
+    <rect x="510" y="360" width="180" height="90" rx="12" fill="#182943"/><text x="600" y="395" text-anchor="middle" fill="#fff" class="label">Bottleneck</text><text x="600" y="423" text-anchor="middle" fill="#e5edff" font-size="16">64² × 256</text>
+    <rect x="810" y="270" width="150" height="90" rx="12" fill="#08796f"/><text x="885" y="305" text-anchor="middle" fill="#fff" class="label">Decoder 2</text><text x="885" y="333" text-anchor="middle" fill="#e5edff" font-size="16">128² × 128</text>
+    <rect x="980" y="150" width="150" height="90" rx="12" fill="#08796f"/><text x="1055" y="185" text-anchor="middle" fill="#fff" class="label">Decoder 1</text><text x="1055" y="213" text-anchor="middle" fill="#e5edff" font-size="16">256² × 64</text>
+    <path d="M145 240 V315 H238 M390 315 H505 V405 M690 405 H805 V315 M960 315 H1055 V240" class="edge"/>
+    <path d="M220 195 H980" class="edge"/><path d="M390 315 H810" class="edge"/>
+    <text x="600" y="176" text-anchor="middle" class="label">skip concat</text>
+    <text x="600" y="295" text-anchor="middle" class="label">skip concat</text>
+  </g>
+  <text x="70" y="490" class="sub">ResNet의 skip은 add, U-Net의 대표적 skip은 channel 방향 concat이라는 차이를 구분합니다.</text>
+</svg>
