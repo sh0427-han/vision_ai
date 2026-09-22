@@ -35,5 +35,15 @@
 ## 현재 범위
 
 이미지/텐서, CNN, 분류/탐지/분할, 학습/평가와
-ViT·ResNet·U-Net·PatchCore 논문 해설로 시작한다.
+ViT·ResNet·U-Net·PatchCore 논문 해설을 포함한다.
+CS231n 공개 강의 노트의 전체 학습 흐름과 Bishop PRML 14개 장 전체를
+별도 종합 문서로 정리하며, 기존 상세 문서와 상호 연결한다.
 아직 만들지 않은 주제를 완료된 자료처럼 표기하지 않는다.
+
+
+## 대규모 참고 자료 원고
+
+- CS231n 종합 원고: `scripts/cs231n_note.py`
+- PRML 종합 원고: `scripts/prml_note.py`
+- `scripts/reference_notes.py`에서 메인 빌더에 등록한다.
+- 원문을 대량 복제하지 않고 개념·수식·예시를 재구성해 설명한다.
