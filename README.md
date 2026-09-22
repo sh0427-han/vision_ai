@@ -16,10 +16,12 @@ Vision AI 지식을 개념, 데이터 흐름, 수치 예시와 도식으로 정�
 6. ResNet 논문 해설: degradation, residual, projection, bottleneck
 7. U-Net 논문 해설: encoder-decoder, concat, 원본 crop 구조
 8. PatchCore 논문 해설: memory bank, coreset, 최근접 거리
+9. CS231n 전체 정리: 분류 → loss → 최적화 → CNN → 전이학습 → 현대 Vision
+10. PRML 전체 정리: 14개 장의 확률·추론·잠재변수·시계열·모델 결합
 
 ## 구조와 수정
 
-`scripts/build.py`의 `NOTES`에 각 문서의 설명과 출처가 들어 있습니다.
+`scripts/build.py`의 `NOTES`와 `scripts/*_note.py`에 각 문서의 설명과 출처가 들어 있습니다.
 HTML은 빌드 결과도 함께 커밋해 브라우저에서 직접 열 수 있게 유지합니다.
 
 ```text
@@ -27,7 +29,10 @@ index.html             홈
 notes/*.html           개별 학습 문서 (생성 결과)
 assets/site.css        공통 스타일
 assets/site.js         메뉴와 4개 계산 실험
-scripts/build.py       콘텐츠와 정적 페이지 생성
+scripts/build.py       핵심 콘텐츠와 정적 페이지 생성
+scripts/cs231n_note.py CS231n 전체 정리 원고
+scripts/prml_note.py   PRML 14장 전체 정리 원고
+scripts/reference_notes.py 추가 원고 등록
 scripts/validate.py    링크·ID·문서 기본 구조 검사
 ```
 
