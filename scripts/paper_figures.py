@@ -53,6 +53,7 @@ def _grid(x, y, rows, cols, cell=30, mode="blue", values=None):
         "blue": ["#f0f4fb", "#dce7fa", "#bcd1f6", "#7fa4ec", "#2f63d8"],
         "heat": ["#fff4e8", "#ffd9b3", "#f5a45e", "#db6945", "#a52a2a"],
         "gray": ["#f4f5f7", "#d9dee6", "#adb7c5", "#768397", "#344156"],
+        "green": ["#eff8f5", "#d5eee6", "#afe0d2", "#6fc0aa", "#08796f"],
     }[mode]
     parts = []
     for r in range(rows):
