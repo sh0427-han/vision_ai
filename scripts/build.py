@@ -1,6 +1,7 @@
 """Build a dependency-free Korean vision AI study site from authored HTML sections."""
 from html import escape
 from pathlib import Path
+import re
 
 from reference_notes import register_reference_notes
 
@@ -372,34 +373,138 @@ PAGE_TERMS = {
 }
 
 
-def term_guide(slug):
+TERM_ALIASES = {
+    ("pixels", "Tensor"): r"(?:텐서|Tensor)",
+    ("cnn", "Kernel"): r"(?:커널|Kernel)",
+    ("cnn", "Stride"): r"(?:stride|Stride)",
+    ("cnn", "Padding"): r"(?:padding|Padding)",
+    ("vit", "Q / K / V"): r"Q\s*[·/]\s*K\s*[·/]\s*V",
+    ("vit", "Patch"): r"(?:패치|Patch)",
+    ("vit", "Token"): r"(?:토큰|Token)",
+    ("vit", "Embedding"): r"(?:임베딩|Embedding)",
+    ("vit", "Self-Attention"): r"(?:self[- ]attention|Self-Attention)",
+    ("tasks", "Classification"): r"(?:분류|Classification)",
+    ("tasks", "Detection"): r"(?:탐지|Detection)",
+    ("tasks", "Segmentation"): r"(?:분할|Segmentation)",
+    ("training", "TP / FP / FN / TN"): r"TP\s*[/·]\s*FP\s*[/·]\s*FN\s*[/·]\s*TN",
+    ("training", "Threshold"): r"(?:threshold|Threshold)",
+    ("training", "Data leakage"): r"(?:data leakage|데이터 누수|누수)",
+    ("resnet", "Residual"): r"(?:residual|Residual|잔차)",
+    ("resnet", "Shortcut"): r"(?:shortcut|Shortcut)",
+    ("unet", "Encoder"): r"(?:encoder|Encoder|인코더)",
+    ("unet", "Decoder"): r"(?:decoder|Decoder|디코더)",
+    ("unet", "Skip connection"): r"(?:skip connection|Skip connection)",
+    ("unet", "Concat"): r"(?:concat|Concat)",
+    ("patchcore", "Memory bank"): r"(?:memory bank|Memory bank)",
+    ("patchcore", "Coreset"): r"(?:coreset|Coreset)",
+    ("patchcore", "Nearest neighbor"): r"(?:nearest neighbor|최근접)",
+    ("cs231n", "Logit"): r"(?:logit|logits)",
+    ("cs231n", "Backpropagation"): r"(?:backpropagation|역전파)",
+}
+
+INLINE_SKIP_TAGS = {
+    "code", "pre", "script", "style", "svg",
+    "header", "nav", "footer", "h1", "h2", "h3",
+}
+
+
+def _term_pattern(slug, short):
+    alias = TERM_ALIASES.get((slug, short))
+    if alias:
+        return re.compile(alias, re.IGNORECASE)
+    escaped = re.escape(short).replace(r"\ ", r"\s+")
+    if short and short[0].isalnum():
+        escaped = r"(?<![\w])" + escaped
+    if short and short[-1].isalnum():
+        escaped = escaped + r"(?![\w])"
+    return re.compile(escaped, re.IGNORECASE)
+
+
+def _term_html(matched, short, full, meaning):
+    if full.casefold() == short.casefold():
+        detail = meaning
+    else:
+        detail = f"{full}, {meaning}"
+    return (
+        '<span class="term-inline">'
+        f'<span class="term-name">{escape(matched)}</span>'
+        f'<span class="term-explain"> ({escape(detail)})</span>'
+        '</span>'
+    )
+
+
+def annotate_first_terms(html, slug):
+    """Explain each configured term once, exactly where it first appears in prose."""
+
     terms = PAGE_TERMS.get(slug, [])
     if not terms:
-        return ""
-    rows = "".join(
-        (
-            f'<div class="term-item"><dt>{escape(short)}</dt>'
-            f'<dd><strong>{escape(full)}</strong>'
-            f'<span>{escape(korean)}</span></dd></div>'
-        )
-        for short, full, korean in terms
-    )
-    return (
-        '<aside class="term-guide" aria-label="약어와 핵심 용어">'
-        '<div class="term-guide-head"><span>BEGINNER GUIDE</span>'
-        '<strong>약어·용어 먼저 보기</strong></div>'
-        '<p>이 페이지에서 낯선 약어와 영어 용어가 나오면 아래 뜻으로 읽으면 됩니다. '
-        '처음 배우는 사람을 기준으로 영어 원문과 한국어 의미를 함께 적었습니다.</p>'
-        f'<dl>{rows}</dl>'
-        '<div class="symbol-guide"><strong>수식 기호 읽는 법</strong>'
-        '<span><b>Σ</b> 여러 값을 모두 더함</span>'
-        '<span><b>∈</b> ~에 속함</span>'
-        '<span><b>∂</b> 다른 변수는 고정한 편미분</span>'
-        '<span><b>‖v‖₂</b> 벡터의 L2 길이</span>'
-        '<span><b>≈</b> 대략 같음</span>'
-        '<span><b>∝</b> 비례함</span></div>'
-        '</aside>'
-    )
+        return html
+
+    compiled = [
+        (short, full, meaning, _term_pattern(slug, short))
+        for short, full, meaning in terms
+    ]
+    seen = set()
+    pieces = re.split(r"(<[^>]+>)", html)
+    stack = []
+
+    for idx, piece in enumerate(pieces):
+        if not piece:
+            continue
+        if piece.startswith("<"):
+            close = re.match(r"</\s*([a-zA-Z0-9]+)", piece)
+            if close:
+                tag = close.group(1).lower()
+                for pos in range(len(stack) - 1, -1, -1):
+                    if stack[pos][0] == tag:
+                        del stack[pos:]
+                        break
+                continue
+
+            open_tag = re.match(r"<\s*([a-zA-Z0-9]+)", piece)
+            if open_tag and not piece.rstrip().endswith("/>"):
+                tag = open_tag.group(1).lower()
+                parent_skip = stack[-1][1] if stack else False
+                skip = parent_skip or tag in INLINE_SKIP_TAGS
+                if tag == "div" and re.search(
+                    r'class=["\'][^"\']*\bequation\b', piece
+                ):
+                    skip = True
+                stack.append((tag, skip))
+            continue
+
+        if stack and stack[-1][1]:
+            continue
+
+        cursor = 0
+        rendered = []
+        while cursor < len(piece):
+            best = None
+            for short, full, meaning, pattern in compiled:
+                if short in seen:
+                    continue
+                match = pattern.search(piece, cursor)
+                if match is None:
+                    continue
+                candidate = (match.start(), match.end(), match, short, full, meaning)
+                if best is None or candidate[:2] < best[:2]:
+                    best = candidate
+
+            if best is None:
+                rendered.append(piece[cursor:])
+                break
+
+            start, end, match, short, full, meaning = best
+            rendered.append(piece[cursor:start])
+            rendered.append(
+                _term_html(match.group(0), short, full, meaning)
+            )
+            seen.add(short)
+            cursor = end
+
+        pieces[idx] = "".join(rendered)
+
+    return "".join(pieces)
 
 
 def table(headers, rows):
@@ -472,7 +577,7 @@ section('normalization', '스케일 변환과 정규화는 구분하기', '''<p>
 section('check', '스스로 설명해 보기', '''<details><summary>224 × 224 RGB 이미지의 채널 값은 왜 50,176개가 아닐까?</summary><p>224 × 224 = 50,176은 공간 위치의 수입니다. 각 위치에 3개 채널이 있으므로 150,528개 값입니다.</p></details><details><summary>배치 크기를 16에서 32로 바꾸면 모델 파라미터도 두 배가 될까?</summary><p>파라미터 수는 그대로입니다. 한 번에 처리하는 입력과 중간 활성값의 양이 늘기 때문에 보통 메모리 사용량이 증가합니다.</p></details>''')
 ], [('PyTorch · Tensor basics', 'https://docs.pytorch.org/tutorials/beginner/basics/tensorqs_tutorial.html', '텐서의 형태와 차원 조작을 확인할 수 있습니다.'), ('Torchvision · Models and pre-trained weights', 'https://docs.pytorch.org/vision/stable/models.html', '가중치별 입력 전처리가 다를 수 있습니다.'), ('OpenCV · Color conversions', 'https://docs.opencv.org/4.x/d8/d01/group__imgproc__color__conversions.html', 'BGR/RGB 변환의 공식 API입니다.')])
 
-note('cnn', 'CNN (Convolutional Neural Network): 작은 계산이 특징이 되는 과정', '합성곱을 한 칸씩 계산하고, 채널·수용영역·다운샘플링이 어떤 역할을 하는지 연결합니다.', '기초 개념', '02 · CONVOLUTION', 22, [
+note('cnn', 'CNN: 작은 계산이 특징이 되는 과정', '합성곱을 한 칸씩 계산하고, 채널·수용영역·다운샘플링이 어떤 역할을 하는지 연결합니다.', '기초 개념', '02 · CONVOLUTION', 22, [
 section('overview', '왜 작은 커널을 반복해서 사용할까?', '''<p>CNN은 가까운 픽셀 사이의 패턴을 작은 커널로 계산합니다. 같은 커널을 여러 위치에 적용하는 <strong>가중치 공유</strong> 덕분에 이미지의 모든 위치마다 별도 가중치를 둘 필요가 없습니다. 학습은 어떤 커널 값이 목적에 유용한지를 데이터로 조정하는 과정입니다.</p>''' + flow([('입력', '3 × 224 × 224'), ('Conv + ReLU', '32 × 224 × 224'), ('Downsample', '32 × 112 × 112'), ('분류 Head', 'K개 logits')], '구조를 설명하기 위한 간단한 CNN 예시. 특정 논문의 전체 모델은 아닙니다.') + '''<p>Feature map은 “물체를 그린 지도”로 항상 해석할 수 있는 결과가 아닙니다. 특정 커널과 비선형 연산에 반응한 활성값의 공간 배열입니다. 초기 층에서 경계·방향 같은 반응을 볼 수 있지만, 모든 채널을 한 단어의 의미에 대응시킬 수는 없습니다.</p>'''),
 section('convolution', '3 × 3 합성곱을 손으로 계산하기', '''<p>입력의 3 × 3 영역과 커널의 같은 위치를 각각 곱한 뒤, 9개 값을 더하고 bias를 더합니다. 딥러닝 라이브러리에서 흔히 합성곱이라고 부르는 연산은 커널을 뒤집지 않는 <em>cross-correlation</em>입니다.</p>''' + asset_figure('convolution-step.svg', '5×5 입력의 3×3 영역과 3×3 커널을 곱하고 더해 출력 한 값을 계산하는 과정', '3×3 합성곱 한 위치의 multiply-and-sum 계산을 외부 SVG로 정리했습니다.') + equation('출력[y, x] = Σ 입력[y+i, x+j] × 커널[i, j] + bias\n예시 커널 = [[−1, 0, 1], [−1, 0, 1], [−1, 0, 1]]') + '''<div class="lab"><div class="lab-heading"><h3>커널이 이동하는 위치</h3><span class="lab-badge">INTERACTIVE</span></div><div class="controls"><label for="conv-position">출력 위치 선택</label><input id="conv-position" type="range" min="0" max="8" value="0" step="1"></div><div class="lab-display"><div><p class="small">입력 5 × 5 · 파란 영역이 현재 계산 범위</p><div id="conv-input" class="matrix" style="grid-template-columns:repeat(5,1fr)"></div></div><div><p class="small">출력 3 × 3 · stride 1, padding 0, bias 0</p><div id="conv-output" class="matrix" style="grid-template-columns:repeat(3,1fr)"></div></div></div><div id="conv-value" class="lab-output" aria-live="polite"></div><p class="lab-note">수직 경계에 반응하는 고정 커널입니다. 실제 CNN에서는 대부분의 커널 값을 학습합니다.</p></div><p>첫 위치에서 각 행은 <code>[0, 0, 1] · [−1, 0, 1] = 1</code>이고, 세 행을 더하면 3입니다. 오른쪽 끝의 일정한 <code>[1, 1, 1]</code>은 −1 + 0 + 1 = 0이므로 경계가 없는 영역은 0이 됩니다.</p>'''),
 section('channels', '채널은 어떻게 섞일까?', '''<p>RGB 입력에 출력 채널 32개를 만드는 3 × 3 Conv를 사용하면 커널의 전체 shape는 <code>[32, 3, 3, 3]</code>입니다. 출력 채널 하나는 R·G·B 각각에 대한 계산을 합한 결과입니다. 일반적인 Conv에서 입력 채널마다 완전히 독립적인 최종 결과를 만드는 것은 아닙니다.</p>''' + table(['항목', '수치 예시', '설명'], [('입력', '[B, 3, 224, 224]', '배치 차원은 공간 연산과 별도'), ('가중치', '[32, 3, 3, 3]', '출력 채널 × 입력 채널 × 커널 높이 × 너비'), ('파라미터', '32 × 3 × 3 × 3 + 32 = 896', 'groups=1, bias=True일 때'), ('출력', '[B, 32, 224, 224]', 'stride=1, padding=1, dilation=1')]) + callout('1 × 1 Conv도 학습할 내용이 있다', '1 × 1 커널은 인접 공간을 직접 섞지는 않지만 채널을 섞습니다. 입력 64채널을 출력 128채널로 바꾸면 위치마다 64차원 벡터를 128차원으로 변환합니다.')),
@@ -480,7 +585,7 @@ section('shape', 'Stride · Padding · Receptive field', equation('H_out = floor
 section('nonlinear', '왜 비선형 함수와 학습이 필요할까?', '''<p>ReLU는 <code>max(0, x)</code>를 계산합니다. 예를 들어 [−2, 0.5, 3]은 [0, 0.5, 3]이 됩니다. 비선형성이 전혀 없다면 여러 선형 변환을 쌓아도 하나의 선형 변환으로 합칠 수 있어 표현력에 제약이 생깁니다.</p><p>분류 학습에서는 특징을 이용해 클래스별 logit을 만들고, 정답과 비교한 loss를 역전파합니다. 기울기는 각 가중치를 바꿨을 때 loss가 어떻게 변할지를 나타내며, optimizer가 이 정보를 사용해 파라미터를 갱신합니다. “경계를 찾는 필터”를 사람이 모두 지정하는 것이 아닙니다.</p>''' + callout('한 문장으로 정리', 'CNN은 공유 커널로 지역 패턴을 계산하고, 채널 변환과 비선형 함수를 반복하면서 목적에 맞는 특징을 학습합니다.'))
 ], [('PyTorch · Conv2d', 'https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html', '연산 정의, 가중치 shape, 출력 크기 공식의 기준입니다.'), ('PyTorch · ReLU', 'https://docs.pytorch.org/docs/stable/generated/torch.nn.ReLU.html', 'ReLU의 정의를 확인할 수 있습니다.'), ('ResNet 논문', 'https://arxiv.org/abs/1512.03385', '깊은 CNN을 학습하는 문제는 ResNet 해설에서 이어집니다.')])
 
-note('vit', 'ViT (Vision Transformer): 이미지를 패치의 관계로 이해하기', 'An Image is Worth 16×16 Words를 바탕으로, 패치부터 Q·K·V와 Transformer encoder까지 설명합니다.', '논문 해설', '03 · VISION TRANSFORMER', 30, [
+note('vit', 'ViT: 이미지를 패치의 관계로 이해하기', 'An Image is Worth 16×16 Words를 바탕으로, 패치부터 Q·K·V와 Transformer encoder까지 설명합니다.', '논문 해설', '03 · VISION TRANSFORMER', 30, [
 section('problem', '논문이 던진 질문', '''<p>Transformer를 이미지 분류의 주된 구조로 사용할 수 있을까요? ViT는 이미지를 일정한 크기의 패치로 나누고, 각 패치를 토큰 벡터로 바꿔 Transformer encoder에 넣습니다. 논문의 핵심은 <strong>이미지의 2차원 격자를 토큰 시퀀스로 변환하는 방법</strong>과 대규모 사전학습의 효과입니다.</p><p>원 논문은 대규모 데이터로 사전학습했을 때의 강력한 결과를 보였습니다. 이것을 “작은 데이터에서도 ViT가 항상 CNN보다 좋다”로 일반화하면 안 됩니다. 사전학습 데이터, 입력 해상도, 증강, 학습 설정과 계산 예산을 함께 비교해야 합니다.</p>''' + flow([('이미지', '224 × 224 × 3'), ('패치 임베딩', '196 × 768'), ('Encoder', '197 tokens'), ('분류 Head', 'K개 logits')], 'ViT-B/16의 224 × 224 입력 예시. Encoder 입력의 197은 패치 196개와 CLS 토큰 1개입니다.')),
 section('patches', 'Patch → Flatten → Linear projection', '''<p>패치 크기를 16 × 16으로 정하면 224/16 = 14이므로 총 14 × 14 = <strong>196개 패치</strong>가 생깁니다. 각 RGB 패치를 펼치면 16 × 16 × 3 = 768개의 숫자입니다. 이 벡터에 학습 가능한 선형 변환을 적용해 임베딩 차원 D로 바꿉니다.</p>''' + asset_figure('vit-patch-attention.svg', '이미지를 패치로 나누고 토큰 시퀀스로 만든 뒤 self-attention을 적용하는 Vision Transformer 흐름', '224×224 이미지를 patch sequence로 바꾸고 attention에 전달하는 흐름입니다.') + equation('N = (H/P) × (W/P)\npatch_flat: [B, N, P²C]\nembedding = patch_flat × E + bias\nE: [P²C, D] → output: [B, N, D]') + '''<p>ViT-B/16에서는 패치 벡터 길이와 D가 우연히 모두 768입니다. 따라서 변환이 불필요한 것이 아닙니다. 학습 가능한 768 × 768 행렬은 픽셀 공간을 모델이 쓸 특징 공간으로 바꿉니다. 패치 크기와 D는 서로 독립적으로 설계할 수 있습니다.</p><div class="lab"><div class="lab-heading"><h3>패치 크기와 토큰 수</h3><span class="lab-badge">INTERACTIVE</span></div><div class="controls"><label for="patch-size">패치 한 변</label><select id="patch-size"><option value="8">8 px</option><option value="16" selected>16 px</option><option value="32">32 px</option></select></div><div class="lab-display"><canvas id="patch-canvas" width="224" height="224" aria-label="224 × 224 입력에 적용한 패치 격자"></canvas><div id="patch-result" class="lab-output" aria-live="polite"></div></div><p class="lab-note">D=768로 고정한 크기 계산입니다. 선택값마다 사전학습 모델을 실행하는 데모는 아닙니다.</p></div>'''),
 section('tokens', 'CLS와 위치 임베딩은 왜 더할까?', '''<p><strong>CLS 토큰</strong>은 이미지 전체를 분류하는 데 사용할 학습 가능한 추가 토큰입니다. 입력 단계에서는 이미지의 내용을 이미 알고 있는 벡터가 아닙니다. 여러 encoder 층에서 패치들과 정보를 주고받은 뒤 최종 표현을 분류 head에 전달합니다.</p><p><strong>Position embedding</strong>은 패치 위치에 대한 학습 가능한 정보를 더합니다. 기본 self-attention만으로는 토큰의 원래 격자 위치를 직접 구분하지 못하기 때문입니다. 원 ViT는 1차원 학습 가능한 위치 임베딩을 사용합니다.</p>''' + equation('z₀ = [CLS; patch₁E; …; patch₁₉₆E] + E_position\nshape: [B, 197, 768]') + callout('패치 번호와 픽셀 좌표는 다르다', '2차원 패치를 일정한 순서로 펼쳐도 원래 행·열 배치는 정해져 있습니다. 위치 임베딩은 그 순서에 대응하는 정보를 제공합니다. 입력 해상도를 바꿔 토큰 수가 달라지면 사전학습 위치 임베딩을 보간하는 등의 처리가 필요할 수 있습니다.')),
@@ -504,7 +609,7 @@ section('metrics', 'Threshold를 바꾸면 어떤 오류가 달라질까?', '''<
 section('report', '실험 기록에 남길 최소 정보', table(['항목', '예시', '필요한 이유'], [('데이터', '그룹 목록·클래스별 개수·split 버전', '같은 조건의 재평가'), ('학습', '입력 640, batch 32, seed, 증강', '결과 차이를 해석'), ('모델', '가중치 hash·라이브러리 버전', '실제 사용한 모델 식별'), ('평가', '클래스별 precision/recall·혼동행렬', '희소 클래스 실패 확인'), ('판정', 'threshold·영상 집계 규칙', '프레임 점수와 최종 판정 구분')]) + callout('기억할 핵심', '평가 숫자는 “어떤 데이터에 어떤 규칙으로 평가했는가”와 함께 해석합니다. 데이터 분할, threshold, 후처리를 바꾸면 서로 다른 실험입니다.'))
 ], [('scikit-learn · Cross-validation', 'https://scikit-learn.org/stable/modules/cross_validation.html', 'GroupKFold와 교차검증의 기본 원칙입니다.'), ('scikit-learn · Model evaluation', 'https://scikit-learn.org/stable/modules/model_evaluation.html', 'Precision·recall·F1과 평균 방식의 정의입니다.'), ('PyTorch · Optimization', 'https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html', '학습·검증 반복과 optimizer의 동작을 설명합니다.')])
 
-note('resnet', 'ResNet (Residual Network): 입력을 더하면 무엇이 달라질까?', 'Deep Residual Learning for Image Recognition의 문제의식과 잔차 블록을 수식·구조·예시로 설명합니다.', '논문 해설', '06 · RESIDUAL LEARNING', 20, [
+note('resnet', 'ResNet: 입력을 더하면 무엇이 달라질까?', 'Deep Residual Learning for Image Recognition의 문제의식과 잔차 블록을 수식·구조·예시로 설명합니다.', '논문 해설', '06 · RESIDUAL LEARNING', 20, [
 section('problem', '깊게 쌓았는데 학습 오차가 커지는 문제', '''<p>깊은 모델은 더 복잡한 함수를 표현할 수 있어 보입니다. 그런데 층을 단순히 더 쌓으면 <strong>훈련 오차 자체가 더 나빠지는 degradation 문제</strong>가 나타날 수 있습니다. 이것은 “훈련 성능은 좋은데 test만 나빠지는 과적합”과 구분해야 합니다.</p><p>ResNet은 여러 층이 원하는 출력 전체 H(x)를 직접 만드는 대신, 입력에서 바꿔야 할 부분 F(x)를 학습하고 입력 x를 더하도록 구성합니다. 즉 <code>H(x) = F(x) + x</code>입니다. 잔차는 정답과 예측의 loss를 뜻하는 것이 아니라 블록이 학습하는 변환의 표현입니다.</p>'''),
 section('block', 'Residual block과 shortcut', asset_figure('resnet-skip.svg', '입력 x가 가중치 경로 F(x)를 우회해 출력에서 다시 더해지는 ResNet residual block', 'Residual branch와 identity shortcut의 관계를 단순화한 외부 SVG입니다.') + svg(box(32,115,116,'입력 x','같은 shape') + box(211,115,142,'가중치 층','Conv · BN · ReLU') + box(407,115,142,'가중치 층','Conv · BN') + box(616,115,119,'출력','Add → ReLU','dark') + edge('M 148 148 H 209') + edge('M 353 148 H 405') + edge('M 549 148 H 614') + edge('M 173 148 V 42 H 583 V 135') + '<text x="349" y="30" class="label">shortcut: x 그대로 전달</text><circle cx="583" cy="148" r="13" fill="white" stroke="#7891b7"/><text x="583" y="154" text-anchor="middle" class="label">+</text>',225,'원 ResNet의 basic block을 단순화한 그림. 마지막 합산 뒤 ReLU가 있는 post-activation 구조입니다.') + '''<p>블록이 입력을 그대로 보존하는 것이 유리하다면 F(x)를 0에 가깝게 만들면 됩니다. 예를 들어 x=[2, −1], F(x)=[0.3, 0.2]이면 합산값은 [2.3, −0.8]입니다. 원 basic block의 마지막 ReLU까지 적용하면 [2.3, 0]이 됩니다. “입력을 더한다”와 “출력이 입력과 항상 같다”는 다른 이야기입니다.</p>''' + equation('합산 전 목표: H(x) = x + F(x)\n단순한 합산 경로의 미분: ∂H/∂x = I + ∂F/∂x') + '''<p>미분 식에는 입력에서 출력으로 직접 이어지는 항 I가 있습니다. 이 경로는 깊은 구조를 최적화하는 데 도움이 됩니다. 다만 활성함수·정규화·손실·학습률까지 포함한 전체 최적화가 언제나 안정적이라는 보장은 아닙니다.</p>'''),
 section('projection', '크기가 다르면 그냥 더할 수 없다', '''<p>텐서를 원소별로 더하려면 shape가 맞아야 합니다. <code>[B, 64, 56, 56]</code>과 <code>[B, 128, 28, 28]</code>은 그대로 더할 수 없습니다. 원 논문은 차원이 바뀌는 경우의 shortcut 전략을 논의하며, projection shortcut에서는 1 × 1 Conv 등을 사용해 차원을 맞춥니다.</p>''' + table(['경로', '입력', '변환', '출력'], [('주 경로', '[B,64,56,56]', 'stride 2 블록', '[B,128,28,28]'), ('Shortcut', '[B,64,56,56]', '1 × 1 Conv, stride 2', '[B,128,28,28]'), ('합산', '동일 shape 두 텐서', '원소별 덧셈', '[B,128,28,28]')]) + callout('Concat과 add는 다르다', 'ResNet shortcut은 보통 덧셈입니다. 64채널 두 텐서를 더하면 64채널이고, 채널 방향으로 concatenate하면 128채널입니다. U-Net의 skip connection과 비교할 때 중요한 차이입니다.')),
@@ -583,11 +688,12 @@ def render():
     (ROOT / 'assets/favicon.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#14213b"/><path d="M7 7h7v7H7zm11 0h7v7h-7zM7 18h7v7H7z" fill="#91afff"/><path d="M18 18h7v7h-7z" fill="#20c4bb"/></svg>', encoding='utf-8')
     for i, item in enumerate(NOTES):
         toc = '<aside class="toc" aria-label="이 페이지 목차"><p>이 페이지에서</p>' + ''.join(f'<a href="#{anchor}">{title}</a>' for anchor,title,_ in item['sections']) + '<a href="#sources">출처와 더 확인할 자료</a></aside>'
-        body = f'<header><p class="eyebrow">{item["label"]}</p><h1>{item["title"]}</h1><p class="lead">{item["subtitle"]}</p><div class="meta"><span class="tag">{item["group"]}</span><span class="tag">예상 학습 {item["minutes"]}분</span><span class="tag">수치 예시 · 직접 그린 도식</span></div></header>' + term_guide(item["slug"])
+        body = f'<header><p class="eyebrow">{item["label"]}</p><h1>{item["title"]}</h1><p class="lead">{item["subtitle"]}</p><div class="meta"><span class="tag">{item["group"]}</span><span class="tag">예상 학습 {item["minutes"]}분</span><span class="tag">수치 예시 · 직접 그린 도식</span></div></header>'
         body += ''.join(f'<section class="article-section" id="{anchor}"><h2>{title}</h2>{content}</section>' for anchor,title,content in item['sections'])
         body += '<section class="article-section" id="sources"><h2>출처와 더 확인할 자료</h2><p class="small">본문은 이해를 위한 한국어 해설입니다. 도식은 직접 재구성했으며, 가상 수치와 단순화한 구조는 해당 위치에 표시했습니다.</p><ol class="references">' + ''.join(f'<li><a href="{url}" target="_blank" rel="noopener noreferrer">{title} ↗</a><small>{description}</small></li>' for title,url,description in item['sources']) + '</ol></section>'
         prev = NOTES[i-1] if i else None
         nex = NOTES[i+1] if i+1 < len(NOTES) else None
+        body = annotate_first_terms(body, item["slug"])
         body += '<nav class="pager" aria-label="이전 다음 자료">' + (f'<a href="{prev["slug"]}.html">← {prev["title"].split(":")[0]}</a>' if prev else '<a href="../index.html">← 전체 자료</a>') + (f'<a href="{nex["slug"]}.html">{nex["title"].split(":")[0]} →</a>' if nex else '<a href="../index.html">전체 자료 →</a>') + '</nav><footer class="footer">Vision AI Notes · 개인 학습 자료 · 최초 작성 2026.09.22</footer>'
         html = page(item['title'], item['subtitle'], item['slug'], body, '../', toc)
         # A document may contain multiple independent SVGs; marker IDs must be unique.
