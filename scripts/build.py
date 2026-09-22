@@ -4,6 +4,7 @@ from pathlib import Path
 import re
 
 from reference_notes import register_reference_notes
+from extra_diagrams import build_extra_diagrams, EXTRA_DIAGRAM_META
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -541,6 +542,87 @@ def asset_figure(filename, alt, caption):
     )
 
 
+SECTION_VISUALS = {
+    ("pixels", "overview"): ["pixels-human-vs-array.svg"],
+    ("pixels", "pixels"): ["pixels-channels.svg"],
+    ("pixels", "illumination"): ["pixels-lighting.svg"],
+    ("pixels", "normalization"): ["pixels-resize.svg", "pixels-normalization.svg"],
+
+    ("cnn", "overview"): ["cnn-hierarchy.svg"],
+    ("cnn", "convolution"): ["cnn-sliding.svg"],
+    ("cnn", "channels"): ["cnn-multichannel.svg", "cnn-featuremaps.svg"],
+    ("cnn", "shape"): ["cnn-stride.svg", "cnn-padding.svg", "cnn-receptive.svg", "cnn-pooling.svg"],
+
+    ("vit", "problem"): ["vit-cnn-compare.svg"],
+    ("vit", "patches"): ["vit-patches.svg", "vit-flatten.svg"],
+    ("vit", "tokens"): ["vit-position.svg", "vit-cls.svg"],
+    ("vit", "attention"): ["vit-attention.svg", "vit-attention-matrix.svg", "vit-multihead.svg"],
+
+    ("tasks", "overview"): ["tasks-three-way.svg"],
+    ("tasks", "visual"): ["tasks-segmentation.svg"],
+    ("tasks", "pipeline"): ["tasks-output-types.svg", "tasks-label-box-mask.svg"],
+
+    ("training", "loop"): ["train-overfit.svg"],
+    ("training", "split"): ["train-split.svg", "train-leakage.svg"],
+    ("training", "metrics"): ["train-confusion.svg", "train-prf.svg", "train-threshold.svg", "train-curves.svg"],
+
+    ("resnet", "problem"): ["resnet-plain-vs.svg"],
+    ("resnet", "block"): ["resnet-function.svg"],
+    ("resnet", "projection"): ["resnet-shortcuts.svg"],
+    ("resnet", "bottleneck"): ["resnet-gradient.svg"],
+
+    ("unet", "problem"): ["unet-mask-triplet.svg"],
+    ("unet", "architecture"): ["unet-pyramid.svg"],
+    ("unet", "concat"): ["unet-skip-why.svg"],
+    ("unet", "loss"): ["unet-pixel-class.svg"],
+
+    ("patchcore", "problem"): ["patchcore-normal-only.svg"],
+    ("patchcore", "pipeline"): ["patchcore-features.svg"],
+    ("patchcore", "memory"): ["patchcore-coreset.svg"],
+    ("patchcore", "score"): ["patchcore-nearest.svg", "patchcore-heatmap.svg", "patchcore-distance.svg"],
+
+    ("cs231n", "classification"): ["cs-knn.svg"],
+    ("cs231n", "linear"): ["cs-linear.svg", "cs-softmax.svg"],
+    ("cs231n", "optimization"): ["cs-optimization.svg"],
+    ("cs231n", "nn"): ["cs-backprop.svg"],
+    ("cs231n", "training"): ["cs-augmentation.svg"],
+    ("cs231n", "cnn"): ["cnn-hierarchy.svg"],
+    ("cs231n", "architectures"): ["vit-cnn-compare.svg"],
+    ("cs231n", "transfer"): ["cs-transfer.svg"],
+    ("cs231n", "modern"): ["cs-modern-map.svg"],
+
+    ("prml", "ch2"): ["prml-gaussian.svg", "prml-beta.svg"],
+    ("prml", "ch3"): ["prml-regression.svg"],
+    ("prml", "ch4"): ["prml-logistic.svg"],
+    ("prml", "ch5"): ["prml-neuralnet.svg"],
+    ("prml", "ch6"): ["prml-kernel.svg"],
+    ("prml", "ch7"): ["prml-svm.svg"],
+    ("prml", "ch8"): ["prml-graphical.svg"],
+    ("prml", "ch9"): ["prml-gmm.svg"],
+    ("prml", "ch10"): ["prml-variational.svg"],
+    ("prml", "ch11"): ["prml-sampling.svg"],
+    ("prml", "ch12"): ["prml-pca.svg"],
+    ("prml", "ch14"): ["prml-ensemble.svg"],
+}
+
+
+def section_visuals(slug, anchor):
+    names = SECTION_VISUALS.get((slug, anchor), [])
+    if not names:
+        return ""
+    figures = []
+    for name in names:
+        title, subtitle = EXTRA_DIAGRAM_META[name]
+        figures.append(
+            asset_figure(
+                f"extra/{name}",
+                title,
+                f"{title} — {subtitle}",
+            )
+        )
+    return '<div class="visual-grid">' + ''.join(figures) + '</div>'
+
+
 def box(x, y, width, title, sub='', kind='box'):
     return f'<rect x="{x}" y="{y}" width="{width}" height="66" rx="9" class="{kind}"/><text x="{x+width/2}" y="{y+27}" text-anchor="middle" class="label {"white" if kind == "dark" else ""}">{title}</text><text x="{x+width/2}" y="{y+49}" text-anchor="middle" class="sub {"white" if kind == "dark" else ""}">{sub}</text>'
 
@@ -685,11 +767,16 @@ def miniature(slug):
 
 
 def render():
+    build_extra_diagrams(ROOT / 'assets' / 'diagrams' / 'extra')
     (ROOT / 'assets/favicon.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#14213b"/><path d="M7 7h7v7H7zm11 0h7v7h-7zM7 18h7v7H7z" fill="#91afff"/><path d="M18 18h7v7h-7z" fill="#20c4bb"/></svg>', encoding='utf-8')
     for i, item in enumerate(NOTES):
         toc = '<aside class="toc" aria-label="이 페이지 목차"><p>이 페이지에서</p>' + ''.join(f'<a href="#{anchor}">{title}</a>' for anchor,title,_ in item['sections']) + '<a href="#sources">출처와 더 확인할 자료</a></aside>'
         body = f'<header><p class="eyebrow">{item["label"]}</p><h1>{item["title"]}</h1><p class="lead">{item["subtitle"]}</p><div class="meta"><span class="tag">{item["group"]}</span><span class="tag">예상 학습 {item["minutes"]}분</span><span class="tag">수치 예시 · 직접 그린 도식</span></div></header>'
-        body += ''.join(f'<section class="article-section" id="{anchor}"><h2>{title}</h2>{content}</section>' for anchor,title,content in item['sections'])
+        body += ''.join(
+            f'<section class="article-section" id="{anchor}"><h2>{title}</h2>'
+            f'{content}{section_visuals(item["slug"], anchor)}</section>'
+            for anchor, title, content in item['sections']
+        )
         body += '<section class="article-section" id="sources"><h2>출처와 더 확인할 자료</h2><p class="small">본문은 이해를 위한 한국어 해설입니다. 도식은 직접 재구성했으며, 가상 수치와 단순화한 구조는 해당 위치에 표시했습니다.</p><ol class="references">' + ''.join(f'<li><a href="{url}" target="_blank" rel="noopener noreferrer">{title} ↗</a><small>{description}</small></li>' for title,url,description in item['sources']) + '</ol></section>'
         prev = NOTES[i-1] if i else None
         nex = NOTES[i+1] if i+1 < len(NOTES) else None
