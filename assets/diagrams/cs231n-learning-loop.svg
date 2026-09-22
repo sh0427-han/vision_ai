@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500">
+  <style>text{font-family:Arial,'Noto Sans KR',sans-serif;fill:#203455}.title{font-size:30px;font-weight:700}.sub{font-size:18px;fill:#5b6880}.label{font-size:19px;font-weight:700}.edge{stroke:#7891b7;stroke-width:4;fill:none}</style>
+  <rect width="1200" height="500" rx="28" fill="#f7f9fc"/>
+  <text x="52" y="58" class="title">CS231n 핵심 학습 루프</text>
+  <text x="52" y="92" class="sub">입력부터 validation까지 하나의 닫힌 루프로 보면 모델 구조가 달라도 공통 흐름이 보입니다.</text>
+  <g transform="translate(55 170)">
+    <rect x="0" y="0" width="150" height="85" rx="14" fill="#edf3ff" stroke="#aac1ee" stroke-width="2"/><text x="75" y="36" text-anchor="middle" class="label">Data</text><text x="75" y="62" text-anchor="middle" class="sub">x, y</text>
+    <rect x="195" y="0" width="150" height="85" rx="14" fill="#dce7fb" stroke="#91afff" stroke-width="2"/><text x="270" y="36" text-anchor="middle" class="label">Scores</text><text x="270" y="62" text-anchor="middle" class="sub">f(x;W)</text>
+    <rect x="390" y="0" width="150" height="85" rx="14" fill="#c8d7f5" stroke="#759ae6" stroke-width="2"/><text x="465" y="36" text-anchor="middle" class="label">Loss</text><text x="465" y="62" text-anchor="middle" class="sub">CE + reg</text>
+    <rect x="585" y="0" width="150" height="85" rx="14" fill="#aac1ee" stroke="#567fdc" stroke-width="2"/><text x="660" y="36" text-anchor="middle" class="label">Gradient</text><text x="660" y="62" text-anchor="middle" class="sub">backprop</text>
+    <rect x="780" y="0" width="150" height="85" rx="14" fill="#2454d8"/><text x="855" y="36" text-anchor="middle" class="label" fill="#fff">Update</text><text x="855" y="62" text-anchor="middle" font-size="18" fill="#e5edff">optimizer</text>
+    <rect x="975" y="0" width="150" height="85" rx="14" fill="#08796f"/><text x="1050" y="36" text-anchor="middle" class="label" fill="#fff">Validation</text><text x="1050" y="62" text-anchor="middle" font-size="18" fill="#e5edff">model select</text>
+    <path d="M150 42 H193" class="edge"/><polygon points="193,42 173,29 173,55" fill="#7891b7"/><path d="M345 42 H388" class="edge"/><polygon points="388,42 368,29 368,55" fill="#7891b7"/><path d="M540 42 H583" class="edge"/><polygon points="583,42 563,29 563,55" fill="#7891b7"/><path d="M735 42 H778" class="edge"/><polygon points="778,42 758,29 758,55" fill="#7891b7"/><path d="M930 42 H973" class="edge"/><polygon points="973,42 953,29 953,55" fill="#7891b7"/>
+    <path d="M1050 90 V180 H660 V105" class="edge"/><polygon points="660,105 647,125 673,125" fill="#7891b7"/>
+  </g>
+  <text x="55" y="425" class="sub">Test set은 모델·threshold·하이퍼파라미터 선택이 끝난 뒤 마지막 일반화 평가에 사용합니다.</text>
+</svg>
