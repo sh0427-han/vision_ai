@@ -5,6 +5,7 @@ import re
 
 from reference_notes import register_reference_notes
 from extra_diagrams import build_extra_diagrams, EXTRA_DIAGRAM_META
+from paper_figures import build_paper_figures, PAPER_FIGURE_META
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -548,15 +549,15 @@ SECTION_VISUALS = {
     ("pixels", "illumination"): ["pixels-lighting.svg"],
     ("pixels", "normalization"): ["pixels-resize.svg", "pixels-normalization.svg"],
 
-    ("cnn", "overview"): ["cnn-hierarchy.svg"],
-    ("cnn", "convolution"): ["cnn-sliding.svg"],
-    ("cnn", "channels"): ["cnn-multichannel.svg", "cnn-featuremaps.svg"],
-    ("cnn", "shape"): ["cnn-stride.svg", "cnn-padding.svg", "cnn-receptive.svg", "cnn-pooling.svg"],
+    ("cnn", "overview"): [],
+    ("cnn", "convolution"): [],
+    ("cnn", "channels"): [],
+    ("cnn", "shape"): [],
 
-    ("vit", "problem"): ["vit-cnn-compare.svg"],
-    ("vit", "patches"): ["vit-patches.svg", "vit-flatten.svg"],
-    ("vit", "tokens"): ["vit-position.svg", "vit-cls.svg"],
-    ("vit", "attention"): ["vit-attention.svg", "vit-attention-matrix.svg", "vit-multihead.svg"],
+    ("vit", "problem"): [],
+    ("vit", "patches"): [],
+    ("vit", "tokens"): [],
+    ("vit", "attention"): [],
 
     ("tasks", "overview"): ["tasks-three-way.svg"],
     ("tasks", "visual"): ["tasks-segmentation.svg"],
@@ -576,10 +577,10 @@ SECTION_VISUALS = {
     ("unet", "concat"): ["unet-skip-why.svg"],
     ("unet", "loss"): ["unet-pixel-class.svg"],
 
-    ("patchcore", "problem"): ["patchcore-normal-only.svg"],
-    ("patchcore", "pipeline"): ["patchcore-features.svg"],
-    ("patchcore", "memory"): ["patchcore-coreset.svg"],
-    ("patchcore", "score"): ["patchcore-nearest.svg", "patchcore-heatmap.svg", "patchcore-distance.svg"],
+    ("patchcore", "problem"): [],
+    ("patchcore", "pipeline"): [],
+    ("patchcore", "memory"): [],
+    ("patchcore", "score"): [],
 
     ("cs231n", "classification"): ["cs-knn.svg"],
     ("cs231n", "linear"): ["cs-linear.svg", "cs-softmax.svg"],
@@ -621,6 +622,50 @@ def section_visuals(slug, anchor):
             )
         )
     return '<div class="visual-grid">' + ''.join(figures) + '</div>'
+
+
+PAPER_VISUALS = {
+    ("cnn", "overview"): ["cnn-paper-overview.svg"],
+    ("cnn", "convolution"): ["cnn-paper-convolution.svg"],
+    ("cnn", "channels"): ["cnn-paper-multichannel.svg"],
+    ("cnn", "shape"): ["cnn-paper-stride-padding.svg", "cnn-paper-receptive-field.svg"],
+    ("cnn", "nonlinear"): ["cnn-paper-pooling.svg"],
+
+    ("vit", "problem"): ["vit-paper-overview.svg"],
+    ("vit", "patches"): ["vit-paper-patch-embedding.svg"],
+    ("vit", "tokens"): ["vit-paper-cls-position.svg"],
+    ("vit", "attention"): [
+        "vit-paper-attention.svg",
+        "vit-paper-multihead.svg",
+        "vit-paper-attention-map.svg",
+    ],
+
+    ("patchcore", "problem"): ["patchcore-paper-overview.svg"],
+    ("patchcore", "pipeline"): ["patchcore-paper-features.svg"],
+    ("patchcore", "memory"): ["patchcore-paper-coreset.svg"],
+    ("patchcore", "score"): [
+        "patchcore-paper-nearest.svg",
+        "patchcore-paper-heatmap.svg",
+        "patchcore-paper-score.svg",
+    ],
+}
+
+
+def section_paper_figures(slug, anchor):
+    names = PAPER_VISUALS.get((slug, anchor), [])
+    if not names:
+        return ""
+    figures = []
+    for index, name in enumerate(names, start=1):
+        title, subtitle = PAPER_FIGURE_META[name]
+        figures.append(
+            '<figure class="paper-figure">'
+            f'<img src="../assets/diagrams/paper/{escape(name)}" '
+            f'alt="{escape(title)}" loading="lazy" decoding="async">'
+            f'<figcaption><strong>Figure {index}.</strong> '
+            f'{escape(title)} — {escape(subtitle)}</figcaption></figure>'
+        )
+    return '<div class="paper-visuals">' + ''.join(figures) + '</div>'
 
 
 def box(x, y, width, title, sub='', kind='box'):
@@ -768,13 +813,14 @@ def miniature(slug):
 
 def render():
     build_extra_diagrams(ROOT / 'assets' / 'diagrams' / 'extra')
+    build_paper_figures(ROOT / 'assets' / 'diagrams' / 'paper')
     (ROOT / 'assets/favicon.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#14213b"/><path d="M7 7h7v7H7zm11 0h7v7h-7zM7 18h7v7H7z" fill="#91afff"/><path d="M18 18h7v7h-7z" fill="#20c4bb"/></svg>', encoding='utf-8')
     for i, item in enumerate(NOTES):
         toc = '<aside class="toc" aria-label="이 페이지 목차"><p>이 페이지에서</p>' + ''.join(f'<a href="#{anchor}">{title}</a>' for anchor,title,_ in item['sections']) + '<a href="#sources">출처와 더 확인할 자료</a></aside>'
         body = f'<header><p class="eyebrow">{item["label"]}</p><h1>{item["title"]}</h1><p class="lead">{item["subtitle"]}</p><div class="meta"><span class="tag">{item["group"]}</span><span class="tag">예상 학습 {item["minutes"]}분</span><span class="tag">수치 예시 · 직접 그린 도식</span></div></header>'
         body += ''.join(
             f'<section class="article-section" id="{anchor}"><h2>{title}</h2>'
-            f'{content}{section_visuals(item["slug"], anchor)}</section>'
+            f'{content}{section_paper_figures(item["slug"], anchor)}{section_visuals(item["slug"], anchor)}</section>'
             for anchor, title, content in item['sections']
         )
         body += '<section class="article-section" id="sources"><h2>출처와 더 확인할 자료</h2><p class="small">본문은 이해를 위한 한국어 해설입니다. 도식은 직접 재구성했으며, 가상 수치와 단순화한 구조는 해당 위치에 표시했습니다.</p><ol class="references">' + ''.join(f'<li><a href="{url}" target="_blank" rel="noopener noreferrer">{title} ↗</a><small>{description}</small></li>' for title,url,description in item['sources']) + '</ol></section>'

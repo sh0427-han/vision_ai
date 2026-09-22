@@ -67,3 +67,11 @@ CS231n 공개 강의 노트의 전체 학습 흐름과 Bishop PRML 14개 장 전
 - 한 섹션에 여러 그림이 필요한 경우 데스크톱 2열, 모바일 1열로 배치한다.
 - 그림 하나는 메시지 하나를 원칙으로 하며, 장식보다 개념 이해를 우선한다.
 - PRML·CS231n처럼 추상도가 높은 내용은 각 주요 개념마다 최소 하나의 시각자료를 우선한다.
+
+
+## 논문형 Figure 규칙
+
+- CNN, ViT, PatchCore의 대표 시각자료는 단순 box-arrow diagram보다 multi-panel paper figure를 우선한다.
+- 패널은 (a), (b), (c)처럼 표시하고 실제 matrix, heatmap, scatter, feature map, score distribution 등 개념에 맞는 시각 표현을 사용한다.
+- paper-style figure는 `scripts/paper_figures.py`에서 생성하고 `PAPER_VISUALS`에서 섹션별 위치를 관리한다.
+- 같은 개념의 단순 diagram과 paper-style figure를 한 페이지에 중복 배치하지 않는다.
