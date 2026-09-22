@@ -47,3 +47,12 @@ CS231n 공개 강의 노트의 전체 학습 흐름과 Bishop PRML 14개 장 전
 - PRML 종합 원고: `scripts/prml_note.py`
 - `scripts/reference_notes.py`에서 메인 빌더에 등록한다.
 - 원문을 대량 복제하지 않고 개념·수식·예시를 재구성해 설명한다.
+
+
+## 초심자 표기 규칙
+
+- 독자는 Vision AI를 처음 접하는 사람을 기준으로 한다.
+- 약어는 페이지 상단에서 영어 원문과 한국어 뜻을 먼저 제공한다.
+- 핵심 모델명은 처음 등장할 때 `CNN (Convolutional Neural Network)`처럼 풀어서 쓴다.
+- 수식은 단순 코드 문자열이 아니라 MathJax/LaTeX 수학 조판으로 표시한다.
+- 어두운 배경에는 반드시 밝은 글자를 사용하고, SVG CSS가 개별 `fill`을 덮어쓰지 않도록 검증한다.

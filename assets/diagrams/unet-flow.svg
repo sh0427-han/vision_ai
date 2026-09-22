@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520">
-  <style>text{font-family:Arial,'Noto Sans KR',sans-serif;fill:#203455}.title{font-size:30px;font-weight:700}.sub{font-size:18px;fill:#5b6880}.label{font-size:18px;font-weight:700}.edge{stroke:#7891b7;stroke-width:4;fill:none}</style>
+  <style>text{font-family:Arial,'Noto Sans KR',sans-serif}.title{font-size:30px;font-weight:700}.sub{font-size:18px;fill:#5b6880}.label{font-size:18px;font-weight:700}.edge{stroke:#7891b7;stroke-width:4;fill:none}</style>
   <rect width="1200" height="520" rx="28" fill="#f7f9fc"/>
   <text x="52" y="58" class="title">U-Net: 문맥을 압축하고 위치 정보를 다시 연결하기</text>
   <text x="52" y="92" class="sub">Encoder의 고해상도 특징을 Decoder에 skip으로 전달해 dense prediction을 만듭니다.</text>
