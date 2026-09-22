@@ -13,7 +13,7 @@ def register_prml(
 
     note(
         "prml",
-        "PRML: 패턴인식과 머신러닝 전체 지도",
+        "PRML (Pattern Recognition and Machine Learning): 전체 지도",
         (
             "Christopher M. Bishop의 Pattern Recognition and Machine Learning "
             "14개 장을 확률·추론·예측·잠재변수의 연결 구조로 정리합니다."
