@@ -2,6 +2,7 @@
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -36,6 +37,11 @@ for path in [ROOT / 'index.html', *sorted((ROOT / 'notes').glob('*.html'))]:
         errors.append(f'Duplicate ID: {path.name}')
     if parser.h1_count != 1:
         errors.append(f'Expected one h1: {path.name}')
+    html = path.read_text(encoding='utf-8')
+    if path.name != 'index.html' and 'class="term-guide"' not in html:
+        errors.append(f'Missing beginner term guide: {path.name}')
+    if 'equation-fallback' in html:
+        errors.append(f'Unmapped plain-text equation: {path.name}')
 
 for path, parser in pages.items():
     for link in parser.links:
@@ -47,6 +53,13 @@ for path, parser in pages.items():
             errors.append(f'Missing resource: {path.name} -> {link}')
         if parsed.fragment and target in pages and parsed.fragment not in pages[target].ids:
             errors.append(f'Missing anchor: {path.name} -> {link}')
+
+for svg_path in sorted((ROOT / 'assets' / 'diagrams').glob('*.svg')):
+    svg_text = svg_path.read_text(encoding='utf-8')
+    if re.search(r'text\s*\{[^}]*fill\s*:', svg_text):
+        errors.append(
+            f'Generic SVG text fill can override white labels: {svg_path.name}'
+        )
 
 if errors:
     raise SystemExit('\n'.join(errors))
