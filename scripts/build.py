@@ -612,13 +612,18 @@ def section_visuals(slug, anchor):
     figures = []
     for name in names:
         title, subtitle = EXTRA_DIAGRAM_META[name]
-        figures.append(
-            asset_figure(
-                f"extra/{name}",
-                title,
-                f"{title} — {subtitle}",
-            )
+        figure_html = asset_figure(
+            f"extra/{name}",
+            title,
+            f"{title} — {subtitle}",
         )
+        if slug == "pixels":
+            figure_html = figure_html.replace(
+                'class="study-diagram"',
+                'class="study-diagram chapter-wide-diagram"',
+                1,
+            )
+        figures.append(figure_html)
     return '<div class="visual-grid">' + ''.join(figures) + '</div>'
 
 
