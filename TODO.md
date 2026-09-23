@@ -15,6 +15,8 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] 실제 Chromium 390px/430px에서 9개 페이지 mobile layout 검증: global horizontal overflow 0, 본문 viewport 이탈 0, sidebar open/Esc close 정상
+- [x] 모바일 wide reference/paper figure에 좌우 스크롤 안내 표시 추가
 - [x] 820px mobile-scroll 기준 text-density 상위 reference figure를 raster 재검수하고 장문 annotation을 짧은 label로 축약
 - [x] 모바일 figure 컨테이너의 touch horizontal scrolling 및 좁은 viewport padding 보강
 - [x] Pages artifact raster contact-sheet 전수 QA: reference 68개 + paper-style 18개 + extra 67개 + core SVG 10개 검수, 문제 항목은 full-size 재검수
@@ -61,8 +63,8 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [ ] 여러 figure가 box / pipeline / bar 형태로 비슷하게 보여 시각적 다양성이 부족하다.
 - [ ] 일부 개념은 “그림 수”는 많지만 핵심 intuition을 보여주는 대표 figure가 부족하다.
 - [ ] 일부 figure는 실제 plot/heatmap/feature map보다 개념 요약 카드에 가깝다.
-- [ ] 모바일/좁은 화면에서 text와 panel spacing을 다시 확인해야 한다. (SVG 내부 Korean font fallback은 보강)
-- [ ] 데스크톱 Pages artifact raster QA는 완료. 모바일 실제 브라우저의 scroll/spacing과 플랫폼별 Korean font fallback 최종 확인이 남아 있다.
+- [x] 모바일/좁은 화면 text와 panel spacing을 Chromium 390px/430px에서 확인 완료. wide figure는 개별 horizontal scroll로 유지
+- [ ] 데스크톱 Pages artifact raster QA와 Chromium 390px/430px mobile layout QA는 완료. 플랫폼별 Korean font fallback 최종 확인만 남아 있다.
 
 ### 공통 수정 원칙
 
