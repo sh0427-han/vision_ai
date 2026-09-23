@@ -749,7 +749,7 @@ def _conv_controls(x, y, w, h):
     return "".join(parts)
 
 def _modern_visual(x, y, w, h):
-    """Compact, concept-correct views of CLIP, DINO and diffusion."""
+    """Compact views of CLIP, DINO, diffusion and attention."""
     parts = []
     cards = [
         (x + 18, y + 58, "CLIP"),
@@ -785,10 +785,18 @@ def _modern_visual(x, y, w, h):
             parts.append(f'<text x="{px+112}" y="{py+105}" text-anchor="middle" class="small">EMA params</text>')
         elif title == "diffusion":
             parts.append(_grid(px + 20, py + 43, 3, 3, 14, "blue", [1, 4, 7]))
-            parts.append(_arrow(px + 70, py + 64, px + 103, py + 64))
             parts.append(_grid(px + 111, py + 43, 3, 3, 14, "gray", [0, 2, 4, 6, 8]))
-            parts.append(f'<text x="{px+21}" y="{py+108}" class="small">forward: data → noise</text>')
-            parts.append(f'<text x="{px+116}" y="{py+108}" class="small">reverse: denoise</text>')
+            parts.append(_arrow(px + 70, py + 56, px + 103, py + 56))
+            parts.append(
+                f'<path d="M{px+103} {py+80} H{px+70}" '
+                'stroke="#08796f" stroke-width="2.5"/>'
+            )
+            parts.append(
+                f'<polygon points="{px+70},{py+80} {px+82},{py+73} '
+                f'{px+82},{py+87}" fill="#08796f"/>'
+            )
+            parts.append(f'<text x="{px+22}" y="{py+108}" class="small">data → noise</text>')
+            parts.append(f'<text x="{px+108}" y="{py+108}" class="small">denoise ←</text>')
         else:
             parts.append(_grid(px + 35, py + 40, 4, 4, 17, "heat", [5, 6, 9, 10]))
             parts.append(f'<text x="{px+116}" y="{py+62}" class="small">QKᵀ</text>')
