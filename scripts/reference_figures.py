@@ -1713,52 +1713,38 @@ def _semantic_instance_masks(x, y, w, h):
     return "".join(parts)
 
 
+
 def _nms_visual(x, y, w, h):
-    """Greedy NMS: rank, keep best, suppress highly overlapping boxes."""
+    """Greedy NMS in three vertical stages to avoid misleading serial box flow."""
     parts = []
     stages = [
-        ("1 rank", 0), ("2 keep best", 1), ("3 suppress", 2)
+        ("1 rank scores", "0.92 / 0.81 / 0.55"),
+        ("2 keep best", "keep 0.92"),
+        ("3 suppress overlap", "remove 0.81 if IoU > threshold"),
     ]
-    stage_w = (w - 40) / 3
-    for idx, (label, stage) in enumerate(stages):
-        px = x + 10 + idx * stage_w
+    for idx, (label, note) in enumerate(stages):
+        yy = y + 58 + idx * 105
         parts.append(
-            f'<text x="{px+stage_w/2}" y="{y+42}" text-anchor="middle" '
-            f'class="small">{label}</text>'
+            f'<rect x="{x+20}" y="{yy}" width="{w-40}" height="82" rx="10" '
+            'fill="#fbfcfe" stroke="#d6deea"/>'
         )
         parts.append(
-            f'<rect x="{px+18}" y="{y+75}" width="{stage_w-36}" height="{h-135}" '
-            'fill="#f8fafc" stroke="#d6deea"/>'
+            f'<text x="{x+34}" y="{yy+24}" class="small">{_e(label)}</text>'
         )
-        boxes = [
-            (px+35, y+105, stage_w*.48, 105, "#2454d8", 0.92),
-            (px+47, y+116, stage_w*.47, 103, "#08796f", 0.81),
-            (px+28, y+198, stage_w*.42, 86, "#a24d18", 0.55),
-        ]
-        for bidx, (bx, by, bw, bh, color, score) in enumerate(boxes):
-            suppressed = stage == 2 and bidx == 1
-            opacity = .20 if suppressed else 1.0
+        parts.append(
+            f'<text x="{x+34}" y="{yy+48}" class="small">{_e(note)}</text>'
+        )
+        bx = x + w - 108
+        parts.append(
+            f'<rect x="{bx}" y="{yy+18}" width="48" height="42" fill="none" '
+            'stroke="#2454d8" stroke-width="3"/>'
+        )
+        if idx != 1:
             parts.append(
-                f'<rect x="{bx}" y="{by}" width="{bw}" height="{bh}" fill="none" '
-                f'stroke="{color}" stroke-width="3" opacity="{opacity}"/>'
-            )
-            if stage == 0:
-                parts.append(
-                    f'<text x="{bx}" y="{by-7}" class="small" fill="{color}">'
-                    f'{score:.2f}</text>'
-                )
-        if stage == 1:
-            parts.append(
-                f'<text x="{px+stage_w/2}" y="{y+h-35}" text-anchor="middle" '
-                'class="small">keep 0.92</text>'
-            )
-        if stage == 2:
-            parts.append(
-                f'<text x="{px+stage_w/2}" y="{y+h-35}" text-anchor="middle" '
-                'class="small">remove high-IoU duplicate</text>'
+                f'<rect x="{bx+9}" y="{yy+24}" width="46" height="40" fill="none" '
+                f'stroke="#08796f" stroke-width="3" opacity="{1 if idx==0 else .22}"/>'
             )
     return "".join(parts)
-
 
 def _architecture_compare(x, y, w, h):
     """Block-level motifs rather than arbitrary depth bars."""
@@ -1792,35 +1778,53 @@ def _architecture_compare(x, y, w, h):
     return "".join(parts)
 
 
+
 def _conv_channel_sum(x, y, w, h):
     """One convolution filter spans every input channel."""
     colors = ["#fbe3e3", "#e9f7f2", "#edf3ff"]
     labels = ["R", "G", "B"]
     parts = []
+    in_x = x + 18
+    box_w = 52
+    box_h = 48
+    kernel_x = x + w * 0.34
+    sum_x = x + w * 0.63
+    out_x = x + w - 38
     for idx, (color, label) in enumerate(zip(colors, labels)):
-        py = y + 68 + idx * 88
+        py = y + 72 + idx * 82
         parts.append(
-            f'<rect x="{x+25}" y="{py}" width="78" height="66" rx="8" '
+            f'<rect x="{in_x}" y="{py}" width="{box_w}" height="{box_h}" rx="7" '
             f'fill="{color}" stroke="#a8b5c8"/>'
         )
-        parts.append(f'<text x="{x+64}" y="{py+39}" text-anchor="middle" class="label">{label}</text>')
         parts.append(
-            f'<text x="{x+122}" y="{py+38}" class="small">× K{idx+1}</text>'
+            f'<text x="{in_x+box_w/2}" y="{py+30}" text-anchor="middle" '
+            f'class="label">{label}</text>'
         )
-        parts.append(_arrow(x + 165, py + 33, x + 215, py + 33))
+        parts.append(
+            f'<text x="{kernel_x}" y="{py+29}" text-anchor="middle" class="small">'
+            f'× K{idx+1}</text>'
+        )
+        parts.append(_arrow(kernel_x + 24, py + 24, sum_x - 26, y + 170))
     parts.append(
-        f'<circle cx="{x+250}" cy="{y+184}" r="28" fill="#e9f7f2" '
+        f'<circle cx="{sum_x}" cy="{y+170}" r="24" fill="#e9f7f2" '
         'stroke="#8ccdbb" stroke-width="2"/>'
     )
-    parts.append(f'<text x="{x+250}" y="{y+190}" text-anchor="middle" class="label">Σ + b</text>')
-    parts.append(_arrow(x + 280, y + 184, x + 325, y + 184))
     parts.append(
-        f'<rect x="{x+332}" y="{y+142}" width="74" height="84" rx="9" '
+        f'<text x="{sum_x}" y="{y+176}" text-anchor="middle" class="small">Σ+b</text>'
+    )
+    parts.append(_arrow(sum_x + 26, y + 170, out_x - 27, y + 170))
+    parts.append(
+        f'<rect x="{out_x-26}" y="{y+140}" width="52" height="60" rx="8" '
         'fill="#edf3ff" stroke="#8faee8"/>'
     )
-    parts.append(f'<text x="{x+369}" y="{y+188}" text-anchor="middle" class="small">1 map</text>')
+    parts.append(
+        f'<text x="{out_x}" y="{y+174}" text-anchor="middle" class="small">1 map</text>'
+    )
+    parts.append(
+        f'<text x="{x+16}" y="{y+h-25}" class="small">'
+        "one 3×3×C_in filter → one output channel</text>"
+    )
     return "".join(parts)
-
 
 def _output_channels(x, y, w, h):
     """C_out different filters produce C_out feature maps."""
@@ -1878,54 +1882,74 @@ def _receptive_field_growth(x, y, w, h):
     return "".join(parts)
 
 
+
 def _patch_tokens(x, y, w, h):
-    parts = [_grid(x + 45, y + 70, 4, 4, 42, "blue", [0, 5, 10, 15])]
-    parts.append(_arrow(x + 225, y + 155, x + 275, y + 155))
+    parts = [_grid(x + 28, y + 78, 4, 4, 34, "blue", [0, 5, 10, 15])]
+    parts.append(_arrow(x + 172, y + 145, x + 205, y + 145))
     for idx in range(4):
         parts.append(
-            f'<rect x="{x+290}" y="{y+78+idx*58}" width="86" height="36" rx="7" '
+            f'<rect x="{x+218}" y="{y+70+idx*58}" width="{w-244}" height="34" rx="7" '
             'fill="#edf3ff" stroke="#8faee8"/>'
         )
         parts.append(
-            f'<text x="{x+333}" y="{y+101+idx*58}" text-anchor="middle" class="small">'
-            f'token {idx+1}</text>'
+            f'<text x="{x+(w+192)/2}" y="{y+92+idx*58}" '
+            f'text-anchor="middle" class="small">token {idx+1}</text>'
         )
     parts.append(
-        f'<text x="{x+18}" y="{y+h-28}" class="small">'
-        "image patches are flattened/projected into token embeddings</text>"
+        f'<text x="{x+16}" y="{y+h-24}" class="small">'
+        "patch → flatten → linear projection</text>"
     )
     return "".join(parts)
 
 
 def _attention_qkv(x, y, w, h):
+    """Scaled dot-product attention within a narrow three-panel layout."""
     parts = []
-    x0 = x + 34
-    ys = [y+90, y+170, y+250]
-    labels = ["Q = XWQ", "K = XWK", "V = XWV"]
+    qx = x + 20
+    box_w = 78
+    ys = [y+82, y+158, y+234]
+    labels = ["Q=XWQ", "K=XWK", "V=XWV"]
+    score_x = x + w * 0.55
+    out_x = x + w - 43
     for yy, label in zip(ys, labels):
         parts.append(
-            f'<rect x="{x0}" y="{yy-23}" width="110" height="46" rx="8" '
+            f'<rect x="{qx}" y="{yy-20}" width="{box_w}" height="40" rx="7" '
             'fill="#edf3ff" stroke="#8faee8"/>'
         )
-        parts.append(f'<text x="{x0+55}" y="{yy+5}" text-anchor="middle" class="small">{label}</text>')
-    parts.append(_arrow(x0+115, ys[0], x+225, y+130))
-    parts.append(_arrow(x0+115, ys[1], x+225, y+130))
+        parts.append(
+            f'<text x="{qx+box_w/2}" y="{yy+5}" text-anchor="middle" '
+            f'class="small">{label}</text>'
+        )
+    parts.append(_arrow(qx+box_w+2, ys[0], score_x-42, y+118))
+    parts.append(_arrow(qx+box_w+2, ys[1], score_x-42, y+118))
     parts.append(
-        f'<rect x="{x+235}" y="{y+100}" width="116" height="60" rx="9" '
+        f'<rect x="{score_x-40}" y="{y+88}" width="80" height="60" rx="8" '
         'fill="#fff1e7" stroke="#e0ae82"/>'
     )
-    parts.append(f'<text x="{x+293}" y="{y+125}" text-anchor="middle" class="small">softmax</text>')
-    parts.append(f'<text x="{x+293}" y="{y+146}" text-anchor="middle" class="small">QKᵀ / √dₖ</text>')
-    parts.append(_arrow(x+353, y+130, x+395, y+175))
-    parts.append(_arrow(x0+115, ys[2], x+395, y+195))
     parts.append(
-        f'<rect x="{x+405}" y="{y+145}" width="84" height="70" rx="9" '
+        f'<text x="{score_x}" y="{y+112}" text-anchor="middle" class="small">softmax</text>'
+    )
+    parts.append(
+        f'<text x="{score_x}" y="{y+135}" text-anchor="middle" class="small">'
+        "QKᵀ/√d</text>"
+    )
+    parts.append(_arrow(score_x+42, y+118, out_x-28, y+170))
+    parts.append(_arrow(qx+box_w+2, ys[2], out_x-28, y+190))
+    parts.append(
+        f'<rect x="{out_x-27}" y="{y+145}" width="54" height="70" rx="8" '
         'fill="#e9f7f2" stroke="#8ccdbb"/>'
     )
-    parts.append(f'<text x="{x+447}" y="{y+176}" text-anchor="middle" class="small">weights</text>')
-    parts.append(f'<text x="{x+447}" y="{y+198}" text-anchor="middle" class="small">× V</text>')
+    parts.append(
+        f'<text x="{out_x}" y="{y+174}" text-anchor="middle" class="small">A·V</text>'
+    )
+    parts.append(
+        f'<text x="{out_x}" y="{y+197}" text-anchor="middle" class="small">output</text>'
+    )
+    parts.append(
+        f'<text x="{x+16}" y="{y+h-24}" class="small">'
+        "A = softmax(QKᵀ/√dₖ)</text>"
+    )
     return "".join(parts)
-
 
 def _multihead_attention(x, y, w, h):
     parts = []
@@ -2329,7 +2353,7 @@ FIGURES = {
         dict(title="dense connectivity",kind="fcconv"),
         dict(title="shared local filters",kind="conv"),
     ]),
-    "cs-conv-channels-rf.svg": dict(title="Multi-channel convolution and receptive field",subtitle="A convolutional filter spans all input channels; multiple filters create output channels, and stacked local kernels expand the receptive field.",panels=[
+    "cs-conv-channels-rf.svg": dict(title="Multi-channel convolution and receptive field",subtitle="Filters span input channels; different filters create output channels, while stacked kernels expand receptive fields.",panels=[
         dict(title="RGB channels summed by one filter",kind="conv_channel_sum"),
         dict(title="multiple filters → output channels",kind="output_channels"),
         dict(title="3×3 stack: receptive field 3→5→7",kind="receptive_field_growth"),
@@ -2362,7 +2386,7 @@ FIGURES = {
         dict(title="attention / CLIP / DINO / diffusion",kind="modern_visual"),
     ]),
 
-    "cs-attention.svg": dict(title="Vision Transformer attention mechanics",subtitle="Patch embeddings become tokens; self-attention forms Q/K/V, normalizes pairwise similarities, and combines multiple heads.",panels=[
+    "cs-attention.svg": dict(title="Vision Transformer attention mechanics",subtitle="ViT converts patches to tokens; attention uses Q/K/V scores, then combines several attention heads.",panels=[
         dict(title="patches → token embeddings",kind="patch_tokens"),
         dict(title="scaled dot-product attention",kind="attention_qkv"),
         dict(title="multi-head attention",kind="multihead_attention"),
@@ -2379,7 +2403,7 @@ FIGURES = {
         dict(title="covariance ellipse",kind="covariance_ellipse"),
         dict(title="Beta prior → posterior",kind="distribution",mode="beta"),
     ]),
-    "prml-discrete-map.svg": dict(title="Bernoulli, Binomial, maximum likelihood and MAP",subtitle="Bernoulli models one binary trial; the Binomial models a success count, while MAP adds prior information to likelihood-based estimation.",panels=[
+    "prml-discrete-map.svg": dict(title="Bernoulli, Binomial, maximum likelihood and MAP",subtitle="Bernoulli models one binary trial; Binomial counts successes; MAP combines likelihood with a prior.",panels=[
         dict(title="Bernoulli trials → Binomial count",kind="bernoulli_binomial"),
         dict(title="ML vs MAP estimate",kind="ml_map"),
     ]),
