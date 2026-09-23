@@ -11,13 +11,13 @@ def _e(value):
 def _svg(title, subtitle, body, height=620):
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 {height}" role="img" aria-label="{_e(title)}">
 <style>
-.title{{font:700 27px Arial,'Noto Sans KR',sans-serif;fill:#18243b}}
-.subtitle{{font:18px Arial,'Noto Sans KR',sans-serif;fill:#5b6880}}
-.panel-label{{font:700 18px Arial,'Noto Sans KR',sans-serif;fill:#18243b}}
-.label{{font:700 17px Arial,'Noto Sans KR',sans-serif;fill:#203455}}
-.body{{font:15px Arial,'Noto Sans KR',sans-serif;fill:#526178}}
-.small{{font:13px Arial,'Noto Sans KR',sans-serif;fill:#68768c}}
-.white{{font:700 15px Arial,'Noto Sans KR',sans-serif;fill:#fff}}
+.title{{font:700 27px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#18243b}}
+.subtitle{{font:18px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#5b6880}}
+.panel-label{{font:700 18px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#18243b}}
+.label{{font:700 17px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#203455}}
+.body{{font:15px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#526178}}
+.small{{font:13px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#68768c}}
+.white{{font:700 15px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#fff}}
 .panel{{fill:#fff;stroke:#d2dceb;stroke-width:2}}
 .soft{{fill:#f3f7fe;stroke:#c9d6ea;stroke-width:2}}
 .blue{{fill:#edf3ff;stroke:#8faee8;stroke-width:2}}
@@ -2556,7 +2556,7 @@ FIGURES = {
         dict(title="numeric forward / backward",kind="chain_rule_numeric"),
         dict(title="analytic vs numerical gradient",kind="gradient_check"),
     ]),
-    "cs-optimizers.svg": dict(title="SGD, Momentum and Adam",subtitle="Illustrative trajectories: the exact path depends on the objective, initialization and hyperparameters.",panels=[
+    "cs-optimizers.svg": dict(title="SGD, Momentum and Adam",subtitle="Illustrative trajectories; exact paths depend on the objective and hyperparameters.",panels=[
         dict(title="schematic optimizer trajectories",kind="optimizer_paths"),
         dict(title="momentum combines gradient and velocity",kind="momentum_update"),
     ]),
@@ -2569,7 +2569,7 @@ FIGURES = {
         dict(title="ReLU / sigmoid / tanh",kind="curve",curve="activations"),
         dict(title="gradient behavior",kind="activation_gradients"),
     ]),
-    "cs-init-bn.svg": dict(title="Initialization and Batch Normalization",subtitle="Initialization controls signal scale; BatchNorm uses different statistics in training and evaluation.",panels=[
+    "cs-init-bn.svg": dict(title="Initialization and Batch Normalization",subtitle="Initialization controls signal scale; BatchNorm changes statistics by mode.",panels=[
         dict(title="activation variance by initialization",kind="init_variance"),
         dict(title="BatchNorm: train vs eval",kind="batchnorm_modes"),
     ]),
@@ -2586,7 +2586,7 @@ FIGURES = {
         dict(title="label-invariance check",kind="invariance_checks"),
     ]),
     # CNN
-    "cs-conv-shape.svg": dict(title="Convolution, stride and padding",subtitle="A convolution is a local dot product; stride, padding and dilation change how that dot product is sampled.",panels=[
+    "cs-conv-shape.svg": dict(title="Convolution, stride and padding",subtitle="Stride, padding and dilation change how local dot products are sampled.",panels=[
         dict(title="3×3 numeric convolution",kind="numeric_conv"),
         dict(title="stride / padding / dilation",kind="conv_controls"),
     ]),
@@ -2598,7 +2598,7 @@ FIGURES = {
         dict(title="dense connectivity",kind="fcconv"),
         dict(title="shared local filters",kind="conv"),
     ]),
-    "cs-conv-channels-rf.svg": dict(title="Multi-channel convolution and receptive field",subtitle="Filters span input channels; different filters create output channels, while stacked kernels expand receptive fields.",panels=[
+    "cs-conv-channels-rf.svg": dict(title="Multi-channel convolution and receptive field",subtitle="Filters span input channels; stacked kernels expand receptive fields.",panels=[
         dict(title="RGB channels summed by one filter",kind="conv_channel_sum"),
         dict(title="multiple filters → output channels",kind="output_channels"),
         dict(title="3×3 stack: receptive field 3→5→7",kind="receptive_field_growth"),
@@ -2617,7 +2617,7 @@ FIGURES = {
         dict(title="detection",kind="task",mode="detection"),
         dict(title="segmentation",kind="task",mode="segmentation"),
     ]),
-    "cs-iou-nms-instance.svg": dict(title="IoU, semantic/instance masks and NMS",subtitle="IoU measures overlap; instance segmentation separates object identities; NMS removes redundant high-overlap detections.",panels=[
+    "cs-iou-nms-instance.svg": dict(title="IoU, semantic/instance masks and NMS",subtitle="IoU measures overlap; masks encode regions; NMS suppresses duplicate detections.",panels=[
         dict(title="box IoU",kind="iou_boxes"),
         dict(title="semantic vs instance masks",kind="semantic_instance_masks"),
         dict(title="greedy NMS",kind="nms_visual"),
@@ -2626,7 +2626,7 @@ FIGURES = {
         dict(title="saliency / heatmap",kind="heatmap"),
         dict(title="feature maps",kind="matrix",rows=4,cols=5,cell=38,mode="gray",hot=[2,8,13,17]),
     ]),
-    "cs-modern.svg": dict(title="Modern CS231n topics",subtitle="Attention, self-distillation, vision-language alignment and denoising are distinct representation-learning patterns.",panels=[
+    "cs-modern.svg": dict(title="Modern CS231n topics",subtitle="Attention, self-distillation, vision-language and denoising learn representations differently.",panels=[
         dict(title="representation learning",kind="pipeline",steps=["unlabeled images","augment/views","encoder","representation"]),
         dict(title="attention / CLIP / DINO / diffusion",kind="modern_visual"),
     ]),
@@ -2661,15 +2661,15 @@ FIGURES = {
         dict(title="bias / variance trade-off",kind="curve",curve="bias_variance"),
         dict(title="regularization effect",kind="curve",curve="regularization"),
     ]),
-    "prml-sigmoid-boundary.svg": dict(title="Logistic regression",subtitle="A linear score becomes a probability through the sigmoid, while the decision boundary remains linear.",panels=[
+    "prml-sigmoid-boundary.svg": dict(title="Logistic regression",subtitle="Sigmoid converts a linear score to probability; the decision boundary stays linear.",panels=[
         dict(title="sigmoid",kind="curve",curve="sigmoid"),
         dict(title="binary decision boundary",kind="scatter_linear"),
     ]),
-    "prml-multiclass.svg": dict(title="Multi-class classification",subtitle="A multiclass model produces one score or probability per class; prediction uses the largest resulting class value.",panels=[
+    "prml-multiclass.svg": dict(title="Multi-class classification",subtitle="One score or probability per class; prediction selects the largest class value.",panels=[
         dict(title="example class probabilities",kind="bars",labels=["C1","C2","C3","C4"],values=[0.52,0.27,0.14,0.07]),
         dict(title="three-class decision regions",kind="multiclass_regions"),
     ]),
-    "prml-nn-boundary.svg": dict(title="Neural networks as learned nonlinear basis functions",subtitle="Hidden units create a learned representation in which a simple output layer can solve nonlinear problems.",panels=[
+    "prml-nn-boundary.svg": dict(title="Neural networks as learned nonlinear basis functions",subtitle="Hidden units learn features that enable nonlinear decision boundaries.",panels=[
         dict(title="hidden network",kind="network",counts=(3,5,2)),
         dict(title="nonlinear boundary",kind="scatter_curve"),
     ]),
@@ -2690,16 +2690,16 @@ FIGURES = {
         dict(title="Markov random field",kind="graphical",undirected=True),
         dict(title="factor graph",kind="factor_graph"),
     ]),
-    "prml-gmm-em.svg": dict(title="Gaussian mixtures and EM",subtitle="A GMM represents density as a weighted sum of Gaussian components; EM alternates soft assignments and parameter updates.",panels=[
+    "prml-gmm-em.svg": dict(title="Gaussian mixtures and EM",subtitle="A GMM mixes Gaussian components; EM alternates assignments and parameter updates.",panels=[
         dict(title="mixture components and density",kind="distribution",mode="mixture"),
         dict(title="soft responsibilities",kind="gmm_responsibility"),
         dict(title="E-step ↔ M-step cycle",kind="em_cycle"),
     ]),
-    "prml-vi-elbo.svg": dict(title="Variational inference and ELBO",subtitle="A tractable q(z) approximates the posterior; maximizing ELBO tightens the lower bound and minimizes KL within the chosen variational family.",panels=[
+    "prml-vi-elbo.svg": dict(title="Variational inference and ELBO",subtitle="ELBO is a lower bound; maximizing it minimizes KL within the chosen variational family.",panels=[
         dict(title="target posterior vs q(z)",kind="posterior_approx"),
         dict(title="ELBO + KL = log evidence",kind="elbo_decomp"),
     ]),
-    "prml-monte-mcmc.svg": dict(title="Monte Carlo and MCMC",subtitle="Monte Carlo estimates expectations with samples; MCMC uses a dependent chain designed to have the target as its stationary distribution under appropriate conditions.",panels=[
+    "prml-monte-mcmc.svg": dict(title="Monte Carlo and MCMC",subtitle="Monte Carlo estimates expectations; MCMC uses a dependent chain with the target as its stationary distribution.",panels=[
         dict(title="samples from a target density",kind="mc_samples"),
         dict(title="illustrative burn-in and dependent chain",kind="mcmc_path"),
         dict(title="importance sampling weights",kind="importance_sampling"),
@@ -2708,7 +2708,7 @@ FIGURES = {
         dict(title="principal axes",kind="pca"),
         dict(title="2D → 1D projection and reconstruction",kind="pca_projection"),
     ]),
-    "prml-ppca.svg": dict(title="Probabilistic PCA",subtitle="PPCA is a linear-Gaussian latent-variable model; isotropic observation noise spreads probability around the latent subspace.",panels=[
+    "prml-ppca.svg": dict(title="Probabilistic PCA",subtitle="PPCA uses a linear latent subspace with isotropic Gaussian observation noise.",panels=[
         dict(title="latent generative model",kind="pipeline",steps=["z ~ N(0,I)","Wz + μ","ε ~ N(0,σ²I)","x"]),
         dict(title="linear subspace + isotropic noise",kind="ppca_subspace"),
     ]),
@@ -2716,11 +2716,11 @@ FIGURES = {
         dict(title="state transitions",kind="hmm"),
         dict(title="filter / predict / smooth / Viterbi",kind="hmm_tasks"),
     ]),
-    "prml-ensemble-moe.svg": dict(title="Ensembles and mixture of experts",subtitle="A committee evaluates models in parallel; a mixture of experts uses input-dependent gating weights to combine expert outputs.",panels=[
+    "prml-ensemble-moe.svg": dict(title="Ensembles and mixture of experts",subtitle="Committees average models; mixtures of experts use input-dependent gating.",panels=[
         dict(title="parallel committee averaging",kind="ensemble_parallel"),
         dict(title="input-dependent expert routing",kind="moe_routing"),
     ]),
-    "prml-vision-bridge.svg": dict(title="PRML concepts inside modern Vision AI",subtitle="Probabilistic tools remain useful around deep networks for calibration, uncertainty, latent structure and temporal reasoning.",panels=[
+    "prml-vision-bridge.svg": dict(title="PRML concepts inside modern Vision AI",subtitle="Probability tools support calibration, uncertainty, latent variables and sequences in Vision AI.",panels=[
         dict(title="model output",kind="pipeline",steps=["image","network","score/probability","decision"]),
         dict(title="probabilistic engineering tools",kind="vision_bridge"),
     ]),
