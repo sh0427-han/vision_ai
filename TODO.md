@@ -2,7 +2,7 @@
 
 > Repository: https://github.com/sh0427-han/vision_ai  
 > Pages: https://sh0427-han.github.io/vision_ai/  
-> TODO 작성 시점의 main commit: `afc720165cbb1676e90ea2999c443596805c45a2`
+> 최근 inventory 재검수 기준 main commit: `d0103b19a3e5d68e8da69c383a007af9d43775aa`
 
 ## 작업 목적
 
@@ -15,6 +15,9 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] 실제 figure inventory와 TODO를 대조하여 기존 구현 항목의 stale checkbox 정리
+- [x] gradient stability / dropout mode·fit / VGG·transfer / activation-max·Grad-CAM figure 보강
+- [x] generative-vs-discriminative / kernel·GP / graph inference / mean-field VI / MCMC diagnostics / state-space / boosting figure 보강
 - [x] 전수 검수 후 ELBO lower-bound, Monte Carlo sample rug, BatchNorm running statistics, SVM margin/support-vector 표현 추가 교정
 - [x] 독립 ResNet/U-Net 문서를 제거하고 CNN·Segmentation 주제 본문으로 실제 내용 병합
 - [x] 사이트 카테고리를 자료 유형이 아닌 학습 주제 중심으로 세분화
@@ -33,7 +36,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] CNN / ViT / PatchCore에 paper-style multi-panel figure 적용
 - [x] CS231n / PRML에 대형 reference figure atlas 추가
 - [x] `scripts/reference_figures.py` 추가
-- [x] 현재 main 기준 CS231n 24개 + PRML 20개 = 총 44개 reference SVG 생성
+- [x] reference atlas를 CS231n 28개 + PRML 27개 = 총 55개 SVG로 확장
 - [x] 기존 simple diagram 일부는 종합 페이지에서 중복되지 않도록 비활성화
 - [x] build / validate / GitHub Pages deploy 성공
 - [x] figure를 1열 전체 폭으로 표시하여 크기 문제 완화
@@ -81,7 +84,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 - [x] linear score `Wx+b`를 입력 vector와 weight matrix 관점에서 시각화
 - [x] softmax와 hinge loss 비교 figure 개선
-- [ ] linear decision boundary vs nonlinear boundary 비교
+- [x] linear decision boundary vs nonlinear boundary 비교
 - [ ] regularization term이 data loss에 더해지는 구조를 별도 작은 figure로 설명
 
 ## 1-3. Optimization / Backpropagation
@@ -91,18 +94,18 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] numerical gradient vs analytic gradient / gradient check figure 추가
 - [x] SGD / Momentum / Adam을 같은 loss landscape 위 trajectory로 비교
 - [x] learning rate too small / good / too large 비교
-- [ ] local minimum / saddle point / flat region 비교 figure 보강
+- [x] local minimum / saddle point / flat region 비교 figure 보강
 
 ## 1-4. Neural Networks / Training Tricks
 
 - [x] sigmoid / tanh / ReLU / Leaky ReLU 함수 모양 비교
 - [x] activation별 gradient 특성 표시
-- [ ] vanishing / exploding gradient figure 추가
+- [x] vanishing / exploding gradient figure 추가
 - [x] initialization이 activation variance에 미치는 영향
 - [x] BatchNorm train vs inference 차이
-- [ ] dropout train vs inference 구조
+- [x] dropout train vs inference 구조
 - [ ] L2 weight decay 직관
-- [ ] underfit / good fit / overfit 학습곡선 비교
+- [x] underfit / good fit / overfit 학습곡선 비교
 - [x] augmentation 전/후 예시를 더 이미지다운 형태로 표현
 
 ## 1-5. CNN
@@ -120,7 +123,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] output channel 여러 개가 여러 filter에서 생성되는 구조
 - [x] receptive field growth
 - [x] max pooling vs average pooling
-- [ ] early / middle / deep layer feature hierarchy
+- [x] early / middle / deep layer feature hierarchy
 - [ ] 실제 feature-map / edge-response 느낌의 synthetic visualization 추가
 
 ## 1-6. Architecture
@@ -128,23 +131,23 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] LeNet / AlexNet / VGG / ResNet / ViT 비교 figure
 - [x] plain block vs residual block
 - [x] residual connection의 gradient flow
-- [ ] VGG의 repeated 3×3 stack intuition
+- [x] VGG의 repeated 3×3 stack intuition
 - [x] architecture별 핵심 차이를 숫자표가 아닌 시각 구조로 비교
 
 ## 1-7. Understanding CNN
 
-- [ ] saliency map
-- [ ] activation maximization / filter visualization
-- [ ] Grad-CAM-style heatmap
-- [ ] feature map comparison
-- [ ] attribution visualization의 한계 설명 figure
+- [x] saliency map
+- [x] activation maximization / filter visualization
+- [x] Grad-CAM-style heatmap
+- [x] feature map comparison
+- [x] attribution visualization의 한계 설명 figure
 
 ## 1-8. Transfer Learning
 
-- [ ] frozen backbone
-- [ ] top-block fine-tuning
-- [ ] full fine-tuning
-- [ ] dataset size × domain gap에 따른 전략 matrix
+- [x] frozen backbone
+- [x] top-block fine-tuning
+- [x] full fine-tuning
+- [x] dataset size × domain gap에 따른 전략 matrix
 
 ## 1-9. Detection / Segmentation / Modern Vision
 
@@ -153,7 +156,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] NMS 단계별 figure
 - [x] semantic vs instance mask
 - [x] ViT patch embedding
-- [ ] positional embedding
+- [x] positional embedding
 - [x] Q/K/V self-attention
 - [x] attention matrix / spatial heatmap
 - [x] multi-head attention
@@ -167,8 +170,8 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 2-1. Chapter 1 — Introduction
 
-- [ ] prior / likelihood / posterior를 서로 다른 density curve로 표현
-- [ ] Bayesian decision / expected risk
+- [x] prior / likelihood / posterior를 서로 다른 density curve로 표현
+- [x] Bayesian decision / expected risk
 - [x] entropy / information intuition
 - [ ] posterior와 posterior predictive를 명확히 구분하는 figure
 
@@ -188,58 +191,58 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] polynomial basis
 - [x] Gaussian basis
 - [x] sigmoid basis
-- [ ] regularization에 따른 curve 변화
+- [x] regularization에 따른 curve 변화
 - [x] Bayesian regression mean + uncertainty band
 - [x] posterior predictive distribution
 
 ## 2-4. Chapter 4 — Linear Models for Classification
 
-- [ ] logistic sigmoid
-- [ ] binary decision boundary
-- [ ] multiclass softmax regions
-- [ ] generative vs discriminative
+- [x] logistic sigmoid
+- [x] binary decision boundary
+- [x] multiclass softmax regions
+- [x] generative vs discriminative
   - `p(x|C)p(C)`
   - `p(C|x)`
-- [ ] probit / logistic 차이의 직관적 설명 여부 검토
+- [x] probit / logistic 차이의 직관적 설명 여부 검토
 
 ## 2-5. Chapter 5 — Neural Networks
 
-- [ ] hidden-layer nonlinear basis intuition
-- [ ] forward propagation
-- [ ] backpropagation
-- [ ] nonlinear decision boundary
+- [x] hidden-layer nonlinear basis intuition
+- [x] forward propagation
+- [x] backpropagation
+- [x] nonlinear decision boundary
 - [ ] regularization and early stopping
 
 ## 2-6. Chapter 6 — Kernel Methods
 
-- [ ] input space → feature space mapping
-- [ ] kernel trick
+- [x] input space → feature space mapping
+- [x] kernel trick
 - [ ] polynomial kernel
-- [ ] RBF kernel similarity 변화
-- [ ] Gaussian Process mean / uncertainty band
-- [ ] kernel matrix heatmap
+- [x] RBF kernel similarity 변화
+- [x] Gaussian Process mean / uncertainty band
+- [x] kernel matrix heatmap
 
 ## 2-7. Chapter 7 — Sparse Kernel Machines
 
-- [ ] SVM margin
-- [ ] support vectors 강조
-- [ ] hinge loss
+- [x] SVM margin
+- [x] support vectors 강조
+- [x] hinge loss
 - [ ] soft margin / C parameter effect
 - [ ] RVM vs SVM sparsity intuition
 
 ## 2-8. Chapter 8 — Graphical Models
 
-- [ ] Bayesian network
-- [ ] Markov random field
+- [x] Bayesian network
+- [x] Markov random field
 - [x] factor graph
-- [ ] conditional independence
-- [ ] d-separation 대표 예시
-- [ ] message passing intuition
+- [x] conditional independence
+- [x] d-separation 대표 예시
+- [x] message passing intuition
 
 ## 2-9. Chapter 9 — Mixture Models / EM
 
 - [x] Gaussian mixture density
-- [ ] component별 cluster coloring
+- [x] component별 cluster coloring
 - [x] responsibility `r_nk`
 - [x] E-step
 - [x] M-step
@@ -248,12 +251,12 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 ## 2-10. Chapter 10 — Approximate Inference
 
 - [x] true posterior vs variational approximation
-- [ ] ELBO decomposition
+- [x] ELBO decomposition
   - expected log-likelihood
   - KL term
   - log evidence gap
-- [ ] mean-field factorization
-- [ ] coordinate ascent VI intuition
+- [x] mean-field factorization
+- [x] coordinate ascent VI intuition
 - [ ] expectation propagation이 VI와 어떻게 다른지 간단 비교
 
 ## 2-11. Chapter 11 — Sampling Methods
@@ -263,17 +266,17 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [ ] rejection sampling
 - [x] MCMC random walk
 - [x] burn-in
-- [ ] autocorrelation
-- [ ] effective sample size
-- [ ] HMC trajectory intuition
+- [x] autocorrelation
+- [x] effective sample size
+- [x] HMC trajectory intuition
 
 ## 2-12. Chapter 12 — Continuous Latent Variables
 
-- [ ] PCA principal axis
+- [x] PCA principal axis
 - [x] 2D → 1D projection
 - [x] reconstruction
 - [ ] eigenvalue / explained variance
-- [ ] PPCA generative model
+- [x] PPCA generative model
 - [ ] factor analysis comparison
 - [ ] ICA intuition
 
@@ -284,18 +287,18 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] prediction
 - [x] smoothing
 - [x] Viterbi decoding
-- [ ] Kalman filter predict/update
-- [ ] particle filter intuition
+- [x] Kalman filter predict/update
+- [x] particle filter intuition
 
 ## 2-14. Chapter 14 — Combining Models
 
-- [ ] Bayesian model averaging
+- [x] Bayesian model averaging
 - [x] simple ensemble averaging
-- [ ] boosting intuition
+- [x] boosting intuition
 - [ ] decision tree / ensemble concept
 - [x] mixture of experts
 - [x] gating network
-- [ ] bias/variance reduction through ensembles
+- [x] bias/variance reduction through ensembles
 
 ---
 

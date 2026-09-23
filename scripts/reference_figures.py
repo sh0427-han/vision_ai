@@ -2320,7 +2320,628 @@ def _em_cycle(x, y, w, h):
     ]
     return "".join(parts)
 
+
+
+def _gradient_scale(x, y, w, h, mode):
+    """Layer-wise gradient scale for vanishing or exploding examples."""
+    left = x + 48
+    right = x + w - 24
+    top = y + 52
+    bottom = y + h - 48
+    parts = [
+        f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>'
+    ]
+    if mode == "vanish":
+        values = [1.0, .55, .30, .16, .09, .05]
+        color = "#2454d8"
+        note = "repeated factors below 1"
+    else:
+        values = [.18, .28, .44, .70, 1.05, 1.55]
+        color = "#a24d18"
+        note = "repeated factors above 1"
+    max_value = max(values)
+    step = (right - left - 35) / len(values)
+    for idx, value in enumerate(values):
+        bh = (bottom - top - 50) * value / max_value
+        xx = left + 16 + idx * step
+        parts.append(
+            f'<rect x="{xx}" y="{bottom-bh}" width="{step*.55}" height="{bh}" '
+            f'rx="4" fill="{color}" opacity="{0.52 + idx*.07}"/>'
+        )
+        parts.append(
+            f'<text x="{xx+step*.27}" y="{bottom+22}" text-anchor="middle" '
+            f'class="small">L{idx+1}</text>'
+        )
+    parts.append(
+        f'<text x="{x+18}" y="{y+35}" class="small">{_e(note)}</text>'
+    )
+    return "".join(parts)
+
+
+def _dropout_modes(x, y, w, h):
+    """Training masks units; evaluation uses the full network with matched scaling."""
+    parts = []
+    rows = [
+        (y + 105, "train", [False, True, False, False, True], "#2454d8"),
+        (y + 245, "eval", [False] * 5, "#08796f"),
+    ]
+    for yy, label, dropped, color in rows:
+        parts.append(f'<text x="{x+18}" y="{yy-50}" class="label">{label}</text>')
+        for idx in range(5):
+            cx = x + 90 + idx * (w - 180) / 4
+            fill = "#d9dee6" if dropped[idx] else color
+            opacity = ".35" if dropped[idx] else ".88"
+            parts.append(
+                f'<circle cx="{cx}" cy="{yy}" r="18" fill="{fill}" opacity="{opacity}"/>'
+            )
+            if dropped[idx]:
+                parts.append(
+                    f'<path d="M{cx-10} {yy-10} L{cx+10} {yy+10} '
+                    f'M{cx+10} {yy-10} L{cx-10} {yy+10}" '
+                    'stroke="#a24d18" stroke-width="3"/>'
+                )
+            if idx < 4:
+                nx = x + 90 + (idx + 1) * (w - 180) / 4
+                parts.append(
+                    f'<path d="M{cx+20} {yy} H{nx-20}" class="thin"/>'
+                )
+    parts.append(
+        f'<text x="{x+18}" y="{y+h-24}" class="small">'
+        "inverted dropout keeps expected activation scale consistent</text>"
+    )
+    return "".join(parts)
+
+
+def _fit_regimes(x, y, w, h):
+    """Underfit, useful fit and overfit training/validation curve sketches."""
+    parts = []
+    labels = ["underfit", "balanced fit", "overfit"]
+    card_w = (w - 44) / 3
+    for idx, label in enumerate(labels):
+        px = x + 8 + idx * (card_w + 14)
+        left = px + 20
+        right = px + card_w - 12
+        top = y + 85
+        bottom = y + h - 55
+        parts.append(
+            f'<rect x="{px}" y="{y+50}" width="{card_w}" height="{h-95}" rx="9" '
+            'fill="#fbfcfe" stroke="#d6deea"/>'
+        )
+        parts.append(
+            f'<text x="{px+card_w/2}" y="{y+76}" text-anchor="middle" '
+            f'class="small">{label}</text>'
+        )
+        parts.append(f'<path d="M{left} {bottom} H{right}" class="thin"/>')
+        if idx == 0:
+            parts.append(
+                f'<path d="M{left} {top+35} C{left+35} {top+20} '
+                f'{right-35} {top+18} {right} {top+18}" '
+                'stroke="#2454d8" stroke-width="3" fill="none"/>'
+            )
+            parts.append(
+                f'<path d="M{left} {top+55} C{left+35} {top+42} '
+                f'{right-35} {top+40} {right} {top+40}" '
+                'stroke="#a24d18" stroke-width="3" fill="none"/>'
+            )
+        elif idx == 1:
+            parts.append(
+                f'<path d="M{left} {top+70} C{left+35} {top+45} '
+                f'{right-35} {top+18} {right} {top+15}" '
+                'stroke="#2454d8" stroke-width="3" fill="none"/>'
+            )
+            parts.append(
+                f'<path d="M{left} {top+85} C{left+35} {top+60} '
+                f'{right-35} {top+30} {right} {top+28}" '
+                'stroke="#a24d18" stroke-width="3" fill="none"/>'
+            )
+        else:
+            mid = (left + right) / 2
+            parts.append(
+                f'<path d="M{left} {top+80} C{left+40} {top+45} '
+                f'{right-35} {top+12} {right} {top+8}" '
+                'stroke="#2454d8" stroke-width="3" fill="none"/>'
+            )
+            parts.append(
+                f'<path d="M{left} {top+88} C{left+45} {top+48} '
+                f'{mid} {top+35} {right} {top+72}" '
+                'stroke="#a24d18" stroke-width="3" fill="none"/>'
+            )
+    parts.append(f'<text x="{x+20}" y="{y+h-20}" class="small" fill="#2454d8">train</text>')
+    parts.append(f'<text x="{x+72}" y="{y+h-20}" class="small" fill="#a24d18">validation</text>')
+    return "".join(parts)
+
+
+def _vgg_stack(x, y, w, h):
+    """Repeated 3x3 convolutions grow receptive field while adding nonlinearities."""
+    parts = []
+    sizes = [3, 5, 7]
+    for idx, rf in enumerate(sizes):
+        cx = x + 78 + idx * (w - 156) / 2
+        parts.append(
+            f'<rect x="{cx-42}" y="{y+100}" width="84" height="72" rx="9" '
+            'fill="#edf3ff" stroke="#8faee8" stroke-width="2"/>'
+        )
+        parts.append(
+            f'<text x="{cx}" y="{y+130}" text-anchor="middle" class="small">'
+            "3x3 conv</text>"
+        )
+        parts.append(
+            f'<text x="{cx}" y="{y+155}" text-anchor="middle" class="label">'
+            f'RF {rf}x{rf}</text>'
+        )
+        if idx < 2:
+            nx = x + 78 + (idx + 1) * (w - 156) / 2
+            parts.append(_arrow(cx + 44, y + 136, nx - 44, y + 136))
+    parts.append(
+        f'<text x="{x+18}" y="{y+55}" class="small">'
+        "three stride-1 3x3 layers: 7x7 theoretical receptive field</text>"
+    )
+    parts.append(
+        f'<text x="{x+18}" y="{y+h-35}" class="small">'
+        "more nonlinear stages than one 7x7 convolution</text>"
+    )
+    return "".join(parts)
+
+
+def _transfer_matrix(x, y, w, h):
+    """Heuristic transfer strategy by labeled-data amount and domain gap."""
+    left = x + 75
+    top = y + 70
+    cell_w = (w - 115) / 2
+    cell_h = (h - 130) / 2
+    labels = [
+        ("freeze backbone", "#edf3ff"),
+        ("unfreeze top blocks", "#e9f7f2"),
+        ("fine-tune carefully", "#fff1e7"),
+        ("full fine-tuning", "#f4e9f7"),
+    ]
+    for idx, (label, fill) in enumerate(labels):
+        row = idx // 2
+        col = idx % 2
+        px = left + col * cell_w
+        py = top + row * cell_h
+        parts = [
+            f'<rect x="{px}" y="{py}" width="{cell_w-6}" height="{cell_h-6}" '
+            f'rx="9" fill="{fill}" stroke="#cbd6e6"/>',
+            f'<text x="{px+(cell_w-6)/2}" y="{py+cell_h/2}" '
+            f'text-anchor="middle" class="small">{label}</text>',
+        ]
+        if idx == 0:
+            out = parts
+        else:
+            out.extend(parts)
+    out.append(f'<text x="{left+cell_w*.5}" y="{top-14}" text-anchor="middle" class="small">near domain</text>')
+    out.append(f'<text x="{left+cell_w*1.5}" y="{top-14}" text-anchor="middle" class="small">far domain</text>')
+    out.append(f'<text x="{x+18}" y="{top+cell_h*.55}" class="small">small data</text>')
+    out.append(f'<text x="{x+18}" y="{top+cell_h*1.55}" class="small">large data</text>')
+    out.append(
+        f'<text x="{x+18}" y="{y+h-22}" class="small">'
+        "heuristic only; validate learning rate and frozen depth</text>"
+    )
+    return "".join(out)
+
+
+def _activation_max(x, y, w, h):
+    """Synthetic input pattern optimized to increase one target unit."""
+    parts = []
+    for idx in range(3):
+        gx = x + 30 + idx * (w - 85) / 3
+        parts.append(_grid(gx, y + 90, 5, 5, 25, "blue", [2+idx, 7+idx, 12+idx, 17+idx]))
+    parts.append(
+        f'<text x="{x+18}" y="{y+48}" class="small">'
+        "optimize input pixels to increase one selected activation</text>"
+    )
+    parts.append(
+        f'<text x="{x+18}" y="{y+h-28}" class="small">'
+        "synthetic diagnostic; not a natural image reconstruction</text>"
+    )
+    return "".join(parts)
+
+
+def _gradcam(x, y, w, h):
+    """Synthetic Grad-CAM-style coarse localization overlay."""
+    parts = [
+        f'<rect x="{x+35}" y="{y+65}" width="{w-70}" height="{h-115}" '
+        'fill="#eef2f6" stroke="#cbd5e2"/>',
+        f'<circle cx="{x+w*.46}" cy="{y+h*.53}" r="{h*.17}" fill="#8faee8" opacity=".35"/>',
+        f'<ellipse cx="{x+w*.56}" cy="{y+h*.49}" rx="{w*.19}" ry="{h*.13}" '
+        'fill="#f5a45e" opacity=".45"/>',
+        f'<ellipse cx="{x+w*.60}" cy="{y+h*.49}" rx="{w*.10}" ry="{h*.08}" '
+        'fill="#db6945" opacity=".58"/>',
+        f'<text x="{x+18}" y="{y+42}" class="small">coarse class-weighted activation map</text>',
+        f'<text x="{x+18}" y="{y+h-25}" class="small">localization is diagnostic, not causal proof</text>',
+    ]
+    return "".join(parts)
+
+
+def _generative_discriminative(x, y, w, h):
+    """Generative class-conditionals versus direct posterior modelling."""
+    parts = []
+    mid = x + w / 2
+    parts.append(
+        f'<text x="{x+w*.23}" y="{y+55}" text-anchor="middle" class="label">generative</text>'
+    )
+    for yy, label in [(y+120, "p(C)"), (y+205, "p(x|C)")]:
+        parts.append(
+            f'<rect x="{x+45}" y="{yy-24}" width="105" height="48" rx="9" '
+            'fill="#edf3ff" stroke="#8faee8"/>'
+        )
+        parts.append(f'<text x="{x+97}" y="{yy+5}" text-anchor="middle" class="small">{label}</text>')
+    parts.append(_arrow(x+152, y+163, mid-45, y+163))
+    parts.append(
+        f'<rect x="{mid-42}" y="{y+139}" width="84" height="48" rx="9" '
+        'fill="#e9f7f2" stroke="#8ccdbb"/>'
+    )
+    parts.append(f'<text x="{mid}" y="{y+168}" text-anchor="middle" class="small">Bayes rule</text>')
+    parts.append(
+        f'<text x="{x+w*.77}" y="{y+55}" text-anchor="middle" class="label">discriminative</text>'
+    )
+    parts.append(
+        f'<rect x="{x+w-165}" y="{y+138}" width="120" height="50" rx="9" '
+        'fill="#fff1e7" stroke="#e0ae82"/>'
+    )
+    parts.append(
+        f'<text x="{x+w-105}" y="{y+169}" text-anchor="middle" class="small">model p(C|x)</text>'
+    )
+    parts.append(
+        f'<text x="{x+18}" y="{y+h-28}" class="small">'
+        "both produce class posteriors with different assumptions</text>"
+    )
+    return "".join(parts)
+
+
+def _sigmoid_probit(x, y, w, h):
+    """Sigmoid and probit links are similar S-shaped mappings with different forms."""
+    left = x + 45
+    right = x + w - 25
+    top = y + 55
+    bottom = y + h - 50
+    parts = [f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>']
+    parts.append(
+        f'<path d="M{left} {bottom-10} C{x+w*.35} {bottom-8} {x+w*.40} {top+55} '
+        f'{x+w*.50} {(top+bottom)/2} C{x+w*.60} {bottom-55} {x+w*.65} {top+8} '
+        f'{right} {top+8}" stroke="#2454d8" stroke-width="4" fill="none"/>'
+    )
+    parts.append(
+        f'<path d="M{left} {bottom-8} C{x+w*.37} {bottom-5} {x+w*.43} {top+48} '
+        f'{x+w*.50} {(top+bottom)/2} C{x+w*.57} {bottom-48} {x+w*.63} {top+5} '
+        f'{right} {top+5}" stroke="#08796f" stroke-width="3" fill="none"/>'
+    )
+    parts.append(f'<text x="{x+18}" y="{y+35}" class="small" fill="#2454d8">logistic sigmoid</text>')
+    parts.append(f'<text x="{x+145}" y="{y+35}" class="small" fill="#08796f">probit CDF</text>')
+    return "".join(parts)
+
+
+def _rbf_similarity(x, y, w, h):
+    """RBF similarity decays smoothly with Euclidean distance."""
+    left = x + 45
+    right = x + w - 25
+    top = y + 55
+    bottom = y + h - 48
+    parts = [f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>']
+    parts.append(
+        f'<path d="M{left} {top+12} C{x+w*.40} {top+22} {x+w*.55} {bottom-35} '
+        f'{right} {bottom-10}" stroke="#2454d8" stroke-width="4" fill="none"/>'
+    )
+    parts.append(f'<text x="{x+18}" y="{y+35}" class="small">k(x,x prime) decreases with distance</text>')
+    parts.append(f'<text x="{right-85}" y="{bottom+24}" class="small">distance</text>')
+    return "".join(parts)
+
+
+def _kernel_matrix(x, y, w, h):
+    """A small symmetric positive-similarity matrix visualization."""
+    parts = [_grid(x + 55, y + 65, 6, 6, 43, "heat", [0,7,14,21,28,35])]
+    parts.append(
+        f'<text x="{x+18}" y="{y+38}" class="small">'
+        "K_ij = k(x_i, x_j); diagonal similarity is highest</text>"
+    )
+    return "".join(parts)
+
+
+def _gp_uncertainty(x, y, w, h):
+    """Illustrative GP posterior mean with uncertainty widening away from observations."""
+    left = x + 42
+    right = x + w - 24
+    top = y + 48
+    bottom = y + h - 42
+    parts = [f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>']
+    parts.append(
+        f'<path d="M{left} {y+h*.62} C{x+w*.34} {y+h*.28} {x+w*.56} {y+h*.72} '
+        f'{right} {y+h*.40}" stroke="#2454d8" stroke-width="4" fill="none"/>'
+    )
+    parts.append(
+        f'<path d="M{left} {y+h*.78} C{x+w*.34} {y+h*.42} {x+w*.56} {y+h*.86} '
+        f'{right} {y+h*.56} L{right} {y+h*.24} C{x+w*.56} {y+h*.56} '
+        f'{x+w*.34} {y+h*.14} {left} {y+h*.46} Z" fill="#8faee8" opacity=".18"/>'
+    )
+    for px, py in [(.23,.58),(.38,.36),(.55,.61),(.72,.45)]:
+        parts.append(f'<circle cx="{x+px*w}" cy="{y+py*h}" r="6" fill="#203455"/>')
+    parts.append(f'<text x="{x+18}" y="{y+35}" class="small">posterior mean + uncertainty band</text>')
+    return "".join(parts)
+
+
+def _meanfield(x, y, w, h):
+    """Mean-field factorization separates a joint approximation into factors."""
+    parts = []
+    cx = x + w / 2
+    parts.append(
+        f'<ellipse cx="{cx}" cy="{y+105}" rx="{w*.30}" ry="55" '
+        'fill="#edf3ff" stroke="#8faee8" stroke-width="2"/>'
+    )
+    parts.append(f'<text x="{cx}" y="{y+111}" text-anchor="middle" class="label">q(z1,z2,z3)</text>')
+    ys = y + 235
+    for idx in range(3):
+        xx = x + 85 + idx * (w - 170) / 2
+        parts.append(
+            f'<circle cx="{xx}" cy="{ys}" r="34" fill="#e9f7f2" stroke="#8ccdbb" stroke-width="2"/>'
+        )
+        parts.append(f'<text x="{xx}" y="{ys+6}" text-anchor="middle" class="small">q{idx+1}(z{idx+1})</text>')
+        parts.append(_arrow(cx, y+163, xx, ys-38))
+    parts.append(f'<text x="{x+18}" y="{y+h-28}" class="small">mean-field: q(z) = product of separate factors</text>')
+    return "".join(parts)
+
+
+def _cavi(x, y, w, h):
+    """Coordinate ascent updates one variational factor while holding others fixed."""
+    parts = []
+    coords = [
+        (x+w*.22, y+115, "q1"),
+        (x+w*.50, y+215, "q2"),
+        (x+w*.78, y+115, "q3"),
+    ]
+    for cx, cy, label in coords:
+        parts.append(
+            f'<circle cx="{cx}" cy="{cy}" r="35" fill="#edf3ff" stroke="#8faee8" stroke-width="2"/>'
+        )
+        parts.append(f'<text x="{cx}" y="{cy+6}" text-anchor="middle" class="label">{label}</text>')
+    parts.append(_arrow(coords[0][0]+35, coords[0][1]+8, coords[1][0]-30, coords[1][1]-25))
+    parts.append(_arrow(coords[1][0]+30, coords[1][1]-25, coords[2][0]-35, coords[2][1]+8))
+    parts.append(_arrow(coords[2][0]-15, coords[2][1]-37, coords[0][0]+15, coords[0][1]-37))
+    parts.append(f'<text x="{x+18}" y="{y+45}" class="small">update one factor using expectations of the others</text>')
+    return "".join(parts)
+
+
+def _autocorrelation(x, y, w, h):
+    """Autocorrelation decays more slowly for a poorly mixing chain."""
+    left = x + 42
+    right = x + w - 25
+    top = y + 50
+    bottom = y + h - 45
+    parts = [f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>']
+    for idx, val in enumerate([1.0,.78,.62,.48,.36,.28,.21,.16]):
+        xx = left + 18 + idx * (right-left-40)/7
+        bh = (bottom-top-25) * val
+        parts.append(f'<path d="M{xx} {bottom} V{bottom-bh}" stroke="#2454d8" stroke-width="5"/>')
+    parts.append(f'<text x="{x+18}" y="{y+34}" class="small">autocorrelation by lag</text>')
+    return "".join(parts)
+
+
+def _ess_panel(x, y, w, h):
+    """Effective sample size is smaller than raw draws when samples are correlated."""
+    parts = []
+    for idx in range(14):
+        cx = x + 28 + idx * (w - 56) / 13
+        parts.append(f'<circle cx="{cx}" cy="{y+120}" r="7" fill="#9bb5e5"/>')
+    for idx in [0,3,6,9,12]:
+        cx = x + 28 + idx * (w - 56) / 13
+        parts.append(f'<circle cx="{cx}" cy="{y+225}" r="10" fill="#08796f"/>')
+    parts.append(f'<text x="{x+18}" y="{y+50}" class="small">14 correlated draws</text>')
+    parts.append(f'<text x="{x+18}" y="{y+185}" class="small">roughly 5 independent-information equivalents</text>')
+    parts.append(f'<text x="{x+18}" y="{y+h-25}" class="small">ESS depends on autocorrelation, not just sample count</text>')
+    return "".join(parts)
+
+
+def _hmc_panel(x, y, w, h):
+    """Hamiltonian dynamics proposal traverses a contour more coherently than a random walk."""
+    parts = [
+        f'<ellipse cx="{x+w*.52}" cy="{y+h*.52}" rx="{w*.34}" ry="{h*.27}" fill="none" stroke="#d2dceb" stroke-width="2"/>',
+        f'<ellipse cx="{x+w*.52}" cy="{y+h*.52}" rx="{w*.22}" ry="{h*.16}" fill="none" stroke="#aebeda" stroke-width="2"/>',
+        f'<path d="M{x+w*.20} {y+h*.72} C{x+w*.32} {y+h*.35} {x+w*.50} {y+h*.32} '
+        f'{x+w*.78} {y+h*.42}" stroke="#a24d18" stroke-width="4" fill="none"/>',
+        f'<circle cx="{x+w*.20}" cy="{y+h*.72}" r="7" fill="#203455"/>',
+        f'<circle cx="{x+w*.78}" cy="{y+h*.42}" r="7" fill="#08796f"/>',
+        f'<text x="{x+18}" y="{y+38}" class="small">illustrative HMC trajectory through a target contour</text>',
+    ]
+    return "".join(parts)
+
+
+def _kalman_cycle(x, y, w, h):
+    """Linear-Gaussian filtering alternates prediction and measurement update."""
+    parts = []
+    centers = [
+        (x+w*.22, y+150, "posterior t-1"),
+        (x+w*.50, y+150, "predict t"),
+        (x+w*.78, y+150, "update t"),
+    ]
+    for cx, cy, label in centers:
+        parts.append(
+            f'<ellipse cx="{cx}" cy="{cy}" rx="58" ry="35" fill="#edf3ff" '
+            'stroke="#8faee8" stroke-width="2"/>'
+        )
+        parts.append(f'<text x="{cx}" y="{cy+5}" text-anchor="middle" class="small">{label}</text>')
+    parts.append(_arrow(centers[0][0]+60, y+150, centers[1][0]-60, y+150))
+    parts.append(_arrow(centers[1][0]+60, y+150, centers[2][0]-60, y+150))
+    parts.append(
+        f'<rect x="{x+w*.70}" y="{y+245}" width="{w*.16}" height="46" rx="8" '
+        'fill="#fff1e7" stroke="#e0ae82"/>'
+    )
+    parts.append(f'<text x="{x+w*.78}" y="{y+273}" text-anchor="middle" class="small">measurement</text>')
+    parts.append(_arrow(x+w*.78, y+243, x+w*.78, y+188))
+    parts.append(f'<text x="{x+18}" y="{y+45}" class="small">dynamics first, observation correction second</text>')
+    return "".join(parts)
+
+
+def _particle_filter(x, y, w, h):
+    """Particles propagate, receive likelihood weights and are resampled."""
+    parts = []
+    stages = ["propagate", "weight", "resample"]
+    for idx, stage in enumerate(stages):
+        px = x + 25 + idx * (w - 50) / 3
+        parts.append(f'<text x="{px+55}" y="{y+55}" text-anchor="middle" class="small">{stage}</text>')
+        weights = [5,7,10,6,12,8] if idx != 1 else [4,6,16,5,18,7]
+        for j, rad in enumerate(weights):
+            cx = px + 18 + (j%3)*38
+            cy = y + 100 + (j//3)*80
+            parts.append(f'<circle cx="{cx}" cy="{cy}" r="{rad/2}" fill="#2454d8" opacity=".72"/>')
+        if idx < 2:
+            parts.append(_arrow(px+118, y+145, px+(w-50)/3-10, y+145))
+    parts.append(f'<text x="{x+18}" y="{y+h-28}" class="small">nonlinear or non-Gaussian state inference by weighted samples</text>')
+    return "".join(parts)
+
+
+def _dseparation(x, y, w, h):
+    """Three canonical structures for conditional independence intuition."""
+    parts = []
+    labels = ["chain", "fork", "collider"]
+    for idx, label in enumerate(labels):
+        px = x + 25 + idx * (w - 50) / 3
+        cy = y + 160
+        xs = [px+18, px+68, px+118]
+        for j, xx in enumerate(xs):
+            parts.append(f'<circle cx="{xx}" cy="{cy}" r="18" fill="#edf3ff" stroke="#8faee8"/>')
+            parts.append(f'<text x="{xx}" y="{cy+5}" text-anchor="middle" class="small">{"ABC"[j]}</text>')
+        if idx == 0:
+            parts.append(_arrow(xs[0]+20, cy, xs[1]-20, cy))
+            parts.append(_arrow(xs[1]+20, cy, xs[2]-20, cy))
+        elif idx == 1:
+            parts.append(_arrow(xs[1]-20, cy, xs[0]+20, cy))
+            parts.append(_arrow(xs[1]+20, cy, xs[2]-20, cy))
+        else:
+            parts.append(_arrow(xs[0]+20, cy, xs[1]-20, cy))
+            parts.append(_arrow(xs[2]-20, cy, xs[1]+20, cy))
+        parts.append(f'<text x="{px+68}" y="{y+65}" text-anchor="middle" class="small">{label}</text>')
+    parts.append(f'<text x="{x+18}" y="{y+h-28}" class="small">conditioning changes whether each path is active or blocked</text>')
+    return "".join(parts)
+
+
+def _message_passing(x, y, w, h):
+    """Local messages summarize information from neighboring factors."""
+    parts = []
+    xs = [x+70, x+w*.38, x+w*.62, x+w-70]
+    labels = ["x1", "f12", "x2", "f23"]
+    shapes = ["circle", "rect", "circle", "rect"]
+    for xx, label, shape in zip(xs, labels, shapes):
+        if shape == "circle":
+            parts.append(f'<circle cx="{xx}" cy="{y+165}" r="30" fill="#edf3ff" stroke="#8faee8"/>')
+        else:
+            parts.append(f'<rect x="{xx-25}" y="{y+140}" width="50" height="50" rx="6" fill="#fff1e7" stroke="#e0ae82"/>')
+        parts.append(f'<text x="{xx}" y="{y+171}" text-anchor="middle" class="small">{label}</text>')
+    for idx in range(3):
+        parts.append(_arrow(xs[idx]+32, y+150, xs[idx+1]-32, y+150))
+        parts.append(_arrow(xs[idx+1]-32, y+180, xs[idx]+32, y+180))
+    parts.append(f'<text x="{x+18}" y="{y+45}" class="small">messages pass local evidence in both directions</text>')
+    return "".join(parts)
+
+
+def _bayes_model_average(x, y, w, h):
+    """Posterior model weights combine predictive distributions."""
+    parts = []
+    models = [("M1", .55), ("M2", .30), ("M3", .15)]
+    for idx, (label, weight) in enumerate(models):
+        yy = y + 90 + idx * 80
+        parts.append(
+            f'<rect x="{x+35}" y="{yy-22}" width="72" height="44" rx="8" '
+            'fill="#edf3ff" stroke="#8faee8"/>'
+        )
+        parts.append(f'<text x="{x+71}" y="{yy+5}" text-anchor="middle" class="small">{label}</text>')
+        parts.append(
+            f'<text x="{x+135}" y="{yy+5}" class="small">p(M|D)={weight:.2f}</text>'
+        )
+        parts.append(_arrow(x+205, yy, x+w-80, y+170))
+    parts.append(
+        f'<circle cx="{x+w-55}" cy="{y+170}" r="30" fill="#e9f7f2" stroke="#8ccdbb"/>'
+    )
+    parts.append(f'<text x="{x+w-55}" y="{y+176}" text-anchor="middle" class="small">predict</text>')
+    return "".join(parts)
+
+
+def _boosting(x, y, w, h):
+    """Sequential weak learners emphasize previously difficult samples."""
+    parts = []
+    for idx in range(4):
+        xx = x + 50 + idx * (w - 100) / 3
+        parts.append(
+            f'<rect x="{xx-34}" y="{y+135}" width="68" height="55" rx="8" '
+            f'fill="{"#edf3ff" if idx<3 else "#e9f7f2"}" stroke="#8faee8"/>'
+        )
+        label = f'h{idx+1}' if idx < 3 else "sum"
+        parts.append(f'<text x="{xx}" y="{y+168}" text-anchor="middle" class="small">{label}</text>')
+        if idx < 3:
+            parts.append(_arrow(xx+36, y+162, x+50+(idx+1)*(w-100)/3-36, y+162))
+    parts.append(f'<text x="{x+18}" y="{y+50}" class="small">later learners focus more on previous mistakes</text>')
+    parts.append(f'<text x="{x+18}" y="{y+h-28}" class="small">sequential correction differs from parallel averaging</text>')
+    return "".join(parts)
+
+
+def _ensemble_variance(x, y, w, h):
+    """Averaging weakly correlated errors can reduce prediction variance."""
+    left = x + 38
+    right = x + w - 20
+    bottom = y + h - 45
+    parts = [f'<path d="M{left} {bottom} H{right}" class="thin"/>']
+    curves = [
+        ("single", [82,55,72,44,65,38], "#a24d18"),
+        ("average", [61,57,55,50,48,45], "#08796f"),
+    ]
+    for label, vals, color in curves:
+        pts = []
+        for idx, val in enumerate(vals):
+            xx = left + idx * (right-left)/5
+            yy = y + val
+            pts.append(f'{xx},{yy}')
+        parts.append(f'<polyline points="{" ".join(pts)}" fill="none" stroke="{color}" stroke-width="4"/>')
+        parts.append(f'<text x="{left}" y="{y+30 if label=="single" else y+52}" class="small" fill="{color}">{label}</text>')
+    return "".join(parts)
+
 def _panel_content(kind, x, y, w, h, data):
+    if kind=="gradient_scale":
+        return _gradient_scale(x,y,w,h,data["mode"])
+    if kind=="dropout_modes":
+        return _dropout_modes(x,y,w,h)
+    if kind=="fit_regimes":
+        return _fit_regimes(x,y,w,h)
+    if kind=="vgg_stack":
+        return _vgg_stack(x,y,w,h)
+    if kind=="transfer_matrix":
+        return _transfer_matrix(x,y,w,h)
+    if kind=="activation_max":
+        return _activation_max(x,y,w,h)
+    if kind=="gradcam":
+        return _gradcam(x,y,w,h)
+    if kind=="generative_discriminative":
+        return _generative_discriminative(x,y,w,h)
+    if kind=="sigmoid_probit":
+        return _sigmoid_probit(x,y,w,h)
+    if kind=="rbf_similarity":
+        return _rbf_similarity(x,y,w,h)
+    if kind=="kernel_matrix":
+        return _kernel_matrix(x,y,w,h)
+    if kind=="gp_uncertainty":
+        return _gp_uncertainty(x,y,w,h)
+    if kind=="meanfield":
+        return _meanfield(x,y,w,h)
+    if kind=="cavi":
+        return _cavi(x,y,w,h)
+    if kind=="autocorrelation":
+        return _autocorrelation(x,y,w,h)
+    if kind=="ess_panel":
+        return _ess_panel(x,y,w,h)
+    if kind=="hmc_panel":
+        return _hmc_panel(x,y,w,h)
+    if kind=="kalman_cycle":
+        return _kalman_cycle(x,y,w,h)
+    if kind=="particle_filter":
+        return _particle_filter(x,y,w,h)
+    if kind=="dseparation":
+        return _dseparation(x,y,w,h)
+    if kind=="message_passing":
+        return _message_passing(x,y,w,h)
+    if kind=="bayes_model_average":
+        return _bayes_model_average(x,y,w,h)
+    if kind=="boosting":
+        return _boosting(x,y,w,h)
+    if kind=="ensemble_variance":
+        return _ensemble_variance(x,y,w,h)
     if kind=="linear_regression_scatter":
         return _linear_regression_scatter(x,y,w,h)
     if kind=="svm_margin":
@@ -2642,7 +3263,55 @@ FIGURES = {
         dict(title="multi-head attention",kind="multihead_attention"),
     ]),
 
+    "cs-gradient-stability.svg": dict(title="Gradient stability across depth",subtitle="Repeated Jacobian factors can shrink or amplify gradients as depth grows.",panels=[
+        dict(title="vanishing gradient",kind="gradient_scale",mode="vanish"),
+        dict(title="exploding gradient",kind="gradient_scale",mode="explode"),
+    ]),
+    "cs-dropout-fit.svg": dict(title="Dropout modes and fitting regimes",subtitle="Dropout changes behavior between training and evaluation; train/validation curves reveal fit quality.",panels=[
+        dict(title="dropout: train vs eval",kind="dropout_modes"),
+        dict(title="underfit / balanced / overfit",kind="fit_regimes"),
+    ]),
+    "cs-vgg-transfer.svg": dict(title="VGG-style stacks and transfer strategy",subtitle="Repeated 3x3 convolutions build receptive field; transfer depth depends on data size and domain gap.",panels=[
+        dict(title="repeated 3x3 stack",kind="vgg_stack"),
+        dict(title="transfer-learning strategy matrix",kind="transfer_matrix"),
+    ]),
+    "cs-interpretability.svg": dict(title="Feature visualization and Grad-CAM-style diagnostics",subtitle="Optimization-based feature visualization and class-localization maps reveal different aspects of model behavior.",panels=[
+        dict(title="activation maximization",kind="activation_max"),
+        dict(title="Grad-CAM-style localization",kind="gradcam"),
+    ]),
+
     # PRML
+    "prml-generative-discriminative.svg": dict(title="Generative and discriminative classification",subtitle="Generative models build class-conditionals; discriminative models directly parameterize class posteriors or boundaries.",panels=[
+        dict(title="two modelling routes",kind="generative_discriminative"),
+        dict(title="logistic vs probit link",kind="sigmoid_probit"),
+    ]),
+    "prml-kernel-gp.svg": dict(title="RBF kernels and Gaussian-process uncertainty",subtitle="Kernel similarity defines a Gram matrix; Gaussian processes turn that kernel into predictive mean and uncertainty.",panels=[
+        dict(title="RBF similarity vs distance",kind="rbf_similarity"),
+        dict(title="kernel matrix",kind="kernel_matrix"),
+        dict(title="GP posterior uncertainty",kind="gp_uncertainty"),
+    ]),
+    "prml-vi-meanfield.svg": dict(title="Mean-field variational inference",subtitle="Mean-field factorization simplifies the approximation; coordinate ascent updates one factor at a time.",panels=[
+        dict(title="factorized q(z)",kind="meanfield"),
+        dict(title="coordinate-ascent updates",kind="cavi"),
+    ]),
+    "prml-sampling-diagnostics.svg": dict(title="MCMC diagnostics and effective samples",subtitle="Autocorrelation reduces independent information; ESS and trajectory diagnostics complement raw sample count.",panels=[
+        dict(title="autocorrelation by lag",kind="autocorrelation"),
+        dict(title="effective sample size",kind="ess_panel"),
+        dict(title="HMC trajectory intuition",kind="hmc_panel"),
+    ]),
+    "prml-state-space.svg": dict(title="Continuous state-space inference",subtitle="Kalman filtering alternates prediction and correction; particle filters use weighted samples for harder dynamics.",panels=[
+        dict(title="Kalman predict / update",kind="kalman_cycle"),
+        dict(title="particle filtering",kind="particle_filter"),
+    ]),
+    "prml-graph-inference.svg": dict(title="Conditional independence and message passing",subtitle="Graph structure controls which paths transmit dependence; local messages summarize evidence between neighboring factors.",panels=[
+        dict(title="chain / fork / collider",kind="dseparation"),
+        dict(title="local message passing",kind="message_passing"),
+    ]),
+    "prml-ensemble-boosting.svg": dict(title="Bayesian averaging, boosting and ensemble variance",subtitle="Model averaging weights hypotheses, boosting corrects errors sequentially, and diverse predictors can reduce variance.",panels=[
+        dict(title="Bayesian model averaging",kind="bayes_model_average"),
+        dict(title="boosting sequence",kind="boosting"),
+        dict(title="variance reduction intuition",kind="ensemble_variance"),
+    ]),
     "prml-bayes-density.svg": dict(title="Bayes update and decision risk",subtitle="Data reshapes uncertainty from prior to posterior; decisions then minimize expected risk.",panels=[
         dict(title="prior × likelihood → posterior",kind="bayes_update"),
         dict(title="Bayesian decision",kind="bayes_risk"),
@@ -2740,29 +3409,29 @@ REFERENCE_FIGURE_META = {
 REFERENCE_VISUALS = {
     ("cs231n","classification"): ["cs-knn-distance.svg","cs-split.svg"],
     ("cs231n","linear"): ["cs-linear-score.svg","cs-softmax-loss.svg","cs-decision-boundary.svg"],
-    ("cs231n","optimization"): ["cs-computational-chain.svg","cs-optimizers.svg","cs-lr-saddle.svg"],
-    ("cs231n","nn"): ["cs-activations.svg","cs-init-bn.svg","cs-reg-dropout.svg"],
+    ("cs231n","optimization"): ["cs-computational-chain.svg","cs-optimizers.svg","cs-lr-saddle.svg","cs-gradient-stability.svg"],
+    ("cs231n","nn"): ["cs-activations.svg","cs-init-bn.svg","cs-reg-dropout.svg","cs-dropout-fit.svg"],
     ("cs231n","training"): ["cs-training-diagnostics.svg","cs-augmentation.svg"],
     ("cs231n","cnn"): ["cs-conv-shape.svg","cs-conv-channels-rf.svg","cs-pooling-hierarchy.svg","cs-fc-conv.svg"],
-    ("cs231n","architectures"): ["cs-architectures-residual.svg"],
-    ("cs231n","visualization"): ["cs-visualization.svg"],
+    ("cs231n","architectures"): ["cs-architectures-residual.svg","cs-vgg-transfer.svg"],
+    ("cs231n","visualization"): ["cs-visualization.svg","cs-interpretability.svg"],
     ("cs231n","transfer"): ["cs-transfer.svg"],
     ("cs231n","modern"): ["cs-task-suite.svg","cs-iou-nms-instance.svg","cs-attention.svg","cs-modern.svg"],
 
     ("prml","ch1"): ["prml-bayes-density.svg"],
     ("prml","ch2"): ["prml-gaussian-beta.svg","prml-discrete-map.svg"],
     ("prml","ch3"): ["prml-regression-basis.svg","prml-bias-reg.svg"],
-    ("prml","ch4"): ["prml-sigmoid-boundary.svg","prml-multiclass.svg"],
+    ("prml","ch4"): ["prml-sigmoid-boundary.svg","prml-multiclass.svg","prml-generative-discriminative.svg"],
     ("prml","ch5"): ["prml-nn-boundary.svg","prml-forward-backprop.svg"],
-    ("prml","ch6"): ["prml-kernel-feature.svg"],
+    ("prml","ch6"): ["prml-kernel-feature.svg","prml-kernel-gp.svg"],
     ("prml","ch7"): ["prml-svm.svg"],
-    ("prml","ch8"): ["prml-graph-mrf.svg"],
+    ("prml","ch8"): ["prml-graph-mrf.svg","prml-graph-inference.svg"],
     ("prml","ch9"): ["prml-gmm-em.svg"],
-    ("prml","ch10"): ["prml-vi-elbo.svg"],
-    ("prml","ch11"): ["prml-monte-mcmc.svg"],
+    ("prml","ch10"): ["prml-vi-elbo.svg","prml-vi-meanfield.svg"],
+    ("prml","ch11"): ["prml-monte-mcmc.svg","prml-sampling-diagnostics.svg"],
     ("prml","ch12"): ["prml-pca-dim.svg","prml-ppca.svg"],
-    ("prml","ch13"): ["prml-hmm-filter.svg"],
-    ("prml","ch14"): ["prml-ensemble-moe.svg"],
+    ("prml","ch13"): ["prml-hmm-filter.svg","prml-state-space.svg"],
+    ("prml","ch14"): ["prml-ensemble-moe.svg","prml-ensemble-boosting.svg"],
     ("prml","vision-bridge"): ["prml-vision-bridge.svg"],
 }
 

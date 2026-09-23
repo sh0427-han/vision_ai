@@ -88,9 +88,9 @@ CS231n 공개 강의 노트의 전체 학습 흐름과 Bishop PRML 14개 장 전
 
 ## CS231n / PRML 시각 아틀라스
 
-- `scripts/reference_figures.py`에서 CS231n 24개, PRML 20개, 총 44개의 대형 multi-panel SVG figure를 생성한다.
-- CS231n은 kNN, split, linear classifier, softmax/hinge, optimization/backprop, activation/init/BN/regularization/dropout, CNN, architecture, transfer learning, detection/segmentation, visualization, modern topics를 시각적으로 커버한다.
-- PRML은 Bayes/확률분포, Gaussian/Beta, regression, bias-variance, logistic/multiclass, neural network, kernel/SVM, graphical model/MRF, GMM/EM, VI/ELBO, Monte Carlo/MCMC, PCA/PPCA, HMM, ensemble/MoE까지 시각적으로 커버한다.
+- `scripts/reference_figures.py`에서 CS231n 28개, PRML 27개, 총 55개의 대형 multi-panel SVG figure를 생성한다.
+- CS231n은 kNN, split, linear classifier, softmax/hinge, optimization/backprop, gradient stability, activation/init/BN/dropout, CNN, architecture/VGG, transfer learning, detection/segmentation, visualization/Grad-CAM, modern topics를 시각적으로 커버한다.
+- PRML은 Bayes/확률분포, Gaussian/Beta, regression, bias-variance, generative/discriminative classification, neural network, kernel/GP/SVM, graphical inference, GMM/EM, VI/ELBO/mean-field, Monte Carlo/MCMC diagnostics, PCA/PPCA, HMM/Kalman/particle filtering, ensemble/MoE/boosting까지 시각적으로 커버한다.
 - 종합 강의 페이지에서는 같은 개념의 기존 simple diagram을 중복 삽입하지 않고 reference figure를 우선한다.
 - figure는 논문 원본을 복제하지 않고, 개념을 설명하기 위해 독자 제작한 scatter/curve/heatmap/matrix/network figure로 구성한다.
 - reference figure 내부에는 문장형 bullet card를 두지 않고, 짧은 label과 실제 plot/matrix/graph/trajectory를 우선한다.

@@ -107,8 +107,8 @@ for path, parser in pages.items():
 extra_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'extra').glob('*.svg'))
 paper_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'paper').glob('*.svg'))
 reference_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'reference').glob('*.svg'))
-if len(reference_diagrams) != 44:
-    errors.append(f'Expected 44 CS231n/PRML reference figures, found {len(reference_diagrams)}')
+if len(reference_diagrams) != 55:
+    errors.append(f'Expected 55 CS231n/PRML reference figures, found {len(reference_diagrams)}')
 if len(paper_diagrams) != 18:
     errors.append(f'Expected 18 paper-style diagrams, found {len(paper_diagrams)}')
 if len(extra_diagrams) < 60:
@@ -170,7 +170,18 @@ for forbidden in [
 for required in [
     'cs-conv-channels-rf.svg',
     'cs-attention.svg',
+    'cs-gradient-stability.svg',
+    'cs-dropout-fit.svg',
+    'cs-vgg-transfer.svg',
+    'cs-interpretability.svg',
     'prml-discrete-map.svg',
+    'prml-generative-discriminative.svg',
+    'prml-kernel-gp.svg',
+    'prml-graph-inference.svg',
+    'prml-vi-meanfield.svg',
+    'prml-sampling-diagnostics.svg',
+    'prml-state-space.svg',
+    'prml-ensemble-boosting.svg',
 ]:
     if required not in reference_source:
         errors.append(f'Missing required corrected reference figure: {required}')
