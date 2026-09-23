@@ -3042,7 +3042,7 @@ def _synthetic_feature_response(x, y, w, h):
     parts.append(_grid(x+w*.72, y+75, 5, 5, 30, "green", horiz_hot))
     parts.append(
         f'<text x="{x+25}" y="{y+h-35}" class="small">'
-        "illustrative responses, not activations measured from a trained network</text>"
+        "synthetic example, not measured activations</text>"
     )
     return "".join(parts)
 
@@ -3129,7 +3129,7 @@ def _svm_c_effect(x, y, w, h):
         if violations:
             parts.append(f'<circle cx="{cx+8}" cy="{y+h*.58}" r="8" fill="#2454d8"/>')
             parts.append(f'<text x="{cx+18}" y="{y+h*.58+5}" class="small">allowed violation</text>')
-    parts.append(f'<text x="{x+22}" y="{y+h-25}" class="small">C controls penalty for margin violations; exact geometry depends on data</text>')
+    parts.append(f'<text x="{x+22}" y="{y+h-25}" class="small">C controls margin-violation penalty</text>')
     return "".join(parts)
 
 
@@ -3171,7 +3171,7 @@ def _em_evolution(x, y, w, h):
             xx=ox+cx*pw; yy=y+65+cy*(h-145)
             parts.append(f'<ellipse cx="{xx}" cy="{yy}" rx="{pw*.16}" ry="{(h-145)*.18}" fill="none" stroke="{color}" stroke-width="3"/>')
             parts.append(f'<circle cx="{xx}" cy="{yy}" r="7" fill="{color}"/>')
-    parts.append(f'<text x="{x+22}" y="{y+h-28}" class="small">schematic: E-step responsibilities and M-step parameters alternate until convergence</text>')
+    parts.append(f'<text x="{x+22}" y="{y+h-28}" class="small">schematic EM: responsibilities ↔ parameters</text>')
     return "".join(parts)
 
 
@@ -3646,24 +3646,24 @@ FIGURES = {
     ]),
 
     # PRML
-    "prml-posterior-predictive.svg": dict(title="Posterior parameters vs posterior predictive",subtitle="The posterior describes uncertainty over parameters; the posterior predictive integrates that uncertainty into a distribution for a new target.",panels=[
+    "prml-posterior-predictive.svg": dict(title="Posterior parameters vs posterior predictive",subtitle="Posterior uncertainty over parameters is integrated into predictions for a new target.",panels=[
         dict(title="parameter posterior → future-target distribution",kind="posterior_predictive_bridge"),
         dict(title="predictive mean and uncertainty",kind="predictive_band"),
     ]),
-    "prml-dirichlet-multinomial.svg": dict(title="Dirichlet–Multinomial conjugacy",subtitle="Categorical counts add directly to Dirichlet concentration parameters, generalizing the Beta–Binomial update to K classes.",panels=[
+    "prml-dirichlet-multinomial.svg": dict(title="Dirichlet–Multinomial conjugacy",subtitle="Class counts add to Dirichlet concentration parameters for K-category data.",panels=[
         dict(title="α + class counts → posterior α",kind="dirichlet_multinomial"),
     ]),
-    "prml-svm-c-rvm.svg": dict(title="Soft-margin C and sparse kernel machines",subtitle="SVM C trades margin violations against margin size; RVMs pursue sparse Bayesian relevance vectors by a different probabilistic objective.",panels=[
+    "prml-svm-c-rvm.svg": dict(title="Soft-margin C and sparse kernel machines",subtitle="C controls soft-margin penalties; RVM uses a sparse Bayesian kernel formulation.",panels=[
         dict(title="smaller C vs larger C",kind="svm_c_effect"),
         dict(title="support vectors vs relevance vectors",kind="rvm_sparsity"),
     ]),
-    "prml-em-evolution.svg": dict(title="EM parameter evolution",subtitle="Responsibilities and component parameters alternate; the sketch shows component centers/covariances moving across iterations.",panels=[
+    "prml-em-evolution.svg": dict(title="EM parameter evolution",subtitle="Responsibilities and component parameters alternate across EM iterations.",panels=[
         dict(title="schematic iteration sequence",kind="em_evolution"),
     ]),
     "prml-rejection-sampling.svg": dict(title="Rejection sampling",subtitle="Sample from a proposal envelope, then accept with probability proportional to p(x)/(M q(x)).",panels=[
         dict(title="proposal envelope and accept/reject samples",kind="rejection_sampling"),
     ]),
-    "prml-pca-spectrum.svg": dict(title="PCA explained variance",subtitle="Eigenvalues quantify variance captured by each principal component; cumulative variance helps choose a retained dimension.",panels=[
+    "prml-pca-spectrum.svg": dict(title="PCA explained variance",subtitle="Eigenvalues show variance per component; cumulative variance guides retained dimension.",panels=[
         dict(title="scree bars and cumulative variance",kind="pca_spectrum"),
     ]),
 
