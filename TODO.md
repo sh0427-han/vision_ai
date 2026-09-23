@@ -15,6 +15,10 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] Pages artifact raster QA 2차: ROC/PR text card를 실제 schematic curve로 교체
+- [x] Pages artifact raster QA 2차: random frame split vs grouped split을 source-group 시각화로 교체
+- [x] 중복된 task 카드형 extra figure 삽입 제거 및 SVG 한국어 fallback font stack 보강
+- [x] threshold figure의 우측 axis label overlap 교정
 - [x] 실제 Pages artifact raster QA에서 잘못된 extra teaching curve 3종(optimization / overfit / threshold) 발견·교정
 - [x] 실제 figure inventory와 TODO를 대조하여 기존 구현 항목의 stale checkbox 정리
 - [x] gradient stability / dropout mode·fit / VGG·transfer / activation-max·Grad-CAM figure 보강
