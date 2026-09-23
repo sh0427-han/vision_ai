@@ -567,7 +567,9 @@ def _activation_gradients(x, y, w, h):
     return "".join(parts)
 
 
+
 def _batchnorm_modes(x, y, w, h):
+    """BatchNorm train/eval statistics and running-stat updates."""
     parts = []
     rows = [
         (y + 78, "train", "batch μB, σB²", "#2454d8"),
@@ -602,8 +604,11 @@ def _batchnorm_modes(x, y, w, h):
             f'<text x="{x+442}" y="{yy+43}" text-anchor="middle" class="small">'
             "γ, β</text>"
         )
+    parts.append(
+        f'<text x="{x+18}" y="{y+182}" class="small" fill="#6d7f9b">'
+        "train also updates running statistics</text>"
+    )
     return "".join(parts)
-
 
 def _augmentation_cards(x, y, w, h):
     parts = []
@@ -932,42 +937,63 @@ def _posterior_approx(x, y, w, h):
     return "".join(parts)
 
 
+
 def _elbo_decomposition(x, y, w, h):
-    bar_x = x + 45
-    bar_y = y + 130
-    bar_w = w - 90
+    """Show ELBO as a lower bound without implying all terms are positive bars."""
+    left = x + 55
+    right = x + w - 35
+    evidence_y = y + 105
+    elbo_y = y + 245
     parts = [
-        f'<text x="{bar_x}" y="{y+62}" class="label">log p(x)</text>',
-        f'<rect x="{bar_x}" y="{bar_y}" width="{bar_w}" height="58" rx="10" fill="#eef2f7" stroke="#c8d3e2"/>',
-        f'<rect x="{bar_x}" y="{bar_y}" width="{bar_w*.72}" height="58" rx="10" fill="#2454d8" opacity=".82"/>',
-        f'<rect x="{bar_x+bar_w*.72}" y="{bar_y}" width="{bar_w*.28}" height="58" rx="10" fill="#e0ae82" opacity=".88"/>',
-        f'<text x="{bar_x+bar_w*.36}" y="{bar_y+35}" text-anchor="middle" class="white">ELBO</text>',
-        f'<text x="{bar_x+bar_w*.86}" y="{bar_y+35}" text-anchor="middle" class="body">KL gap</text>',
-        f'<text x="{bar_x}" y="{bar_y+105}" class="small">maximize ELBO → shrink KL gap</text>',
+        f'<path d="M{left} {evidence_y} H{right}" '
+        'stroke="#2454d8" stroke-width="4"/>',
+        f'<path d="M{left} {elbo_y} H{right}" '
+        'stroke="#08796f" stroke-width="4"/>',
+        f'<path d="M{x+w*.72} {evidence_y+4} V{elbo_y-4}" '
+        'stroke="#e0ae82" stroke-width="4"/>',
+        f'<text x="{left}" y="{evidence_y-16}" class="label" '
+        'fill="#2454d8">log p(x)</text>',
+        f'<text x="{left}" y="{elbo_y-16}" class="label" '
+        'fill="#08796f">ELBO(q)</text>',
+        f'<text x="{x+w*.72+10}" y="{(evidence_y+elbo_y)/2}" '
+        'class="small" fill="#a24d18">KL(q || p)</text>',
+        f'<text x="{x+22}" y="{y+h-48}" class="small">'
+        "log p(x) = ELBO(q) + KL(q(z)||p(z|x))</text>",
+        f'<text x="{x+22}" y="{y+h-24}" class="small">'
+        "KL ≥ 0 ⇒ ELBO ≤ log p(x)</text>",
     ]
     return "".join(parts)
 
 
 def _mc_samples(x, y, w, h):
+    """Target density plus a rug plot of sampled x positions."""
     left = x + 38
     right = x + w - 22
-    bottom = y + h - 48
+    baseline = y + h - 76
     top = y + 52
     parts = [
-        f'<path d="M{left} {bottom} H{right}" class="thin"/>',
-        f'<path d="M{left+5} {bottom} C{x+w*.28} {bottom} {x+w*.36} {top+45} '
-        f'{x+w*.50} {top+45} C{x+w*.64} {top+45} {x+w*.72} {bottom} '
-        f'{right-5} {bottom}" stroke="#2454d8" stroke-width="4" fill="none"/>',
+        f'<path d="M{left} {baseline} H{right}" class="thin"/>',
+        f'<path d="M{left+5} {baseline} C{x+w*.28} {baseline} '
+        f'{x+w*.36} {top+45} {x+w*.50} {top+45} '
+        f'C{x+w*.64} {top+45} {x+w*.72} {baseline} {right-5} {baseline}" '
+        'stroke="#2454d8" stroke-width="4" fill="none"/>',
     ]
     samples = [0.18, 0.27, 0.41, 0.46, 0.53, 0.61, 0.68, 0.74, 0.83]
-    heights = [36, 55, 92, 125, 142, 118, 86, 60, 31]
-    for sx, sh in zip(samples, heights):
+    for sx in samples:
         xx = x + sx * w
-        parts.append(f'<path d="M{xx} {bottom} V{bottom-sh}" stroke="#08796f" stroke-width="3"/>')
-        parts.append(f'<circle cx="{xx}" cy="{bottom-sh}" r="5" fill="#08796f"/>')
-    parts.append(f'<text x="{left+6}" y="{top+15}" class="small">target density + samples</text>')
+        parts.append(
+            f'<path d="M{xx} {baseline+8} V{baseline+29}" '
+            'stroke="#08796f" stroke-width="4"/>'
+        )
+    parts.append(
+        f'<text x="{left+6}" y="{top+15}" class="small">'
+        "target density p(x)</text>"
+    )
+    parts.append(
+        f'<text x="{left+6}" y="{baseline+55}" class="small" fill="#08796f">'
+        "rug marks = sampled x values</text>"
+    )
     return "".join(parts)
-
 
 def _mcmc_path(x, y, w, h):
     parts = [
@@ -2220,21 +2246,47 @@ def _linear_regression_scatter(x, y, w, h):
     return "".join(parts)
 
 
+
 def _svm_margin(x, y, w, h):
-    """Maximum-margin sketch with rings aligned to displayed closest samples."""
-    parts = [_scatter(x, y, w, h, "linear", False, True)]
-    support = [
-        (x + w * .42, y + h * .55),
-        (x + w * .62, y + h * .30),
+    """Consistent 2D maximum-margin sketch with support vectors on margins."""
+    parts = [
+        f'<path d="M{x+25} {y+h-30} H{x+w-20} '
+        f'M{x+25} {y+h-30} V{y+35}" class="thin"/>'
     ]
-    for cx, cy in support:
+    a = [(0.18,0.72),(0.28,0.60),(0.34,0.76),(0.22,0.45),(0.42,0.55)]
+    b = [(0.62,0.30),(0.72,0.42),(0.77,0.24),(0.66,0.58),(0.84,0.48)]
+    for px, py in a:
+        parts.append(
+            f'<circle cx="{x+px*w}" cy="{y+py*h}" r="8" fill="#2454d8"/>'
+        )
+    for px, py in b:
+        parts.append(
+            f'<circle cx="{x+px*w}" cy="{y+py*h}" r="8" fill="#08796f"/>'
+        )
+
+    margin_left = x + w * .42
+    boundary = x + w * .52
+    margin_right = x + w * .62
+    parts.append(
+        f'<path d="M{boundary} {y+35} V{y+h-30}" '
+        'stroke="#a24d18" stroke-width="4"/>'
+    )
+    parts.append(
+        f'<path d="M{margin_left} {y+35} V{y+h-30} '
+        f'M{margin_right} {y+35} V{y+h-30}" '
+        'stroke="#89a9ec" stroke-width="3" stroke-dasharray="8 6"/>'
+    )
+    for cx, cy in [
+        (margin_left, y + h * .55),
+        (margin_right, y + h * .30),
+    ]:
         parts.append(
             f'<circle cx="{cx}" cy="{cy}" r="15" fill="none" '
             'stroke="#a24d18" stroke-width="3"/>'
         )
     parts.append(
         f'<text x="{x+18}" y="{y+35}" class="small">'
-        "rings mark the displayed samples nearest the separator</text>"
+        "support vectors lie on the displayed margin</text>"
     )
     return "".join(parts)
 
