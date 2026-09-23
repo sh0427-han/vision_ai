@@ -136,6 +136,38 @@ if 'automatic two-line labels for narrow boxes' not in reference_source:
     errors.append('Missing wrapped pipeline labels in reference figures')
 
 for forbidden in [
+    '"pixels-channels.svg": ("flow"',
+    '"cnn-multichannel.svg": ("flow"',
+    '"vit-attention.svg": ("flow"',
+    '"vit-multihead.svg": ("flow"',
+    '"tasks-output-types.svg": ("flow"',
+    '"tasks-label-box-mask.svg": ("flow"',
+    '"unet-mask-triplet.svg": ("flow"',
+    '"prml-variational.svg": ("flow"',
+    '"prml-ensemble.svg": ("flow"',
+    '"train-curves.svg": ("compare"',
+    '"resnet-function.svg": ("flow"',
+    '"resnet-gradient.svg": ("flow"',
+]:
+    if forbidden in extra_source:
+        errors.append(
+            f'Extra-diagram structural regression remains: {forbidden}'
+        )
+
+for required in [
+    'def _pixels_channels(',
+    'def _parallel_conv_channels(',
+    'def _attention_qkv_visual(',
+    'def _multihead_visual(',
+    'def _mask_compare_visual(',
+    'def _roc_pr_visual(',
+    'def _residual_function_visual(',
+    'def _ensemble_visual(',
+]:
+    if required not in extra_source:
+        errors.append(f'Missing visual-QA corrected extra diagram: {required}')
+
+for forbidden in [
     '"train-overfit.svg": ("curve"',
     '"train-threshold.svg": ("curve"',
     '"cs-optimization.svg": ("curve"',
@@ -287,6 +319,13 @@ for svg_path in [*paper_diagrams, *reference_diagrams]:
                 f'Overlong in-figure label ({len(text_value)} chars): '
                 f'{svg_path.name} -> {text_value[:40]}...'
             )
+
+for svg_path in sorted((ROOT / 'assets' / 'diagrams').glob('*.svg')):
+    svg_text = svg_path.read_text(encoding='utf-8')
+    if "font-family:Arial,'Noto Sans KR',sans-serif" in svg_text:
+        errors.append(
+            f'Core SVG puts Latin font before Korean fallback: {svg_path.name}'
+        )
 
 for svg_path in [
     *sorted((ROOT / 'assets' / 'diagrams').glob('*.svg')),
