@@ -280,11 +280,12 @@ C990 345 1010 398 1060 405" stroke="#a24d18" stroke-width="5" fill="none"/>
 
 SPECS = {
     # pixels
-    "pixels-human-vs-array.svg": ("pixels_human_array", "사람이 보는 이미지 vs 컴퓨터 입력", "같은 장면도 모델에는 픽셀 값 배열로 전달됩니다."),
-    "pixels-channels.svg": ("pixels_channels", "RGB 채널 분리", "R·G·B는 같은 이미지의 병렬 채널이며 직렬 처리 단계가 아닙니다."),
-    "pixels-lighting.svg": ("lighting_visual", "같은 물체, 다른 조명", "물체의 의미는 같아도 픽셀 intensity는 크게 달라질 수 있습니다."),
-    "pixels-resize.svg": ("resize_visual", "Resize가 바꾸는 정보", "해상도를 줄이면 작은 패턴이 몇 cell로 축약되거나 사라질 수 있습니다."),
-    "pixels-normalization.svg": ("flow", "픽셀 값 전처리 흐름", "학습과 추론에서 같은 전처리 계약을 사용해야 합니다.", [["uint8","0~255"],["float","0.0~1.0"],["표준화","(x-μ)/σ"],["Tensor","모델 입력"],["Model","예측"]]),
+    "pixels-human-vs-array.svg": ("pixels_human_array", "이미지 파일에서 픽셀 배열까지", "JPEG/PNG는 디코딩된 뒤에야 H×W×C 형태의 픽셀 배열이 됩니다."),
+    "pixels-channels.svg": ("pixels_channels", "한 픽셀과 RGB 채널", "한 RGB 픽셀은 세 숫자를 가지며 전체 이미지는 세 채널 평면으로 볼 수 있습니다."),
+    "pixels-layout.svg": ("pixels_layout", "HWC · CHW · NCHW", "같은 픽셀도 라이브러리와 연산에 따라 axis order가 달라집니다."),
+    "pixels-resize.svg": ("resize_visual", "Resize와 종횡비", "resize는 resampling이며 직접 stretch는 geometry를 왜곡할 수 있습니다."),
+    "pixels-lighting.svg": ("lighting_visual", "같은 구조, 다른 조명", "합성 patch에서 같은 공간 구조도 조명 조건에 따라 픽셀 값 범위가 달라집니다."),
+    "pixels-normalization.svg": ("pixel_preprocess", "Scale과 normalization", "자료형·값 범위·채널별 표준화를 구분하고 학습·추론의 입력 계약을 맞춥니다."),
 
     # CNN
     "cnn-sliding.svg": ("flow", "Kernel sliding", "작은 커널이 입력 위를 이동하며 각 위치의 반응을 계산합니다.", [["Input patch","3×3"],["Kernel","3×3"],["Multiply","원소별 곱"],["Sum","+ bias"],["Feature","한 출력값"]]),
@@ -369,73 +370,166 @@ SPECS = {
 
 
 
+
 def _pixels_human_array():
-    """Contrast semantic perception with the numeric tensor given to a model."""
+    """Distinguish encoded image files from the decoded pixel array seen by preprocessing code."""
     body = [
-        '<rect x="70" y="145" width="430" height="300" rx="20" fill="#fff" stroke="#b9c9e7" stroke-width="3"/>',
-        '<rect x="700" y="145" width="430" height="300" rx="20" fill="#fff" stroke="#8ac7a5" stroke-width="3"/>',
-        '<text x="285" y="190" text-anchor="middle" class="l">사람: 사과로 인식</text>',
-        '<circle cx="285" cy="315" r="72" fill="#e85b48"/>',
-        '<path d="M282 245 C281 222 298 207 316 198" stroke="#6d7f45" stroke-width="10" fill="none"/>',
-        '<ellipse cx="336" cy="205" rx="27" ry="13" fill="#6da76f" transform="rotate(-25 336 205)"/>',
-        '<text x="285" y="415" text-anchor="middle" class="m">모양·색·문맥을 함께 해석</text>',
-        '<text x="915" y="190" text-anchor="middle" class="l">컴퓨터: H×W×C 숫자</text>',
+        '<rect x="55" y="150" width="265" height="285" rx="20" fill="#fff" stroke="#b9c9e7" stroke-width="3"/>',
+        '<text x="187" y="192" text-anchor="middle" class="l">JPEG / PNG file</text>',
+        '<rect x="112" y="225" width="150" height="115" rx="12" fill="#edf3ff" stroke="#8faee8" stroke-width="3"/>',
+        '<text x="187" y="270" text-anchor="middle" class="l">encoded bytes</text>',
+        '<text x="187" y="305" text-anchor="middle" class="m">압축·헤더·메타데이터</text>',
+        '<text x="187" y="392" text-anchor="middle" class="m">아직 H×W×C 배열이 아님</text>',
+        _arrow(325,292,430,292),
+        '<text x="377" y="265" text-anchor="middle" class="m">decode</text>',
+        '<rect x="445" y="150" width="700" height="285" rx="20" fill="#fff" stroke="#8ac7a5" stroke-width="3"/>',
+        '<text x="795" y="192" text-anchor="middle" class="l">decoded RGB raster</text>',
+        '<text x="795" y="220" text-anchor="middle" class="m">예: height=5, width=5, channels=3</text>',
     ]
     vals = [
-        [18,28,35,42,20],
-        [24,96,172,118,31],
-        [28,148,228,164,34],
-        [22,110,190,132,29],
-        [17,30,42,33,18],
+        [(35,40,30),(40,45,34),(52,60,43),(43,50,37),(31,36,29)],
+        [(38,44,32),(176,62,44),(214,74,52),(158,55,42),(35,41,31)],
+        [(41,47,34),(205,68,48),(232,83,57),(196,65,47),(37,44,32)],
+        [(34,40,30),(165,58,43),(218,72,50),(151,53,40),(33,39,30)],
+        [(28,34,27),(36,42,31),(47,54,39),(39,45,34),(29,35,27)],
     ]
-    start_x,start_y,cell=820,215,37
+    sx,sy,cell=520,245,37
     for r,row in enumerate(vals):
-        for col,v in enumerate(row):
-            shade=max(0,min(255,245-v//2))
+        for c,(rv,gv,bv) in enumerate(row):
             body.append(
-                f'<rect x="{start_x+col*cell}" y="{start_y+r*cell}" width="42" height="42" rx="5" '
-                f'fill="rgb({shade},{shade},{shade})" stroke="#c7d5ee"/>'
+                f'<rect x="{sx+c*cell}" y="{sy+r*cell}" width="34" height="34" rx="4" '
+                f'fill="rgb({rv},{gv},{bv})" stroke="#d6deea"/>'
             )
-            body.append(
-                f'<text x="{start_x+col*cell+21}" y="{start_y+r*cell+27}" text-anchor="middle" '
-                f'font-size="13" fill="#203455">{v}</text>'
-            )
-    body.append('<text x="915" y="430" text-anchor="middle" class="m">조명·노이즈가 바뀌면 숫자도 바뀜</text>')
-    body.append(_arrow(505,295,680,295))
-    return _frame("사람이 보는 이미지 vs 컴퓨터 입력", "같은 장면도 모델에는 픽셀 값으로 전달됩니다.", "".join(body))
+    hx=sx+2*cell
+    hy=sy+2*cell
+    body.append(
+        f'<rect x="{hx-4}" y="{hy-4}" width="42" height="42" rx="5" '
+        'fill="none" stroke="#2454d8" stroke-width="4"/>'
+    )
+    body += [
+        '<text x="805" y="278" class="l">highlighted pixel</text>',
+        '<text x="805" y="315" class="m">R = 232</text>',
+        '<text x="805" y="345" class="m">G = 83</text>',
+        '<text x="805" y="375" class="m">B = 57</text>',
+        '<text x="805" y="410" class="m">pixel vector = [232, 83, 57]</text>',
+    ]
+    return _frame(
+        "이미지 파일에서 픽셀 배열까지",
+        "JPEG/PNG bytes를 decoder가 해석한 뒤에야 높이·너비·채널의 숫자 배열을 얻습니다.",
+        "".join(body),
+    )
 
 
 def _pixels_channels():
-    """RGB channels split in parallel, not serially."""
+    """Show one RGB pixel and the three channel planes that make up an RGB image."""
     body = [
-        _card(70, 200, 175, 110, "원본", "H×W×3"),
-        '<circle cx="330" cy="255" r="32" fill="#edf3ff" stroke="#7891b7" stroke-width="3"/>',
-        '<text x="330" y="262" text-anchor="middle" class="l">분리</text>',
+        '<text x="80" y="150" class="l">한 위치의 RGB pixel</text>',
+        '<rect x="80" y="180" width="250" height="210" rx="18" fill="#fff" stroke="#c7d5ee" stroke-width="3"/>',
+        '<circle cx="205" cy="255" r="54" fill="rgb(220,60,30)" stroke="#c94d3b" stroke-width="3"/>',
+        '<text x="205" y="335" text-anchor="middle" class="l">[220, 60, 30]</text>',
+        '<text x="205" y="365" text-anchor="middle" class="m">R, G, B 세 값이 한 pixel을 구성</text>',
+        _arrow(338,285,420,285),
     ]
-    body.append(_arrow(245,255,296,255))
-    channel_y=[145,235,325]
-    colors=[("#fde8e8","#b64040","R"),("#e9f7f2","#08796f","G"),("#e8eefc","#2454d8","B")]
-    for yy,(fill,stroke,label) in zip(channel_y,colors):
-        body.append(f'<rect x="430" y="{yy}" width="180" height="72" rx="13" fill="{fill}" stroke="{stroke}" stroke-width="3"/>')
-        body.append(f'<text x="520" y="{yy+31}" text-anchor="middle" class="l">{label} channel</text>')
-        body.append(f'<text x="520" y="{yy+55}" text-anchor="middle" class="m">H×W</text>')
-        body.append(_arrow(362,255,424,yy+36))
-    body += [
-        '<circle cx="730" cy="255" r="34" fill="#fff7e9" stroke="#d79b66" stroke-width="3"/>',
-        '<text x="730" y="262" text-anchor="middle" class="l">결합</text>',
-        _card(865, 200, 210, 110, "RGB image", "H×W×3", True),
+    planes=[
+        (445,150,"R plane","#fde8e8","#b64040",[[32,40,48],[60,220,180],[38,52,44]]),
+        (690,150,"G plane","#e9f7f2","#08796f",[[30,38,45],[55,60,72],[35,44,40]]),
+        (935,150,"B plane","#e8eefc","#2454d8",[[28,35,42],[48,30,52],[31,39,36]]),
     ]
-    for yy in channel_y:
-        body.append(_arrow(610,yy+36,696,255))
-    body.append(_arrow(764,255,860,255))
-    return _frame("RGB 채널 분리와 결합", "R·G·B는 직렬 단계가 아니라 같은 이미지의 병렬 채널입니다.", "".join(body))
+    for x0,title,fill,stroke,vals in planes:
+        body.append(
+            f'<rect x="{x0}" y="145" width="205" height="285" rx="18" fill="#fff" '
+            f'stroke="{stroke}" stroke-width="3"/>'
+        )
+        body.append(f'<text x="{x0+102}" y="182" text-anchor="middle" class="l">{title}</text>')
+        cell=46
+        sx=x0+33
+        sy=220
+        for r,row in enumerate(vals):
+            for c,v in enumerate(row):
+                body.append(
+                    f'<rect x="{sx+c*cell}" y="{sy+r*cell}" width="40" height="40" rx="5" '
+                    f'fill="{fill}" stroke="{stroke}" stroke-opacity=".45"/>'
+                )
+                body.append(
+                    f'<text x="{sx+c*cell+20}" y="{sy+r*cell+26}" text-anchor="middle" '
+                    f'font-size="13" fill="#203455">{v}</text>'
+                )
+    body.append(
+        '<text x="600" y="475" text-anchor="middle" class="m">'
+        'RGB image = 같은 H×W 좌표를 공유하는 세 channel plane</text>'
+    )
+    return _frame(
+        "한 픽셀과 RGB 채널",
+        "RGB에서는 각 공간 위치가 R·G·B 세 숫자를 가지며, 이미지 전체는 세 채널 평면으로 볼 수 있습니다.",
+        "".join(body),
+    )
 
+
+
+def _pixels_layout():
+    """Show common image/tensor axis orders without implying one universal storage layout."""
+    body = [
+        '<rect x="55" y="155" width="300" height="270" rx="18" fill="#fff" stroke="#c7d5ee" stroke-width="3"/>',
+        '<text x="205" y="195" text-anchor="middle" class="l">decoded array</text>',
+        '<text x="205" y="235" text-anchor="middle" class="l">HWC</text>',
+        '<text x="205" y="273" text-anchor="middle" class="m">[224, 224, 3]</text>',
+        '<text x="205" y="315" text-anchor="middle" class="m">NumPy / OpenCV에서 흔함</text>',
+        '<text x="205" y="355" text-anchor="middle" class="m">H=height · W=width · C=channel</text>',
+        _arrow(360,290,455,290),
+        '<text x="408" y="263" text-anchor="middle" class="m">permute</text>',
+        '<rect x="470" y="155" width="300" height="270" rx="18" fill="#fff" stroke="#8faee8" stroke-width="3"/>',
+        '<text x="620" y="195" text-anchor="middle" class="l">tensor image</text>',
+        '<text x="620" y="235" text-anchor="middle" class="l">CHW</text>',
+        '<text x="620" y="273" text-anchor="middle" class="m">[3, 224, 224]</text>',
+        '<text x="620" y="315" text-anchor="middle" class="m">Torchvision tensor에서 흔함</text>',
+        '<text x="620" y="355" text-anchor="middle" class="m">차원 순서만 바뀌고 pixel 수는 같음</text>',
+        _arrow(775,290,870,290),
+        '<text x="823" y="263" text-anchor="middle" class="m">stack B장</text>',
+        '<rect x="885" y="155" width="270" height="270" rx="18" fill="#203455" stroke="#203455" stroke-width="3"/>',
+        '<text x="1020" y="195" text-anchor="middle" font-size="20" font-weight="700" fill="#fff">model batch</text>',
+        '<text x="1020" y="235" text-anchor="middle" font-size="20" font-weight="700" fill="#fff">NCHW</text>',
+        '<text x="1020" y="273" text-anchor="middle" font-size="16" fill="#e5edff">[32, 3, 224, 224]</text>',
+        '<text x="1020" y="315" text-anchor="middle" font-size="16" fill="#e5edff">N = batch size</text>',
+        '<text x="1020" y="355" text-anchor="middle" font-size="16" fill="#e5edff">Conv2d의 대표 입력 형태</text>',
+        '<text x="600" y="477" text-anchor="middle" class="m">reshape가 아니라 axis permutation으로 HWC ↔ CHW를 바꿉니다.</text>',
+    ]
+    return _frame(
+        "HWC, CHW, NCHW는 축의 순서를 말한다",
+        "같은 픽셀 데이터라도 라이브러리와 연산이 기대하는 axis order가 다를 수 있습니다.",
+        "".join(body),
+    )
+
+
+def _pixel_preprocess():
+    """Distinguish dtype conversion, scaling, per-channel normalization and the model input contract."""
+    body = [
+        _card(55,190,205,120,"uint8 RGB","0…255"),
+        _card(325,190,205,120,"float32 + scale","0.0…1.0"),
+        _card(595,190,230,120,"channel normalize","(x_c − μ_c) / σ_c"),
+        _card(890,190,255,120,"model input","shape + dtype + range",True),
+        _arrow(265,250,315,250),
+        _arrow(535,250,585,250),
+        _arrow(830,250,880,250),
+        '<text x="157" y="365" text-anchor="middle" class="m">값 128</text>',
+        '<text x="427" y="365" text-anchor="middle" class="m">128/255 ≈ 0.502</text>',
+        '<text x="710" y="365" text-anchor="middle" class="m">μ=0.5, σ=0.25 → ≈ 0.0078</text>',
+        '<text x="1018" y="365" text-anchor="middle" class="m">학습·추론에서 동일 계약</text>',
+        '<text x="600" y="450" text-anchor="middle" class="m">mean/std는 보통 channel별 값이며, 사전학습 weight가 지정한 transform을 따라야 합니다.</text>',
+    ]
+    return _frame(
+        "Scale과 normalization은 서로 다른 단계",
+        "자료형 변환·값 범위 조정·채널별 표준화를 구분하면 전처리 오류를 찾기 쉽습니다.",
+        "".join(body),
+    )
 
 def _lighting_visual():
-    """Same object with shifted pixel intensities under different illumination."""
+    """Synthetic patches with the same spatial structure but different intensity ranges."""
     body = []
-    for x0,title,base in [(95,"밝은 조명",210),(665,"어두운 조명",75)]:
-        body.append(f'<rect x="{x0}" y="145" width="440" height="300" rx="20" fill="#fff" stroke="#c7d5ee" stroke-width="3"/>')
+    for x0,title,base in [(95,"밝은 조건",205),(665,"어두운 조건",78)]:
+        body.append(
+            f'<rect x="{x0}" y="145" width="440" height="300" rx="20" '
+            'fill="#fff" stroke="#c7d5ee" stroke-width="3"/>'
+        )
         body.append(f'<text x="{x0+220}" y="190" text-anchor="middle" class="l">{title}</text>')
         vals=[
             [base,base+8,base+4,base+10],
@@ -443,40 +537,68 @@ def _lighting_visual():
             [base-10,base-82,base-95,base-18],
             [base+3,base-20,base-15,base+5],
         ]
-        sx=x0+95; sy=220; cell=56
+        sx=x0+95
+        sy=220
+        cell=56
         for r,row in enumerate(vals):
-            for col,v in enumerate(row):
+            for c,v in enumerate(row):
                 v=max(0,min(255,v))
-                shade=v
-                body.append(f'<rect x="{sx+col*cell}" y="{sy+r*cell}" width="50" height="50" rx="6" fill="rgb({shade},{shade},{shade})" stroke="#d6deea"/>')
-                body.append(f'<text x="{sx+col*cell+25}" y="{sy+r*cell+31}" text-anchor="middle" font-size="13" fill="{"#fff" if v<130 else "#203455"}">{v}</text>')
-    body.append('<text x="600" y="475" text-anchor="middle" class="m">객체의 의미는 같아도 intensity distribution은 크게 이동할 수 있음</text>')
-    return _frame("같은 물체, 다른 조명", "조명 변화는 그대로 픽셀 값 변화로 전달됩니다.", "".join(body))
-
+                body.append(
+                    f'<rect x="{sx+c*cell}" y="{sy+r*cell}" width="50" height="50" rx="6" '
+                    f'fill="rgb({v},{v},{v})" stroke="#d6deea"/>'
+                )
+                body.append(
+                    f'<text x="{sx+c*cell+25}" y="{sy+r*cell+31}" text-anchor="middle" '
+                    f'font-size="13" fill="{"#fff" if v<130 else "#203455"}">{v}</text>'
+                )
+    body.append(
+        '<text x="600" y="475" text-anchor="middle" class="m">'
+        '같은 공간 패턴이어도 exposure·illumination 변화가 pixel value distribution을 이동시킬 수 있습니다.</text>'
+    )
+    return _frame(
+        "같은 구조, 다른 조명 조건",
+        "합성 4×4 patch 예시: 구조는 유지되어도 기록되는 숫자의 범위는 크게 달라질 수 있습니다.",
+        "".join(body),
+    )
 
 def _resize_visual():
-    """Show loss of a small structure after aggressive downsampling."""
-    body = [
-        '<text x="285" y="155" text-anchor="middle" class="l">1920×1080 개념</text>',
-        '<text x="915" y="155" text-anchor="middle" class="l">224×224 개념</text>',
+    """Contrast direct aspect-ratio distortion with aspect-preserving resize strategies."""
+    body = []
+    cards=[
+        (45,145,330,290,"원본 16:9"),
+        (435,145,330,290,"직접 224×224 resize"),
+        (825,145,330,290,"비율 유지 후 crop / pad"),
     ]
-    def grid(x0,y0,rows,cols,cell,hot):
-        out=[]
-        for r in range(rows):
-            for cc in range(cols):
-                idx=r*cols+cc
-                fill="#2454d8" if idx in hot else "#edf3ff"
-                out.append(f'<rect x="{x0+cc*cell}" y="{y0+r*cell}" width="{cell-3}" height="{cell-3}" rx="3" fill="{fill}" stroke="#c7d5ee"/>')
-        return "".join(out)
-    body.append(grid(115,185,7,10,34,{24,25,34,35,36,44,45}))
-    body.append(_arrow(510,300,680,300))
-    body.append(grid(795,220,4,6,45,{8,14}))
+    for x0,y0,w0,h0,title in cards:
+        body.append(
+            f'<rect x="{x0}" y="{y0}" width="{w0}" height="{h0}" rx="18" '
+            'fill="#fff" stroke="#c7d5ee" stroke-width="3"/>'
+        )
+        body.append(f'<text x="{x0+w0/2}" y="{y0+38}" text-anchor="middle" class="l">{title}</text>')
+    body.append('<rect x="80" y="230" width="260" height="146" rx="8" fill="#edf3ff" stroke="#8faee8"/>')
+    body.append('<circle cx="210" cy="303" r="42" fill="#2454d8" opacity=".80"/>')
+    body.append('<rect x="285" y="330" width="18" height="18" fill="#a24d18"/>')
+    body.append('<text x="210" y="405" text-anchor="middle" class="m">1920×1080 → downsample</text>')
+    body.append('<rect x="485" y="215" width="230" height="190" rx="8" fill="#edf3ff" stroke="#8faee8"/>')
+    body.append('<ellipse cx="600" cy="310" rx="48" ry="67" fill="#2454d8" opacity=".80"/>')
+    body.append('<rect x="666" y="350" width="12" height="12" fill="#a24d18"/>')
+    body.append('<text x="600" y="425" text-anchor="middle" class="m">종횡비가 바뀌면 모양도 변형</text>')
+    body.append('<rect x="865" y="230" width="250" height="146" rx="8" fill="#edf3ff" stroke="#8faee8"/>')
+    body.append('<circle cx="990" cy="303" r="42" fill="#2454d8" opacity=".80"/>')
+    body.append('<rect x="1062" y="331" width="12" height="12" fill="#a24d18"/>')
+    body.append('<path d="M900 220 V386 M1080 220 V386" stroke="#08796f" stroke-width="3" stroke-dasharray="7 5"/>')
+    body.append('<text x="990" y="405" text-anchor="middle" class="m">비율 유지 + crop/pad 선택</text>')
     body += [
-        '<text x="285" y="455" text-anchor="middle" class="m">작은 구조가 여러 픽셀로 남음</text>',
-        '<text x="915" y="455" text-anchor="middle" class="m">축소 후 작은 구조가 1–2 cell로 줄거나 사라질 수 있음</text>',
+        '<text x="600" y="475" text-anchor="middle" class="m">'
+        '어떤 방법이든 resampling 과정에서 작은 패턴이 약해지거나 사라질 수 있습니다.</text>',
+        _arrow(380,292,425,292),
+        _arrow(770,292,815,292),
     ]
-    return _frame("Resize가 바꾸는 정보", "해상도 축소는 계산량을 줄이지만 작은 패턴의 표현력을 낮출 수 있습니다.", "".join(body))
-
+    return _frame(
+        "Resize는 크기뿐 아니라 정보 표현도 바꾼다",
+        "직접 stretch는 geometry를 왜곡할 수 있고, 비율을 유지해도 crop·pad·resampling의 영향은 남습니다.",
+        "".join(body),
+    )
 
 def _parallel_conv_channels():
     body = [_card(55,200,150,110,"RGB input","C_in=3")]
@@ -802,6 +924,10 @@ def _render(spec):
         return _pixels_human_array()
     if kind == "pixels_channels":
         return _pixels_channels()
+    if kind == "pixels_layout":
+        return _pixels_layout()
+    if kind == "pixel_preprocess":
+        return _pixel_preprocess()
     if kind == "lighting_visual":
         return _lighting_visual()
     if kind == "resize_visual":
