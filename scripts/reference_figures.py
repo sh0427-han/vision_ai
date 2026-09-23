@@ -2585,7 +2585,7 @@ def _generative_discriminative(x, y, w, h):
     )
     parts.append(
         f'<text x="{x+18}" y="{y+h-28}" class="small">'
-        "both can produce class posteriors; assumptions and training differ</text>"
+        "both produce class posteriors with different assumptions</text>"
     )
     return "".join(parts)
 
@@ -2810,7 +2810,7 @@ def _dseparation(x, y, w, h):
             parts.append(_arrow(xs[0]+20, cy, xs[1]-20, cy))
             parts.append(_arrow(xs[2]-20, cy, xs[1]+20, cy))
         parts.append(f'<text x="{px+68}" y="{y+65}" text-anchor="middle" class="small">{label}</text>')
-    parts.append(f'<text x="{x+18}" y="{y+h-28}" class="small">conditioning affects paths differently; colliders reverse the usual blocking intuition</text>')
+    parts.append(f'<text x="{x+18}" y="{y+h-28}" class="small">conditioning changes whether each path is active or blocked</text>')
     return "".join(parts)
 
 
