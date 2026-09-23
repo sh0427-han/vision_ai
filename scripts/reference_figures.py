@@ -2501,11 +2501,11 @@ def _vgg_stack(x, y, w, h):
             parts.append(_arrow(cx + 44, y + 136, nx - 44, y + 136))
     parts.append(
         f'<text x="{x+18}" y="{y+55}" class="small">'
-        "three stride-1 3x3 layers: 7x7 theoretical receptive field</text>"
+        "3 stacked 3x3 layers → theoretical RF 7x7</text>"
     )
     parts.append(
         f'<text x="{x+18}" y="{y+h-35}" class="small">'
-        "more nonlinear stages than one 7x7 convolution</text>"
+        "3 nonlinear stages vs one 7x7 conv</text>"
     )
     return "".join(parts)
 
@@ -2543,7 +2543,7 @@ def _transfer_matrix(x, y, w, h):
     out.append(f'<text x="{x+18}" y="{top+cell_h*1.55}" class="small">large data</text>')
     out.append(
         f'<text x="{x+18}" y="{y+h-22}" class="small">'
-        "heuristic only; validate learning rate and frozen depth</text>"
+        "heuristic: validate frozen depth and learning rate</text>"
     )
     return "".join(out)
 
@@ -2556,11 +2556,11 @@ def _activation_max(x, y, w, h):
         parts.append(_grid(gx, y + 90, 5, 5, 25, "blue", [2+idx, 7+idx, 12+idx, 17+idx]))
     parts.append(
         f'<text x="{x+18}" y="{y+48}" class="small">'
-        "optimize input pixels to increase one selected activation</text>"
+        "optimize input for one target activation</text>"
     )
     parts.append(
         f'<text x="{x+18}" y="{y+h-28}" class="small">'
-        "synthetic diagnostic; not a natural image reconstruction</text>"
+        "synthetic diagnostic, not image reconstruction</text>"
     )
     return "".join(parts)
 
@@ -2783,8 +2783,8 @@ def _ess_panel(x, y, w, h):
         cx = x + 28 + idx * (w - 56) / 13
         parts.append(f'<circle cx="{cx}" cy="{y+225}" r="10" fill="#08796f"/>')
     parts.append(f'<text x="{x+18}" y="{y+50}" class="small">14 correlated draws</text>')
-    parts.append(f'<text x="{x+18}" y="{y+185}" class="small">roughly 5 independent-information equivalents</text>')
-    parts.append(f'<text x="{x+18}" y="{y+h-25}" class="small">ESS depends on autocorrelation, not just sample count</text>')
+    parts.append(f'<text x="{x+18}" y="{y+185}" class="small">≈5 independent-equivalent samples</text>')
+    parts.append(f'<text x="{x+18}" y="{y+h-25}" class="small">ESS reflects autocorrelation</text>')
     return "".join(parts)
 
 
@@ -2797,7 +2797,7 @@ def _hmc_panel(x, y, w, h):
         f'{x+w*.78} {y+h*.42}" stroke="#a24d18" stroke-width="4" fill="none"/>',
         f'<circle cx="{x+w*.20}" cy="{y+h*.72}" r="7" fill="#203455"/>',
         f'<circle cx="{x+w*.78}" cy="{y+h*.42}" r="7" fill="#08796f"/>',
-        f'<text x="{x+18}" y="{y+38}" class="small">illustrative HMC trajectory through a target contour</text>',
+        f'<text x="{x+18}" y="{y+38}" class="small">illustrative HMC trajectory</text>',
     ]
     return "".join(parts)
 
@@ -2867,7 +2867,7 @@ def _dseparation(x, y, w, h):
             parts.append(_arrow(xs[0]+20, cy, xs[1]-20, cy))
             parts.append(_arrow(xs[2]-20, cy, xs[1]+20, cy))
         parts.append(f'<text x="{px+68}" y="{y+65}" text-anchor="middle" class="small">{label}</text>')
-    parts.append(f'<text x="{x+18}" y="{y+h-28}" class="small">conditioning changes whether each path is active or blocked</text>')
+    parts.append(f'<text x="{x+18}" y="{y+h-28}" class="small">conditioning opens or blocks paths</text>')
     return "".join(parts)
 
 
@@ -2886,7 +2886,7 @@ def _message_passing(x, y, w, h):
     for idx in range(3):
         parts.append(_arrow(xs[idx]+32, y+150, xs[idx+1]-32, y+150))
         parts.append(_arrow(xs[idx+1]-32, y+180, xs[idx]+32, y+180))
-    parts.append(f'<text x="{x+18}" y="{y+45}" class="small">messages pass local evidence in both directions</text>')
+    parts.append(f'<text x="{x+18}" y="{y+45}" class="small">local evidence passes both ways</text>')
     return "".join(parts)
 
 
@@ -2925,8 +2925,8 @@ def _boosting(x, y, w, h):
         parts.append(f'<text x="{xx}" y="{y+168}" text-anchor="middle" class="small">{label}</text>')
         if idx < 3:
             parts.append(_arrow(xx+36, y+162, x+50+(idx+1)*(w-100)/3-36, y+162))
-    parts.append(f'<text x="{x+18}" y="{y+50}" class="small">later learners focus more on previous mistakes</text>')
-    parts.append(f'<text x="{x+18}" y="{y+h-28}" class="small">sequential correction differs from parallel averaging</text>')
+    parts.append(f'<text x="{x+18}" y="{y+50}" class="small">later learners emphasize earlier mistakes</text>')
+    parts.append(f'<text x="{x+18}" y="{y+h-28}" class="small">sequential correction ≠ parallel averaging</text>')
     return "".join(parts)
 
 
@@ -2979,7 +2979,7 @@ def _l2_shrink(x, y, w, h):
     scale = 42
     parts = [
         f'<path d="M{x+35} {base} H{x+w-25}" class="thin"/>',
-        f'<text x="{x+28}" y="{y+55}" class="small">same signs, smaller magnitudes after shrink pressure</text>',
+        f'<text x="{x+28}" y="{y+55}" class="small">L2 pressure favors smaller magnitudes</text>',
     ]
     for i, (a, b) in enumerate(zip(before, after)):
         xx = x + 70 + i * (w-130)/4
@@ -2992,7 +2992,7 @@ def _l2_shrink(x, y, w, h):
     parts += [
         f'<text x="{x+35}" y="{y+h-48}" class="small" fill="#a24d18">before update</text>',
         f'<text x="{x+145}" y="{y+h-48}" class="small" fill="#08796f">after L2-influenced update</text>',
-        f'<text x="{x+35}" y="{y+h-22}" class="small">R(W)=||W||² does not force every useful weight to zero</text>',
+        f'<text x="{x+35}" y="{y+h-22}" class="small">L2 shrinks weights; it does not hard-zero them</text>',
     ]
     return "".join(parts)
 
@@ -3283,7 +3283,7 @@ def _polynomial_kernel(x, y, w, h):
         parts.append(f'<circle cx="{xx}" cy="{base}" r="8" fill="{color}"/>')
     parts.append(
         f'<text x="{left_l}" y="{base+55}" class="small">'
-        "outer / inner classes need two cuts on this 1D axis</text>"
+        "inner vs outer classes: not separable by one cut</text>"
     )
 
     # Mapping arrow between the two views.
@@ -3340,11 +3340,11 @@ def _polynomial_kernel(x, y, w, h):
     )
     parts.append(
         f'<text x="{x+25}" y="{y+h-36}" class="small">'
-        "kernel trick: compute feature-space inner products implicitly</text>"
+        "kernel trick: implicit feature-space inner product</text>"
     )
     parts.append(
         f'<text x="{x+25}" y="{y+h-16}" class="small">'
-        "the explicit φ(x) plot here is only for intuition</text>"
+        "explicit φ(x) shown only for intuition</text>"
     )
     return "".join(parts)
 
@@ -3431,7 +3431,7 @@ def _ica_unmixing(x, y, w, h):
         )
     parts.append(
         f'<text x="{x+28}" y="{y+h-30}" class="small">'
-        "linear mixtures → statistically independent components</text>"
+        "unmixing seeks independent components</text>"
     )
     return "".join(parts)
 
@@ -3878,16 +3878,16 @@ FIGURES = {
         dict(title="dropout: train vs eval",kind="dropout_modes"),
         dict(title="underfit / balanced / overfit",kind="fit_regimes"),
     ]),
-    "cs-vgg-transfer.svg": dict(title="VGG-style stacks and transfer strategy",subtitle="Repeated 3x3 convolutions build receptive field; transfer depth depends on data size and domain gap.",panels=[
+    "cs-vgg-transfer.svg": dict(title="VGG-style stacks and transfer strategy",subtitle="Stacked 3x3 convolutions grow receptive field; transfer strategy depends on data and domain gap.",panels=[
         dict(title="repeated 3x3 stack",kind="vgg_stack"),
         dict(title="transfer-learning strategy matrix",kind="transfer_matrix"),
     ]),
-    "cs-interpretability.svg": dict(title="Feature visualization and Grad-CAM-style diagnostics",subtitle="Optimization-based feature visualization and class-localization maps reveal different aspects of model behavior.",panels=[
+    "cs-interpretability.svg": dict(title="Feature visualization and Grad-CAM-style diagnostics",subtitle="Feature visualization and localization maps probe different model behaviors.",panels=[
         dict(title="activation maximization",kind="activation_max"),
         dict(title="Grad-CAM-style localization",kind="gradcam"),
     ]),
 
-    "cs-regularization-objective.svg": dict(title="Regularized learning objective",subtitle="Training often minimizes data fit plus an explicit regularization penalty weighted by λ.",panels=[
+    "cs-regularization-objective.svg": dict(title="Regularized learning objective",subtitle="Objective = data loss + weighted regularization.",panels=[
         dict(title="data loss + λR(W)",kind="regularization_objective"),
         dict(title="L2 pressure shrinks weight magnitude",kind="l2_shrink"),
     ]),
@@ -3922,15 +3922,15 @@ FIGURES = {
         dict(title="validation-selected early stopping",kind="early_stopping"),
         dict(title="complementary regularization mechanisms",kind="nn_regularization_paths"),
     ]),
-    "prml-polynomial-kernel.svg": dict(title="Polynomial kernel intuition",subtitle="Polynomial kernels evaluate similarity in an implicit feature space containing interaction and power terms.",panels=[
-        dict(title="nonlinear input relation → polynomial features",kind="polynomial_kernel"),
+    "prml-polynomial-kernel.svg": dict(title="Polynomial kernel intuition",subtitle="Polynomial kernels compare inputs through nonlinear feature interactions.",panels=[
+        dict(title="1D relation → polynomial feature space",kind="polynomial_kernel"),
     ]),
     "prml-ep-vi.svg": dict(title="Expectation propagation vs variational inference",subtitle="VI optimizes a global approximation; EP iteratively refines local site approximations using moment matching.",panels=[
         dict(title="two approximation strategies",kind="ep_vi_compare"),
     ]),
-    "prml-factor-ica.svg": dict(title="Factor analysis and independent components",subtitle="Factor Analysis uses latent factors with feature-specific noise; ICA seeks statistically independent source components.",panels=[
+    "prml-factor-ica.svg": dict(title="Factor analysis and independent components",subtitle="Factor Analysis models latent factors plus feature noise; ICA seeks independent sources.",panels=[
         dict(title="PCA / PPCA vs Factor Analysis",kind="factor_analysis_compare"),
-        dict(title="ICA: mixtures → independent sources",kind="ica_unmixing"),
+        dict(title="ICA: mixtures → sources",kind="ica_unmixing"),
     ]),
     "prml-tree-ensemble.svg": dict(title="Decision trees and ensembles",subtitle="Tree ensembles combine multiple partitioning models; bagging and boosting obtain diversity in different ways.",panels=[
         dict(title="parallel trees → vote / average",kind="tree_ensemble"),
@@ -3949,7 +3949,7 @@ FIGURES = {
         dict(title="factorized q(z)",kind="meanfield"),
         dict(title="coordinate-ascent updates",kind="cavi"),
     ]),
-    "prml-sampling-diagnostics.svg": dict(title="MCMC diagnostics and effective samples",subtitle="Autocorrelation reduces independent information; ESS and trajectory diagnostics complement raw sample count.",panels=[
+    "prml-sampling-diagnostics.svg": dict(title="MCMC diagnostics and effective samples",subtitle="Autocorrelation lowers effective information; ESS and trajectories diagnose sampling quality.",panels=[
         dict(title="autocorrelation by lag",kind="autocorrelation"),
         dict(title="effective sample size",kind="ess_panel"),
         dict(title="HMC trajectory intuition",kind="hmc_panel"),
@@ -3958,11 +3958,11 @@ FIGURES = {
         dict(title="Kalman predict / update",kind="kalman_cycle"),
         dict(title="particle filtering",kind="particle_filter"),
     ]),
-    "prml-graph-inference.svg": dict(title="Conditional independence and message passing",subtitle="Graph structure controls which paths transmit dependence; local messages summarize evidence between neighboring factors.",panels=[
+    "prml-graph-inference.svg": dict(title="Conditional independence and message passing",subtitle="Graph structure controls dependence; local messages propagate neighboring evidence.",panels=[
         dict(title="chain / fork / collider",kind="dseparation"),
         dict(title="local message passing",kind="message_passing"),
     ]),
-    "prml-ensemble-boosting.svg": dict(title="Bayesian averaging, boosting and ensemble variance",subtitle="Model averaging weights hypotheses, boosting corrects errors sequentially, and diverse predictors can reduce variance.",panels=[
+    "prml-ensemble-boosting.svg": dict(title="Bayesian averaging, boosting and ensemble variance",subtitle="Averaging combines models; boosting corrects errors sequentially; diversity can reduce variance.",panels=[
         dict(title="Bayesian model averaging",kind="bayes_model_average"),
         dict(title="boosting sequence",kind="boosting"),
         dict(title="variance reduction intuition",kind="ensemble_variance"),

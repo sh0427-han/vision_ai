@@ -15,6 +15,8 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] 820px mobile-scroll 기준 text-density 상위 reference figure를 raster 재검수하고 장문 annotation을 짧은 label로 축약
+- [x] 모바일 figure 컨테이너의 touch horizontal scrolling 및 좁은 viewport padding 보강
 - [x] Pages artifact raster contact-sheet 전수 QA: reference 68개 + paper-style 18개 + extra 67개 + core SVG 10개 검수, 문제 항목은 full-size 재검수
 - [x] raster QA에서 발견한 RGB/QKV/multi-head/ensemble/task output/U-Net comparison/grouped split/ROC-PR/ResNet 구조 오류와 Korean font fallback 교정
 - [x] PRML 내용 TODO의 마지막 6개 보강: early stopping, polynomial kernel, EP vs VI, Factor Analysis, ICA, decision-tree ensemble
@@ -55,7 +57,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 ## 현재 확인된 문제
 
 - [x] 데스크톱 raster artifact 기준 SVG 내부 text overflow/겹침 전수 확인 및 발견 항목 교정
-- [ ] figure 내부에 설명문이 너무 많아 축소 시 읽기 어렵다.
+- [ ] figure 내부 설명문 과밀도는 지속 정리 중. text-density 상위 8개 reference figure는 축약 완료.
 - [ ] 여러 figure가 box / pipeline / bar 형태로 비슷하게 보여 시각적 다양성이 부족하다.
 - [ ] 일부 개념은 “그림 수”는 많지만 핵심 intuition을 보여주는 대표 figure가 부족하다.
 - [ ] 일부 figure는 실제 plot/heatmap/feature map보다 개념 요약 카드에 가깝다.
