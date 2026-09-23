@@ -13,6 +13,22 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ---
 
+## 챕터별 정밀 검수 현황
+
+> 앞으로는 한 번에 한 챕터만 검토한다. 본문·수식·figure·caption·desktop/mobile 렌더링을 완료한 뒤 다음 챕터로 넘어간다.
+
+- [x] 01 · 이미지와 텐서 — 파일 decode / RGB pixel / HWC·CHW·NCHW / resize / illumination / scaling·normalization 재구성 및 렌더링 검수
+- [ ] 02 · CNN · ResNet
+- [ ] 03 · Transformer · ViT
+- [ ] 04 · Vision Tasks · U-Net
+- [ ] 05 · 학습과 평가
+- [ ] 06 · Anomaly Detection · PatchCore
+- [ ] 07 · CS231n 전체 정리
+- [ ] 08 · PRML 전체 정리
+
+---
+
+
 ## 현재 완료 상태
 
 - [x] 실제 Chromium 390px/430px에서 9개 페이지 mobile layout 검증: global horizontal overflow 0, 본문 viewport 이탈 0, sidebar open/Esc close 정상
