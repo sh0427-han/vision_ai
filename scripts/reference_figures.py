@@ -17,13 +17,13 @@ def _e(value):
 def _svg(title, subtitle, body, height=620):
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 {height}" role="img" aria-label="{_e(title)}">
 <style>
-.title{{font:700 27px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#18243b}}
-.subtitle{{font:18px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#5b6880}}
-.panel-label{{font:700 18px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#18243b}}
-.label{{font:700 17px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#203455}}
-.body{{font:15px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#526178}}
-.small{{font:13px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#68768c}}
-.white{{font:700 15px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#fff}}
+.title{{font:700 27px 'NanumGothic','Noto Sans CJK KR','Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;fill:#18243b}}
+.subtitle{{font:18px 'NanumGothic','Noto Sans CJK KR','Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;fill:#5b6880}}
+.panel-label{{font:700 18px 'NanumGothic','Noto Sans CJK KR','Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;fill:#18243b}}
+.label{{font:700 17px 'NanumGothic','Noto Sans CJK KR','Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;fill:#203455}}
+.body{{font:15px 'NanumGothic','Noto Sans CJK KR','Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;fill:#526178}}
+.small{{font:13px 'NanumGothic','Noto Sans CJK KR','Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;fill:#68768c}}
+.white{{font:700 15px 'NanumGothic','Noto Sans CJK KR','Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;fill:#fff}}
 .panel{{fill:#fff;stroke:#d2dceb;stroke-width:2}}
 .soft{{fill:#f3f7fe;stroke:#c9d6ea;stroke-width:2}}
 .blue{{fill:#edf3ff;stroke:#8faee8;stroke-width:2}}
@@ -101,6 +101,7 @@ def _scatter(x, y, w, h, boundary="linear", query=False, margin=False):
 
 
 def _pipeline(x, y, w, h, steps):
+    """Compact pipeline with automatic two-line labels for narrow boxes."""
     n = len(steps)
     gap = 18
     bw = (w - 35 - gap*(n-1)) / n
@@ -110,10 +111,35 @@ def _pipeline(x, y, w, h, steps):
         fill = "#2454d8" if i == len(steps)-1 else "#edf3ff"
         stroke = "#2454d8" if i == len(steps)-1 else "#9bb5e5"
         txt = "#fff" if i == len(steps)-1 else "#203455"
-        parts.append(f'<rect x="{bx}" y="{y+h*.42}" width="{bw}" height="64" rx="11" fill="{fill}" stroke="{stroke}" stroke-width="2"/>')
-        parts.append(f'<text x="{bx+bw/2}" y="{y+h*.42+28}" text-anchor="middle" font-size="14" font-weight="700" fill="{txt}">{_e(step)}</text>')
+        cy = y + h*.42 + 32
+        parts.append(
+            f'<rect x="{bx}" y="{y+h*.42}" width="{bw}" height="64" rx="11" '
+            f'fill="{fill}" stroke="{stroke}" stroke-width="2"/>'
+        )
+
+        words = step.split()
+        if len(step) > 14 and len(words) > 1:
+            split_at = min(
+                range(1, len(words)),
+                key=lambda j: abs(len(" ".join(words[:j])) - len(" ".join(words[j:]))),
+            )
+            line1 = " ".join(words[:split_at])
+            line2 = " ".join(words[split_at:])
+            parts.append(
+                f'<text x="{bx+bw/2}" y="{cy-7}" text-anchor="middle" '
+                f'font-size="12.5" font-weight="700" fill="{txt}">{_e(line1)}</text>'
+            )
+            parts.append(
+                f'<text x="{bx+bw/2}" y="{cy+10}" text-anchor="middle" '
+                f'font-size="12.5" font-weight="700" fill="{txt}">{_e(line2)}</text>'
+            )
+        else:
+            parts.append(
+                f'<text x="{bx+bw/2}" y="{cy+5}" text-anchor="middle" '
+                f'font-size="14" font-weight="700" fill="{txt}">{_e(step)}</text>'
+            )
         if i < n-1:
-            parts.append(_arrow(bx+bw, y+h*.42+32, bx+bw+gap-3, y+h*.42+32))
+            parts.append(_arrow(bx+bw, cy, bx+bw+gap-3, cy))
     return "".join(parts)
 
 
