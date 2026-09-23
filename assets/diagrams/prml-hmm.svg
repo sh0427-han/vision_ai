@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500">
-  <style>text{font-family:Arial,'Noto Sans KR',sans-serif}.title{font-size:30px;font-weight:700}.sub{font-size:18px;fill:#5b6880}.label{font-size:20px;font-weight:700}.edge{stroke:#7891b7;stroke-width:4;fill:none}</style>
+  <style>text{font-family:'NanumGothic','Noto Sans CJK KR','Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif}.title{font-size:30px;font-weight:700}.sub{font-size:18px;fill:#5b6880}.label{font-size:20px;font-weight:700}.edge{stroke:#7891b7;stroke-width:4;fill:none}</style>
   <rect width="1200" height="500" rx="28" fill="#f7f9fc"/>
   <text x="52" y="58" class="title">HMM: 보이지 않는 상태가 시간에 따라 전이되고 관측을 생성</text>
   <text x="52" y="92" class="sub">영상 frame을 독립적으로 보지 않고 latent state의 시간적 지속성을 모델링하는 고전적 방법</text>
