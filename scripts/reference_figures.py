@@ -796,6 +796,7 @@ def _modern_visual(x, y, w, h):
     return "".join(parts)
 
 def _bayes_update_density(x, y, w, h):
+    """Schematic prior, likelihood over a parameter, and posterior."""
     left = x + 40
     right = x + w - 20
     bottom = y + h - 42
@@ -811,12 +812,13 @@ def _bayes_update_density(x, y, w, h):
         f'<path d="M{left+10} {bottom} C{x+w*.42} {bottom} {x+w*.49} {top+28} '
         f'{x+w*.55} {top+28} C{x+w*.64} {top+28} {x+w*.70} {bottom} '
         f'{right-10} {bottom}" stroke="#08796f" stroke-width="5" fill="none"/>',
-        f'<text x="{left+4}" y="{top+18}" class="small" fill="#2454d8">prior</text>',
-        f'<text x="{left+72}" y="{top+18}" class="small" fill="#a24d18">likelihood</text>',
-        f'<text x="{left+170}" y="{top+18}" class="small" fill="#08796f">posterior</text>',
+        f'<text x="{left+4}" y="{top+18}" class="small" fill="#2454d8">prior p(θ)</text>',
+        f'<text x="{left+92}" y="{top+18}" class="small" fill="#a24d18">likelihood L(θ)</text>',
+        f'<text x="{left+215}" y="{top+18}" class="small" fill="#08796f">posterior p(θ|D)</text>',
+        f'<text x="{right-22}" y="{bottom+24}" text-anchor="end" class="small">parameter θ →</text>',
+        f'<text x="{left+5}" y="{y+h-15}" class="small">schematic shapes over θ</text>',
     ]
     return "".join(parts)
-
 
 def _bayes_risk(x, y, w, h):
     parts = [
@@ -2416,14 +2418,23 @@ def _panel_content(kind, x, y, w, h, data):
         return "".join(parts)
     if kind=="fcconv":
         parts=[]
+        inputs=[]
+        outputs=[]
         for i in range(4):
             for j in range(4):
-                parts.append(f'<circle cx="{x+50+i*32}" cy="{y+80+j*32}" r="5" fill="#89a9ec"/>')
+                point=(x+50+i*32, y+80+j*32)
+                inputs.append(point)
+                parts.append(f'<circle cx="{point[0]}" cy="{point[1]}" r="5" fill="#89a9ec"/>')
         for j in range(5):
-            parts.append(f'<circle cx="{x+w-55}" cy="{y+70+j*38}" r="8" fill="#2454d8"/>')
-        for i in range(0,4,2):
-            for j in range(0,4,2):
-                parts.append(f'<path d="M{x+50+i*32} {y+80+j*32} L{x+w-63} {y+70+(i+j)%5*38}" class="thin"/>')
+            point=(x+w-55, y+70+j*38)
+            outputs.append(point)
+            parts.append(f'<circle cx="{point[0]}" cy="{point[1]}" r="8" fill="#2454d8"/>')
+        for ix,iy in inputs:
+            for ox,oy in outputs:
+                parts.append(
+                    f'<path d="M{ix+6} {iy} L{ox-9} {oy}" '
+                    'stroke="#c6d0de" stroke-width="0.8" opacity=".55"/>'
+                )
         return "".join(parts)
     if kind=="architecture":
         parts=[]
@@ -2624,13 +2635,13 @@ FIGURES = {
         dict(title="soft responsibilities",kind="gmm_responsibility"),
         dict(title="E-step ↔ M-step cycle",kind="em_cycle"),
     ]),
-    "prml-vi-elbo.svg": dict(title="Variational inference and ELBO",subtitle="A tractable q(z) approximates the true posterior; maximizing ELBO closes the KL gap.",panels=[
-        dict(title="true posterior vs q(z)",kind="posterior_approx"),
+    "prml-vi-elbo.svg": dict(title="Variational inference and ELBO",subtitle="A tractable q(z) approximates the posterior; maximizing ELBO tightens the lower bound and minimizes KL within the chosen variational family.",panels=[
+        dict(title="target posterior vs q(z)",kind="posterior_approx"),
         dict(title="ELBO + KL = log evidence",kind="elbo_decomp"),
     ]),
-    "prml-monte-mcmc.svg": dict(title="Monte Carlo and MCMC",subtitle="Monte Carlo uses samples to estimate expectations; MCMC reaches a target distribution through a dependent chain.",panels=[
+    "prml-monte-mcmc.svg": dict(title="Monte Carlo and MCMC",subtitle="Monte Carlo estimates expectations with samples; MCMC uses a dependent chain designed to have the target as its stationary distribution under appropriate conditions.",panels=[
         dict(title="samples from a target density",kind="mc_samples"),
-        dict(title="burn-in and retained chain",kind="mcmc_path"),
+        dict(title="illustrative burn-in and dependent chain",kind="mcmc_path"),
         dict(title="importance sampling weights",kind="importance_sampling"),
     ]),
     "prml-pca-dim.svg": dict(title="PCA and dimensionality reduction",subtitle="Principal components align the coordinate system with directions of largest data variance.",panels=[
