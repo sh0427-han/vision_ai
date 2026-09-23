@@ -15,6 +15,9 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] 전수 검수 후 ELBO lower-bound, Monte Carlo sample rug, BatchNorm running statistics, SVM margin/support-vector 표현 추가 교정
+- [x] 독립 ResNet/U-Net 문서를 제거하고 CNN·Segmentation 주제 본문으로 실제 내용 병합
+- [x] 사이트 카테고리를 자료 유형이 아닌 학습 주제 중심으로 세분화
 - [x] 44개 reference figure + 18개 paper-style figure + 실제 삽입 extra diagram을 정의·수식·수치 기준으로 전수 semantic audit
 - [x] paper-style CNN convolution output 수치 오류 수정: 3×3 output 각 행 `[3, 3, 0]`
 - [x] ViT patch-grid 축약 도식 / multi-head 의미 / attention heatmap이 합성 예시임을 명시
@@ -47,7 +50,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [ ] 일부 개념은 “그림 수”는 많지만 핵심 intuition을 보여주는 대표 figure가 부족하다.
 - [ ] 일부 figure는 실제 plot/heatmap/feature map보다 개념 요약 카드에 가깝다.
 - [ ] 모바일/좁은 화면에서 text와 panel spacing을 다시 확인해야 한다.
-- [ ] 모든 figure를 브라우저 raster render 기준으로 최종 육안 QA해야 한다. (source/semantic 전수 검수와 SVG 정적 검증은 완료)
+- [ ] 모든 figure를 브라우저 raster render 기준으로 최종 육안 QA해야 한다. (정의·수식·수치·caption의 source-level semantic 전수 검수는 완료)
 
 ### 공통 수정 원칙
 
