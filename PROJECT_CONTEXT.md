@@ -79,7 +79,7 @@ CS231n 공개 강의 노트의 전체 학습 흐름과 Bishop PRML 14개 장 전
 
 ## CS231n / PRML 시각 아틀라스
 
-- `scripts/reference_figures.py`에서 CS231n 21개, PRML 19개, 총 40개의 대형 multi-panel SVG figure를 생성한다.
+- `scripts/reference_figures.py`에서 CS231n 22개, PRML 19개, 총 41개의 대형 multi-panel SVG figure를 생성한다.
 - CS231n은 kNN, split, linear classifier, softmax/hinge, optimization/backprop, activation/init/BN/regularization/dropout, CNN, architecture, transfer learning, detection/segmentation, visualization, modern topics를 시각적으로 커버한다.
 - PRML은 Bayes/확률분포, Gaussian/Beta, regression, bias-variance, logistic/multiclass, neural network, kernel/SVM, graphical model/MRF, GMM/EM, VI/ELBO, Monte Carlo/MCMC, PCA/PPCA, HMM, ensemble/MoE까지 시각적으로 커버한다.
 - 종합 강의 페이지에서는 같은 개념의 기존 simple diagram을 중복 삽입하지 않고 reference figure를 우선한다.
