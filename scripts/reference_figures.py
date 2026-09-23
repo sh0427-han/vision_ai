@@ -3339,8 +3339,12 @@ def _polynomial_kernel(x, y, w, h):
         'class="small" fill="#a24d18">linear separator in feature space</text>'
     )
     parts.append(
-        f'<text x="{x+25}" y="{y+h-18}" class="small">'
-        "kernel trick evaluates inner products in such polynomial features without explicitly building them</text>"
+        f'<text x="{x+25}" y="{y+h-36}" class="small">'
+        "kernel trick: compute feature-space inner products implicitly</text>"
+    )
+    parts.append(
+        f'<text x="{x+25}" y="{y+h-16}" class="small">'
+        "the explicit φ(x) plot here is only for intuition</text>"
     )
     return "".join(parts)
 
