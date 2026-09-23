@@ -562,15 +562,14 @@ SECTION_VISUALS = {
     ("training", "split"): ["train-leakage.svg"],
     ("training", "metrics"): ["train-confusion.svg", "train-prf.svg", "train-threshold.svg", "train-curves.svg"],
 
-    ("cnn", "resnet-problem"): ["resnet-plain-vs.svg"],
-    ("cnn", "resnet-block"): ["resnet-function.svg"],
-    ("cnn", "resnet-projection"): ["resnet-shortcuts.svg"],
-    ("cnn", "resnet-bottleneck"): ["resnet-gradient.svg"],
+    ("cnn", "resnet_problem"): ["resnet-plain-vs.svg"],
+    ("cnn", "residual_block"): ["resnet-function.svg"],
+    ("cnn", "residual_shape"): ["resnet-shortcuts.svg"],
+    ("cnn", "resnet_bottleneck"): ["resnet-gradient.svg"],
 
-    ("tasks", "unet-problem"): ["unet-mask-triplet.svg"],
-    ("tasks", "unet-architecture"): ["unet-pyramid.svg"],
-    ("tasks", "unet-concat"): ["unet-skip-why.svg"],
-    ("tasks", "unet-loss"): ["unet-pixel-class.svg"],
+    ("tasks", "segmentation_context"): ["unet-mask-triplet.svg"],
+    ("tasks", "unet_architecture"): ["unet-pyramid.svg", "unet-skip-why.svg"],
+    ("tasks", "unet_original"): ["unet-pixel-class.svg"],
 
     ("patchcore", "problem"): [],
     ("patchcore", "pipeline"): [],
@@ -868,11 +867,11 @@ def render():
         (ROOT / 'notes' / f'{item["slug"]}.html').write_text('<figure>'.join(pieces), encoding='utf-8')
     legacy_redirects = {
         'resnet.html': (
-            'cnn.html#resnet-problem',
+            'cnn.html#resnet_problem',
             'ResNet 내용은 CNN 주제로 이동했습니다.',
         ),
         'unet.html': (
-            'tasks.html#unet-problem',
+            'tasks.html#unet_architecture',
             'U-Net 내용은 Vision Tasks 주제로 이동했습니다.',
         ),
     }
