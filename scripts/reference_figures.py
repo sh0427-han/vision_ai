@@ -258,6 +258,7 @@ def _distribution(x, y, w, h, mode="gaussian"):
             'stroke="#a24d18" stroke-width="4" fill="none"/>',
             f'<text x="{x+20}" y="{y+42}" class="small" fill="#2454d8">prior</text>',
             f'<text x="{x+82}" y="{y+42}" class="small" fill="#a24d18">posterior after data</text>',
+            f'<text x="{x+20}" y="{y+h-18}" class="small">Beta(a,b) + m successes + ℓ failures → Beta(a+m,b+ℓ)</text>',
         ])
     return "".join(parts)
 
@@ -276,15 +277,43 @@ def _graphical(x, y, w, h, undirected=False):
     return "".join(parts)
 
 
-def _pca(x, y, w, h):
-    parts=[f'<path d="M{x+35} {y+h-35} H{x+w-20} M{x+35} {y+h-35} V{y+35}" class="thin"/>']
-    pts=[(.18,.72),(.27,.65),(.35,.60),(.43,.53),(.50,.47),(.59,.42),(.68,.35),(.77,.28),(.83,.25)]
-    for px,py in pts:
-        parts.append(f'<circle cx="{x+px*w}" cy="{y+py*h}" r="7" fill="#2454d8"/>')
-    parts.append(f'<path d="M{x+45} {y+h-55} L{x+w-35} {y+50}" stroke="#a24d18" stroke-width="4"/>')
-    parts.append(f'<path d="M{x+w*.38} {y+45} L{x+w*.62} {y+h-40}" stroke="#08796f" stroke-width="3"/>')
-    return "".join(parts)
 
+def _pca(x, y, w, h):
+    """Display orthogonal principal axes through the sample mean."""
+    parts = [
+        f'<path d="M{x+35} {y+h-35} H{x+w-20} M{x+35} {y+h-35} V{y+35}" '
+        'class="thin"/>'
+    ]
+    pts = [
+        (.18,.72),(.27,.65),(.35,.60),(.43,.53),(.50,.47),
+        (.59,.42),(.68,.35),(.77,.28),(.83,.25)
+    ]
+    for px, py in pts:
+        parts.append(
+            f'<circle cx="{x+px*w}" cy="{y+py*h}" r="7" fill="#2454d8"/>'
+        )
+
+    cx = x + w * 0.51
+    cy = y + h * 0.49
+    dx = w * 0.40
+    dy = -h * 0.25
+    parts.append(
+        f'<path d="M{cx-dx} {cy-dy} L{cx+dx} {cy+dy}" '
+        'stroke="#a24d18" stroke-width="4"/>'
+    )
+    # Perpendicular direction to (dx, dy), scaled down.
+    scale = 0.42
+    pdx = -dy * scale
+    pdy = dx * scale
+    parts.append(
+        f'<path d="M{cx-pdx} {cy-pdy} L{cx+pdx} {cy+pdy}" '
+        'stroke="#08796f" stroke-width="3"/>'
+    )
+    parts.append(
+        f'<text x="{x+18}" y="{y+35}" class="small">'
+        "PC1 and PC2 are orthogonal eigenvector directions</text>"
+    )
+    return "".join(parts)
 
 def _hmm(x, y, w, h):
     parts=[]
@@ -438,28 +467,61 @@ def _score_softmax_ce(x, y, w, h):
     return "".join(parts)
 
 
-def _loss_compare(x, y, w, h):
-    left = x + 45
-    right = x + w - 25
-    top = y + 45
-    bottom = y + h - 45
-    mid_x = x + w * 0.55
-    parts = [
-        f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>',
-        f'<path d="M{left} {top+20} L{mid_x} {bottom-12} L{right} {bottom-12}" '
-        'stroke="#a24d18" stroke-width="4" fill="none"/>',
-        f'<path d="M{left} {top+10} C{x+w*.35} {y+h*.28} '
-        f'{x+w*.58} {y+h*.70} {right} {bottom-8}" '
-        'stroke="#2454d8" stroke-width="4" fill="none"/>',
-        f'<path d="M{mid_x} {top} V{bottom}" stroke="#9aa9be" stroke-width="2" '
-        'stroke-dasharray="6 6"/>',
-        f'<text x="{left+6}" y="{top+8}" class="small" fill="#2454d8">CE</text>',
-        f'<text x="{left+6}" y="{top+30}" class="small" fill="#a24d18">hinge</text>',
-        f'<text x="{mid_x+6}" y="{bottom-10}" class="small">margin = 1</text>',
-        f'<text x="{right-95}" y="{bottom+26}" class="small">confidence / margin →</text>',
-    ]
-    return "".join(parts)
 
+def _loss_compare(x, y, w, h):
+    """Keep cross-entropy and hinge loss on their own correct x-axes."""
+    parts = []
+    half = w / 2
+
+    # Cross-entropy: -log p_y for p_y in (0, 1].
+    lx = x + 32
+    rx = x + half - 18
+    top = y + 62
+    bottom = y + h - 52
+    parts.append(f'<text x="{x+18}" y="{y+40}" class="label">cross-entropy</text>')
+    parts.append(
+        f'<path d="M{lx} {bottom} H{rx} M{lx} {bottom} V{top}" class="thin"/>'
+    )
+    parts.append(
+        f'<path d="M{lx+5} {top+8} C{x+half*.25} {top+45} '
+        f'{x+half*.55} {bottom-45} {rx-5} {bottom-6}" '
+        'stroke="#2454d8" stroke-width="4" fill="none"/>'
+    )
+    parts.append(
+        f'<text x="{lx+4}" y="{bottom+22}" class="small">pᵧ→0</text>'
+    )
+    parts.append(
+        f'<text x="{rx-38}" y="{bottom+22}" class="small">pᵧ=1</text>'
+    )
+    parts.append(
+        f'<text x="{x+18}" y="{top-10}" class="small">−log pᵧ</text>'
+    )
+
+    # Hinge: max(0, 1-m), m=yf(x).
+    ox = x + half + 25
+    oright = x + w - 20
+    margin_x = ox + (oright - ox) * 0.66
+    parts.append(
+        f'<text x="{x+half+12}" y="{y+40}" class="label">hinge</text>'
+    )
+    parts.append(
+        f'<path d="M{ox} {bottom} H{oright} M{ox} {bottom} V{top}" class="thin"/>'
+    )
+    parts.append(
+        f'<path d="M{ox+3} {top+18} L{margin_x} {bottom} H{oright}" '
+        'stroke="#a24d18" stroke-width="4" fill="none"/>'
+    )
+    parts.append(
+        f'<path d="M{margin_x} {top} V{bottom}" stroke="#9aa9be" '
+        'stroke-width="2" stroke-dasharray="5 5"/>'
+    )
+    parts.append(
+        f'<text x="{margin_x+5}" y="{bottom-10}" class="small">m=1</text>'
+    )
+    parts.append(
+        f'<text x="{oright-90}" y="{bottom+22}" class="small">m=yf(x) →</text>'
+    )
+    return "".join(parts)
 
 def _activation_gradients(x, y, w, h):
     half = w / 2
@@ -642,31 +704,49 @@ def _numeric_conv(x, y, w, h):
     return "".join(parts)
 
 
+
 def _conv_controls(x, y, w, h):
+    """Accurate stride, padding and dilation sketches for a 3×3 kernel."""
     parts = []
     cards = [
-        ("stride 1", "blue", [6, 7, 8, 11, 12, 13]),
-        ("stride 2", "green", [6, 8, 16, 18]),
-        ("padding=same", "gray", [0, 4, 20, 24]),
-        ("dilation 2", "heat", [0, 2, 4, 10, 12, 14, 20, 22, 24]),
+        ("stride 1", "5×5 → 3×3", [0, 1, 5, 6], "#2454d8"),
+        ("stride 2", "5×5 → 2×2", [0, 2, 10, 12], "#08796f"),
+        ("P=1, S=1", "5×5 → 5×5", [0, 1, 5, 6], "#6d7f9b"),
+        ("dilation 2", "effective field 5×5", [0, 2, 4, 10, 12, 14, 20, 22, 24], "#a24d18"),
     ]
     positions = [
-        (x + 18, y + 58),
-        (x + w/2 + 3, y + 58),
-        (x + 18, y + 210),
-        (x + w/2 + 3, y + 210),
+        (x + 14, y + 55),
+        (x + w/2 + 4, y + 55),
+        (x + 14, y + 215),
+        (x + w/2 + 4, y + 215),
     ]
-    card_w = w / 2 - 24
-    for (title, mode, hot), (px, py) in zip(cards, positions):
+    card_w = w / 2 - 20
+    for (title, note, hot, color), (px, py) in zip(cards, positions):
         parts.append(
-            f'<rect x="{px}" y="{py}" width="{card_w}" height="125" rx="11" '
+            f'<rect x="{px}" y="{py}" width="{card_w}" height="135" rx="10" '
             'fill="#fbfcfe" stroke="#d6deea"/>'
         )
         parts.append(f'<text x="{px+10}" y="{py+22}" class="small">{title}</text>')
-        parts.append(_grid(px + 56, py + 32, 5, 5, 16, mode, hot))
+        parts.append(
+            f'<text x="{px+10}" y="{py+43}" class="small">{_e(note)}</text>'
+        )
+        # Padding card gets an explicit outer padded border.
+        if title == "P=1, S=1":
+            parts.append(
+                f'<rect x="{px+49}" y="{py+52}" width="90" height="90" '
+                'fill="#f4f5f7" stroke="#a8b5c8" stroke-dasharray="4 3"/>'
+            )
+            parts.append(_grid(px + 59, py + 62, 5, 5, 14, "gray", hot))
+        else:
+            parts.append(_grid(px + 55, py + 58, 5, 5, 14, "gray", hot))
+        if title == "dilation 2":
+            for idx in hot:
+                rr, cc = divmod(idx, 5)
+                parts.append(
+                    f'<circle cx="{px+55+cc*14+5}" cy="{py+58+rr*14+5}" '
+                    f'r="3.5" fill="{color}"/>'
+                )
     return "".join(parts)
-
-
 
 def _modern_visual(x, y, w, h):
     """Compact, concept-correct views of CLIP, DINO and diffusion."""
@@ -987,7 +1067,7 @@ def _linear_score_matrix(x, y, w, h):
     parts.append(_value_grid(x + 338, y + 62, [[v] for v in scores], 40, "#edf3ff"))
     parts.append(
         f'<text x="{x+18}" y="{y+h-22}" class="small">'
-        "each row of W is one class template</text>"
+        "each row of W defines one class score direction</text>"
     )
     return "".join(parts)
 
@@ -1720,7 +1800,7 @@ def _nms_visual(x, y, w, h):
     stages = [
         ("1 rank scores", "0.92 / 0.81 / 0.55"),
         ("2 keep best", "keep 0.92"),
-        ("3 suppress overlap", "remove 0.81 if IoU > threshold"),
+        ("3 suppress overlap", "same class: suppress 0.81 if IoU > threshold"),
     ]
     for idx, (label, note) in enumerate(stages):
         yy = y + 58 + idx * 105
@@ -1983,31 +2063,44 @@ def _multihead_attention(x, y, w, h):
     return "".join(parts)
 
 
+
 def _bernoulli_binomial(x, y, w, h):
+    """Bernoulli trials and an exact Binomial(N=8,p=0.5) shape."""
     parts = []
     trials = [1, 0, 1, 1, 0, 1, 0, 1]
     for idx, val in enumerate(trials):
         cx = x + 38 + idx * 44
         color = "#2454d8" if val else "#e0ae82"
-        parts.append(f'<circle cx="{cx}" cy="{y+120}" r="14" fill="{color}"/>')
-        parts.append(f'<text x="{cx}" y="{y+126}" text-anchor="middle" class="white">{val}</text>')
-    parts.append(
-        f'<text x="{x+18}" y="{y+45}" class="small">'
-        "Bernoulli: one binary trial, x∈{0,1}</text>"
-    )
-    parts.append(
-        f'<text x="{x+18}" y="{y+190}" class="small">'
-        "Binomial: count m successes in N independent Bernoulli trials</text>"
-    )
-    for m, height in enumerate([8, 24, 55, 92, 120, 105, 62, 26, 8]):
-        xx = x + 36 + m * 42
+        parts.append(f'<circle cx="{cx}" cy="{y+105}" r="14" fill="{color}"/>')
         parts.append(
-            f'<rect x="{xx}" y="{y+h-55-height}" width="24" height="{height}" '
+            f'<text x="{cx}" y="{y+111}" text-anchor="middle" class="white">'
+            f'{val}</text>'
+        )
+    parts.append(
+        f'<text x="{x+18}" y="{y+38}" class="small">'
+        "one Bernoulli sequence (example)</text>"
+    )
+    parts.append(
+        f'<text x="{x+18}" y="{y+168}" class="small">'
+        "Binomial PMF example: N=8, p=0.5</text>"
+    )
+    coefficients = [1, 8, 28, 56, 70, 56, 28, 8, 1]
+    max_c = max(coefficients)
+    for m, coeff in enumerate(coefficients):
+        height = 112 * coeff / max_c
+        xx = x + 30 + m * 43
+        parts.append(
+            f'<rect x="{xx}" y="{y+h-52-height}" width="24" height="{height}" '
             'rx="3" fill="#91abe2"/>'
         )
+        parts.append(
+            f'<text x="{xx+12}" y="{y+h-30}" text-anchor="middle" class="small">'
+            f'{m}</text>'
+        )
+    parts.append(
+        f'<text x="{x+w-95}" y="{y+h-10}" class="small">success count m</text>'
+    )
     return "".join(parts)
-
-
 
 def _ml_map(x, y, w, h):
     """Illustrate ML as likelihood mode and MAP as posterior mode."""
@@ -2085,7 +2178,89 @@ def _ppca_subspace(x, y, w, h):
     )
     return "".join(parts)
 
+
+def _linear_regression_scatter(x, y, w, h):
+    """Observed targets with a fitted straight regression line and residuals."""
+    left = x + 38
+    right = x + w - 22
+    top = y + 48
+    bottom = y + h - 42
+    parts = [
+        f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>',
+        f'<path d="M{left+8} {bottom-30} L{right-8} {top+35}" '
+        'stroke="#2454d8" stroke-width="4"/>',
+    ]
+    points = [
+        (.16,.76,.71),(.28,.66,.62),(.40,.61,.53),
+        (.53,.47,.43),(.66,.38,.34),(.80,.22,.23)
+    ]
+    for px, py, fit_py in points:
+        sx = x + px*w
+        sy = y + py*h
+        fy = y + fit_py*h
+        parts.append(
+            f'<path d="M{sx} {sy} V{fy}" stroke="#a8b5c8" '
+            'stroke-width="2" stroke-dasharray="4 4"/>'
+        )
+        parts.append(f'<circle cx="{sx}" cy="{sy}" r="6" fill="#203455"/>')
+    parts.append(
+        f'<text x="{x+18}" y="{y+35}" class="small">'
+        "linear mean function; vertical gaps are residuals</text>"
+    )
+    return "".join(parts)
+
+
+def _svm_margin(x, y, w, h):
+    """Maximum-margin separator with support vectors highlighted."""
+    parts = [_scatter(x, y, w, h, "linear", False, True)]
+    support = [
+        (x+w*.42, y+h*.55),
+        (x+w*.62, y+h*.58),
+    ]
+    for cx, cy in support:
+        parts.append(
+            f'<circle cx="{cx}" cy="{cy}" r="15" fill="none" '
+            'stroke="#a24d18" stroke-width="3"/>'
+        )
+    parts.append(
+        f'<text x="{x+18}" y="{y+35}" class="small">'
+        "circled points lie closest to the separating boundary</text>"
+    )
+    return "".join(parts)
+
+
+def _em_cycle(x, y, w, h):
+    """EM alternates E-step responsibilities and M-step parameter updates."""
+    cx = x + w / 2
+    top_y = y + 82
+    left_x = x + 90
+    right_x = x + w - 90
+    bottom_y = y + h - 78
+    parts = [
+        f'<rect x="{cx-48}" y="{top_y-22}" width="96" height="44" rx="8" '
+        'fill="#edf3ff" stroke="#8faee8"/>',
+        f'<text x="{cx}" y="{top_y+5}" text-anchor="middle" class="small">parameters θ</text>',
+        f'<rect x="{right_x-50}" y="{bottom_y-22}" width="100" height="44" rx="8" '
+        'fill="#fff1e7" stroke="#e0ae82"/>',
+        f'<text x="{right_x}" y="{bottom_y+5}" text-anchor="middle" class="small">E: γₙₖ</text>',
+        f'<rect x="{left_x-50}" y="{bottom_y-22}" width="100" height="44" rx="8" '
+        'fill="#e9f7f2" stroke="#8ccdbb"/>',
+        f'<text x="{left_x}" y="{bottom_y+5}" text-anchor="middle" class="small">M: update θ</text>',
+        _arrow(cx+30, top_y+24, right_x-18, bottom_y-24),
+        _arrow(right_x-52, bottom_y, left_x+52, bottom_y),
+        _arrow(left_x+5, bottom_y-24, cx-28, top_y+24),
+        f'<text x="{x+18}" y="{y+h-28}" class="small">'
+        "repeat until the objective stops improving appreciably</text>",
+    ]
+    return "".join(parts)
+
 def _panel_content(kind, x, y, w, h, data):
+    if kind=="linear_regression_scatter":
+        return _linear_regression_scatter(x,y,w,h)
+    if kind=="svm_margin":
+        return _svm_margin(x,y,w,h)
+    if kind=="em_cycle":
+        return _em_cycle(x,y,w,h)
     if kind=="split_roles":
         return _split_roles(x,y,w,h)
     if kind=="score_axis":
@@ -2359,7 +2534,7 @@ FIGURES = {
         dict(title="3×3 stack: receptive field 3→5→7",kind="receptive_field_growth"),
     ]),
     # architectures / transfer / tasks
-    "cs-architectures-residual.svg": dict(title="Architecture evolution and residual learning",subtitle="The major shift is not just depth, but how information and gradients flow.",panels=[
+    "cs-architectures-residual.svg": dict(title="Architecture motifs and residual learning",subtitle="High-level motifs only: these blocks summarize design ideas, not exact layer-by-layer architectures.",panels=[
         dict(title="architecture motifs",kind="architecture_compare"),
         dict(title="residual block and gradient shortcut",kind="residual_flow"),
     ]),
@@ -2408,7 +2583,7 @@ FIGURES = {
         dict(title="ML vs MAP estimate",kind="ml_map"),
     ]),
     "prml-regression-basis.svg": dict(title="Linear regression and basis expansion",subtitle="The model can stay linear in its weights while nonlinear basis functions reshape the input.",panels=[
-        dict(title="raw regression fit",kind="curve",curve="regression"),
+        dict(title="linear regression fit + residuals",kind="linear_regression_scatter"),
         dict(title="nonlinear basis functions",kind="basis_functions"),
         dict(title="posterior predictive uncertainty",kind="regression_uncertainty"),
     ]),
@@ -2430,14 +2605,14 @@ FIGURES = {
     ]),
     "prml-forward-backprop.svg": dict(title="Forward and backward computation",subtitle="Values move forward; derivatives move backward through the same graph.",panels=[
         dict(title="forward",kind="pipeline",steps=["input","hidden","output","loss"]),
-        dict(title="backward",kind="pipeline",steps=["dL/dy","dL/dh","dL/dW","update"]),
+        dict(title="backward derivatives",kind="pipeline",steps=["dL/dy","dL/dh","dL/dW"]),
     ]),
     "prml-kernel-feature.svg": dict(title="Feature space and the kernel trick",subtitle="A nonlinear problem in input space can correspond to a linear separator in a richer feature space.",panels=[
         dict(title="input space",kind="scatter_curve"),
         dict(title="feature space",kind="scatter_linear"),
     ]),
     "prml-svm.svg": dict(title="SVM margin and support vectors",subtitle="Only samples on or inside the margin determine the optimal separating hyperplane.",panels=[
-        dict(title="maximum margin",kind="scatter_linear",margin=True),
+        dict(title="margin and support vectors",kind="svm_margin"),
         dict(title="hinge loss vs functional margin",kind="svm_hinge"),
     ]),
     "prml-graph-mrf.svg": dict(title="Graphical model families",subtitle="Directed graphs, undirected graphs and factor graphs encode dependencies with different primitives.",panels=[
@@ -2448,7 +2623,7 @@ FIGURES = {
     "prml-gmm-em.svg": dict(title="Gaussian mixtures and EM",subtitle="A GMM represents density as a weighted sum of Gaussian components; EM alternates soft assignments and parameter updates.",panels=[
         dict(title="mixture components and density",kind="distribution",mode="mixture"),
         dict(title="soft responsibilities",kind="gmm_responsibility"),
-        dict(title="EM alternation",kind="pipeline",steps=["initialize","E-step γ","M-step θ","repeat"]),
+        dict(title="E-step ↔ M-step cycle",kind="em_cycle"),
     ]),
     "prml-vi-elbo.svg": dict(title="Variational inference and ELBO",subtitle="A tractable q(z) approximates the true posterior; maximizing ELBO closes the KL gap.",panels=[
         dict(title="true posterior vs q(z)",kind="posterior_approx"),
