@@ -67,6 +67,7 @@ CS231n 공개 강의 노트의 전체 학습 흐름과 Bishop PRML 14개 장 전
 - `scripts/extra_diagrams.py`가 추가 학습용 SVG를 생성하며, `SECTION_VISUALS`에서 페이지/섹션별 삽입 위치를 관리한다.
 - 한 섹션에 여러 그림이 필요한 경우 데스크톱 2열, 모바일 1열로 배치한다.
 - 그림 하나는 메시지 하나를 원칙으로 하며, 장식보다 개념 이해를 우선한다.
+- RGB channel decomposition, multi-channel convolution, Q/K/V, multi-head attention, ensemble/MoE, residual/skip branch, 서로 다른 vision task output처럼 본질적으로 병렬·분기·합산되는 구조는 generic serial flow로 그리지 않는다.
 - PRML·CS231n처럼 추상도가 높은 내용은 각 주요 개념마다 최소 하나의 시각자료를 우선한다.
 
 
