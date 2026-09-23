@@ -2950,7 +2950,306 @@ def _ensemble_variance(x, y, w, h):
         parts.append(f'<text x="{left}" y="{y+30 if label=="single" else y+52}" class="small" fill="{color}">{label}</text>')
     return "".join(parts)
 
+
+def _regularization_objective(x, y, w, h):
+    """Separate empirical data loss from an explicit regularization penalty."""
+    parts = [
+        f'<rect x="{x+24}" y="{y+82}" width="{w*.28}" height="92" rx="12" fill="#edf3ff" stroke="#8faee8"/>',
+        f'<text x="{x+24+w*.14}" y="{y+116}" text-anchor="middle" class="label">data loss</text>',
+        f'<text x="{x+24+w*.14}" y="{y+145}" text-anchor="middle" class="small">fit predictions to labels</text>',
+        f'<text x="{x+w*.36}" y="{y+135}" text-anchor="middle" class="label">+</text>',
+        f'<rect x="{x+w*.42}" y="{y+82}" width="{w*.28}" height="92" rx="12" fill="#e9f7f2" stroke="#8ccdbb"/>',
+        f'<text x="{x+w*.56}" y="{y+116}" text-anchor="middle" class="label">λ R(W)</text>',
+        f'<text x="{x+w*.56}" y="{y+145}" text-anchor="middle" class="small">penalize complexity</text>',
+        f'<text x="{x+w*.75}" y="{y+135}" text-anchor="middle" class="label">=</text>',
+        f'<rect x="{x+w*.80}" y="{y+82}" width="{w*.17}" height="92" rx="12" fill="#2454d8"/>',
+        f'<text x="{x+w*.885}" y="{y+117}" text-anchor="middle" class="white">total</text>',
+        f'<text x="{x+w*.885}" y="{y+145}" text-anchor="middle" class="white">objective</text>',
+        f'<text x="{x+24}" y="{y+230}" class="small">λ = 0: fit data only</text>',
+        f'<text x="{x+24}" y="{y+258}" class="small">larger λ: stronger regularization pressure</text>',
+    ]
+    return "".join(parts)
+
+
+def _l2_shrink(x, y, w, h):
+    """Illustrate L2 penalty preferring smaller weight magnitude."""
+    before = [1.8, -1.4, 0.9, -0.6, 1.1]
+    after = [1.15, -0.92, 0.58, -0.38, 0.72]
+    base = y + h * .53
+    scale = 42
+    parts = [
+        f'<path d="M{x+35} {base} H{x+w-25}" class="thin"/>',
+        f'<text x="{x+28}" y="{y+55}" class="small">same signs, smaller magnitudes after shrink pressure</text>',
+    ]
+    for i, (a, b) in enumerate(zip(before, after)):
+        xx = x + 70 + i * (w-130)/4
+        ya = base - a * scale
+        yb = base - b * scale
+        parts.append(f'<path d="M{xx} {base} V{ya}" stroke="#a24d18" stroke-width="5"/>')
+        parts.append(f'<circle cx="{xx}" cy="{ya}" r="7" fill="#a24d18"/>')
+        parts.append(f'<path d="M{xx+16} {base} V{yb}" stroke="#08796f" stroke-width="5"/>')
+        parts.append(f'<circle cx="{xx+16}" cy="{yb}" r="7" fill="#08796f"/>')
+    parts += [
+        f'<text x="{x+35}" y="{y+h-48}" class="small" fill="#a24d18">before update</text>',
+        f'<text x="{x+145}" y="{y+h-48}" class="small" fill="#08796f">after L2-influenced update</text>',
+        f'<text x="{x+35}" y="{y+h-22}" class="small">R(W)=||W||² does not force every useful weight to zero</text>',
+    ]
+    return "".join(parts)
+
+
+def _conv_sliding(x, y, w, h):
+    """Three snapshots of a 3x3 kernel sliding across a 5x5 input."""
+    parts = []
+    cell = 23
+    starts = [(0, 0), (0, 1), (1, 2)]
+    panel_w = w / 3
+    for k, (rr, cc) in enumerate(starts):
+        ox = x + k * panel_w + 18
+        oy = y + 82
+        parts.append(_grid(ox, oy, 5, 5, cell, "gray", None))
+        parts.append(
+            f'<rect x="{ox+cc*cell}" y="{oy+rr*cell}" width="{3*cell}" height="{3*cell}" '
+            'fill="#2454d8" fill-opacity=".10" stroke="#2454d8" stroke-width="3"/>'
+        )
+        parts.append(
+            f'<text x="{ox+55}" y="{y+55}" text-anchor="middle" class="small">step {k+1}</text>'
+        )
+        parts.append(
+            f'<text x="{ox+55}" y="{oy+145}" text-anchor="middle" class="small">'
+            f'window ({rr},{cc})</text>'
+        )
+    parts.append(
+        f'<text x="{x+20}" y="{y+h-35}" class="small">'
+        "one shared kernel → one output value per valid window position</text>"
+    )
+    return "".join(parts)
+
+
+def _synthetic_feature_response(x, y, w, h):
+    """Synthetic edge-like input and two illustrative filter-response maps."""
+    parts = [
+        f'<text x="{x+25}" y="{y+50}" class="small">synthetic input</text>',
+        f'<text x="{x+w*.39}" y="{y+50}" class="small">vertical-edge response</text>',
+        f'<text x="{x+w*.72}" y="{y+50}" class="small">horizontal-edge response</text>',
+    ]
+    input_hot = [2,3,4,7,8,9,12,13,14,17,18,19,22,23,24]
+    vert_hot = [2,7,12,17,22]
+    horiz_hot = [10,11,12,13,14]
+    parts.append(_grid(x+25, y+75, 5, 5, 30, "gray", input_hot))
+    parts.append(_arrow(x+w*.30, y+150, x+w*.36, y+150))
+    parts.append(_grid(x+w*.40, y+75, 5, 5, 30, "blue", vert_hot))
+    parts.append(_arrow(x+w*.63, y+150, x+w*.69, y+150))
+    parts.append(_grid(x+w*.72, y+75, 5, 5, 30, "green", horiz_hot))
+    parts.append(
+        f'<text x="{x+25}" y="{y+h-35}" class="small">'
+        "synthetic example, not measured activations</text>"
+    )
+    return "".join(parts)
+
+
+def _posterior_predictive_bridge(x, y, w, h):
+    """Distinguish uncertainty over parameters from uncertainty over a new observation."""
+    parts = [
+        f'<rect x="{x+24}" y="{y+78}" width="{w*.35}" height="110" rx="12" fill="#edf3ff" stroke="#8faee8"/>',
+        f'<text x="{x+24+w*.175}" y="{y+112}" text-anchor="middle" class="label">posterior p(w|D)</text>',
+        f'<text x="{x+24+w*.175}" y="{y+142}" text-anchor="middle" class="small">distribution over parameters</text>',
+        f'<text x="{x+24+w*.175}" y="{y+168}" text-anchor="middle" class="small">after observing D</text>',
+    ]
+    parts.append(_arrow(x+w*.42, y+133, x+w*.54, y+133))
+    parts += [
+        f'<rect x="{x+w*.57}" y="{y+78}" width="{w*.39}" height="110" rx="12" fill="#e9f7f2" stroke="#8ccdbb"/>',
+        f'<text x="{x+w*.765}" y="{y+112}" text-anchor="middle" class="label">p(t* | x*, D)</text>',
+        f'<text x="{x+w*.765}" y="{y+142}" text-anchor="middle" class="small">average predictions over w</text>',
+        f'<text x="{x+w*.765}" y="{y+168}" text-anchor="middle" class="small">distribution over a future target</text>',
+        f'<text x="{x+24}" y="{y+242}" class="small">p(t*|x*,D) = ∫ p(t*|x*,w) p(w|D) dw</text>',
+    ]
+    return "".join(parts)
+
+
+def _predictive_band(x, y, w, h):
+    """Illustrative posterior-predictive mean and uncertainty band."""
+    left, right = x+38, x+w-24
+    top, bottom = y+45, y+h-48
+    parts = [
+        f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>',
+        f'<path d="M{left+15} {bottom-35} C{x+w*.33} {y+h*.55} {x+w*.55} {y+h*.35} {right-15} {top+65} '
+        f'L{right-15} {top+115} C{x+w*.55} {y+h*.48} {x+w*.33} {y+h*.70} {left+15} {bottom-5} Z" '
+        'fill="#89a9ec" opacity=".28"/>',
+        f'<path d="M{left+15} {bottom-20} C{x+w*.33} {y+h*.61} {x+w*.55} {y+h*.41} {right-15} {top+90}" '
+        'stroke="#2454d8" stroke-width="4" fill="none"/>',
+        f'<text x="{left+8}" y="{top+18}" class="small">predictive uncertainty</text>',
+        f'<text x="{right-135}" y="{top+78}" class="small" fill="#2454d8">predictive mean</text>',
+    ]
+    return "".join(parts)
+
+
+def _dirichlet_multinomial(x, y, w, h):
+    """Categorical counts updating a Dirichlet concentration vector."""
+    labels = ["A", "B", "C"]
+    prior = [2, 2, 2]
+    counts = [7, 2, 1]
+    post = [9, 4, 3]
+    parts = []
+    cols = [x+70, x+w*.47, x+w*.78]
+    titles = ["prior α", "counts n", "posterior α+n"]
+    vals = [prior, counts, post]
+    colors = ["#89a9ec", "#e0ae82", "#08796f"]
+    for cx, title, arr, color in zip(cols, titles, vals, colors):
+        parts.append(f'<text x="{cx}" y="{y+50}" text-anchor="middle" class="label">{title}</text>')
+        base = y+h-65
+        for i, (lab, val) in enumerate(zip(labels, arr)):
+            xx = cx-55+i*42
+            bh = val*14
+            parts.append(f'<rect x="{xx}" y="{base-bh}" width="26" height="{bh}" rx="4" fill="{color}" opacity=".82"/>')
+            parts.append(f'<text x="{xx+13}" y="{base+20}" text-anchor="middle" class="small">{lab}</text>')
+            parts.append(f'<text x="{xx+13}" y="{base-bh-7}" text-anchor="middle" class="small">{val}</text>')
+    parts.append(_arrow(x+w*.28, y+h*.47, x+w*.38, y+h*.47))
+    parts.append(_arrow(x+w*.60, y+h*.47, x+w*.68, y+h*.47))
+    return "".join(parts)
+
+
+def _svm_c_effect(x, y, w, h):
+    """Compare schematic soft margins for smaller and larger C."""
+    parts = []
+    for idx, (label, margin, violations) in enumerate([
+        ("smaller C", .16, True),
+        ("larger C", .08, False),
+    ]):
+        ox = x + idx*w/2
+        cx = ox + w/4
+        parts.append(f'<text x="{cx}" y="{y+48}" text-anchor="middle" class="label">{label}</text>')
+        parts.append(f'<path d="M{cx} {y+75} V{y+h-60}" stroke="#a24d18" stroke-width="3"/>')
+        parts.append(f'<path d="M{cx-w*margin} {y+75} V{y+h-60} M{cx+w*margin} {y+75} V{y+h-60}" '
+                     'stroke="#89a9ec" stroke-width="2" stroke-dasharray="7 5"/>')
+        for px, py in [(-.28,.30),(-.21,.55),(-.12,.72),(.17,.28),(.25,.52),(.30,.70)]:
+            color = "#2454d8" if px < 0 else "#08796f"
+            xx = cx + px*(w/2)
+            yy = y+80+py*(h-165)
+            parts.append(f'<circle cx="{xx}" cy="{yy}" r="7" fill="{color}"/>')
+        if violations:
+            parts.append(f'<circle cx="{cx+8}" cy="{y+h*.58}" r="8" fill="#2454d8"/>')
+            parts.append(f'<text x="{cx+18}" y="{y+h*.58+5}" class="small">allowed violation</text>')
+    parts.append(f'<text x="{x+22}" y="{y+h-25}" class="small">C controls margin-violation penalty</text>')
+    return "".join(parts)
+
+
+def _rvm_sparsity(x, y, w, h):
+    """Contrast many SVM support vectors with sparse RVM relevance vectors."""
+    parts = []
+    for idx, (title, kept) in enumerate([("SVM support vectors", [1,2,4,5,7]), ("RVM relevance vectors", [2,6])]):
+        ox=x+idx*w/2
+        parts.append(f'<text x="{ox+w/4}" y="{y+48}" text-anchor="middle" class="label">{title}</text>')
+        for i in range(9):
+            xx=ox+38+i*(w/2-76)/8
+            yy=y+145+35*((i%3)-1)
+            active=i in kept
+            parts.append(
+                f'<circle cx="{xx}" cy="{yy}" r="{11 if active else 6}" '
+                f'fill="{"#2454d8" if active else "#d5deeb"}" '
+                f'stroke="{"#a24d18" if active else "#bcc9da"}" stroke-width="{2 if active else 1}"/>'
+            )
+        parts.append(f'<text x="{ox+w/4}" y="{y+h-45}" text-anchor="middle" class="small">{len(kept)} highlighted basis points</text>')
+    return "".join(parts)
+
+
+def _em_evolution(x, y, w, h):
+    """Three schematic EM iterations showing component-center movement."""
+    stages = [
+        ((.28,.66),(.68,.35)),
+        ((.34,.59),(.64,.40)),
+        ((.39,.54),(.60,.44)),
+    ]
+    pw=w/3
+    points=[(.20,.68),(.27,.60),(.35,.58),(.42,.50),(.57,.46),(.64,.39),(.72,.35),(.78,.42)]
+    parts=[]
+    for s,(a,b) in enumerate(stages):
+        ox=x+s*pw
+        parts.append(f'<text x="{ox+pw/2}" y="{y+45}" text-anchor="middle" class="small">iteration {s}</text>')
+        for px,py in points:
+            parts.append(f'<circle cx="{ox+px*pw}" cy="{y+65+py*(h-145)}" r="5" fill="#6d7f9b"/>')
+        for (cx,cy,color) in [(a[0],a[1],"#2454d8"),(b[0],b[1],"#08796f")]:
+            xx=ox+cx*pw; yy=y+65+cy*(h-145)
+            parts.append(f'<ellipse cx="{xx}" cy="{yy}" rx="{pw*.16}" ry="{(h-145)*.18}" fill="none" stroke="{color}" stroke-width="3"/>')
+            parts.append(f'<circle cx="{xx}" cy="{yy}" r="7" fill="{color}"/>')
+    parts.append(f'<text x="{x+22}" y="{y+h-28}" class="small">schematic EM: responsibilities ↔ parameters</text>')
+    return "".join(parts)
+
+
+def _rejection_sampling(x, y, w, h):
+    """Target/proposal envelope with accepted and rejected proposal samples."""
+    left=x+38; right=x+w-24; bottom=y+h-52; top=y+45
+    parts=[
+        f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>',
+        f'<path d="M{left+8} {bottom-8} C{x+w*.28} {bottom-15} {x+w*.40} {top+65} {x+w*.52} {top+70} '
+        f'C{x+w*.68} {top+78} {x+w*.76} {bottom-10} {right-8} {bottom-8}" '
+        'stroke="#2454d8" stroke-width="4" fill="none"/>',
+        f'<path d="M{left+8} {bottom-30} C{x+w*.28} {bottom-45} {x+w*.40} {top+20} {x+w*.52} {top+28} '
+        f'C{x+w*.68} {top+38} {x+w*.76} {bottom-35} {right-8} {bottom-30}" '
+        'stroke="#a24d18" stroke-width="3" fill="none" stroke-dasharray="8 5"/>',
+        f'<text x="{left+10}" y="{top+18}" class="small" fill="#a24d18">M q(x) envelope</text>',
+        f'<text x="{right-90}" y="{top+90}" class="small" fill="#2454d8">p(x)</text>',
+    ]
+    samples=[(.18,.72,True),(.30,.38,False),(.43,.56,True),(.55,.30,False),(.66,.51,True),(.78,.64,True)]
+    for sx,sy,accept in samples:
+        xx=x+sx*w; yy=y+sy*(h-80)
+        color="#08796f" if accept else "#a24d18"
+        parts.append(f'<circle cx="{xx}" cy="{yy}" r="7" fill="{color}"/>')
+        parts.append(f'<path d="M{xx} {yy+8} V{bottom}" stroke="{color}" stroke-width="1.5" opacity=".55"/>')
+    parts.append(f'<text x="{left+8}" y="{bottom+32}" class="small"><tspan fill="#08796f">● accept</tspan>   <tspan fill="#a24d18">● reject</tspan></text>')
+    return "".join(parts)
+
+
+def _pca_spectrum(x, y, w, h):
+    """Scree bars and cumulative explained-variance curve."""
+    vals=[0.46,0.25,0.14,0.08,0.04,0.03]
+    cum=[]; s=0
+    for v in vals:
+        s+=v; cum.append(s)
+    left=x+42; right=x+w-24; bottom=y+h-58; top=y+50
+    step=(right-left)/len(vals)
+    parts=[f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>']
+    pts=[]
+    for i,v in enumerate(vals):
+        xx=left+i*step+step*.18
+        bh=v*(h-140)
+        parts.append(f'<rect x="{xx}" y="{bottom-bh}" width="{step*.48}" height="{bh}" rx="4" fill="#89a9ec"/>')
+        parts.append(f'<text x="{xx+step*.24}" y="{bottom+20}" text-anchor="middle" class="small">PC{i+1}</text>')
+        cy=bottom-cum[i]*(h-145)
+        pts.append(f'{xx+step*.24},{cy}')
+    parts.append(f'<polyline points="{" ".join(pts)}" fill="none" stroke="#a24d18" stroke-width="4"/>')
+    for pt in pts:
+        px,py=pt.split(","); parts.append(f'<circle cx="{px}" cy="{py}" r="5" fill="#a24d18"/>')
+    parts.append(f'<text x="{right-175}" y="{top+18}" class="small" fill="#a24d18">cumulative variance</text>')
+    return "".join(parts)
+
+
+
 def _panel_content(kind, x, y, w, h, data):
+    if kind=="regularization_objective":
+        return _regularization_objective(x,y,w,h)
+    if kind=="l2_shrink":
+        return _l2_shrink(x,y,w,h)
+    if kind=="conv_sliding":
+        return _conv_sliding(x,y,w,h)
+    if kind=="synthetic_feature_response":
+        return _synthetic_feature_response(x,y,w,h)
+    if kind=="posterior_predictive_bridge":
+        return _posterior_predictive_bridge(x,y,w,h)
+    if kind=="predictive_band":
+        return _predictive_band(x,y,w,h)
+    if kind=="dirichlet_multinomial":
+        return _dirichlet_multinomial(x,y,w,h)
+    if kind=="svm_c_effect":
+        return _svm_c_effect(x,y,w,h)
+    if kind=="rvm_sparsity":
+        return _rvm_sparsity(x,y,w,h)
+    if kind=="em_evolution":
+        return _em_evolution(x,y,w,h)
+    if kind=="rejection_sampling":
+        return _rejection_sampling(x,y,w,h)
+    if kind=="pca_spectrum":
+        return _pca_spectrum(x,y,w,h)
+
     if kind=="gradient_scale":
         return _gradient_scale(x,y,w,h,data["mode"])
     if kind=="dropout_modes":
@@ -3337,7 +3636,37 @@ FIGURES = {
         dict(title="Grad-CAM-style localization",kind="gradcam"),
     ]),
 
+    "cs-regularization-objective.svg": dict(title="Regularized learning objective",subtitle="Training often minimizes data fit plus an explicit regularization penalty weighted by λ.",panels=[
+        dict(title="data loss + λR(W)",kind="regularization_objective"),
+        dict(title="L2 pressure shrinks weight magnitude",kind="l2_shrink"),
+    ]),
+    "cs-conv-sliding-response.svg": dict(title="Kernel sliding and synthetic feature responses",subtitle="A shared local kernel produces one response per window; different filters emphasize different local patterns.",panels=[
+        dict(title="3×3 kernel sliding across 5×5 input",kind="conv_sliding"),
+        dict(title="illustrative edge-response maps",kind="synthetic_feature_response"),
+    ]),
+
     # PRML
+    "prml-posterior-predictive.svg": dict(title="Posterior parameters vs posterior predictive",subtitle="Posterior uncertainty over parameters is integrated into predictions for a new target.",panels=[
+        dict(title="parameter posterior → future-target distribution",kind="posterior_predictive_bridge"),
+        dict(title="predictive mean and uncertainty",kind="predictive_band"),
+    ]),
+    "prml-dirichlet-multinomial.svg": dict(title="Dirichlet–Multinomial conjugacy",subtitle="Class counts add to Dirichlet concentration parameters for K-category data.",panels=[
+        dict(title="α + class counts → posterior α",kind="dirichlet_multinomial"),
+    ]),
+    "prml-svm-c-rvm.svg": dict(title="Soft-margin C and sparse kernel machines",subtitle="C controls soft-margin penalties; RVM uses a sparse Bayesian kernel formulation.",panels=[
+        dict(title="smaller C vs larger C",kind="svm_c_effect"),
+        dict(title="support vectors vs relevance vectors",kind="rvm_sparsity"),
+    ]),
+    "prml-em-evolution.svg": dict(title="EM parameter evolution",subtitle="Responsibilities and component parameters alternate across EM iterations.",panels=[
+        dict(title="schematic iteration sequence",kind="em_evolution"),
+    ]),
+    "prml-rejection-sampling.svg": dict(title="Rejection sampling",subtitle="Sample from a proposal envelope, then accept with probability proportional to p(x)/(M q(x)).",panels=[
+        dict(title="proposal envelope and accept/reject samples",kind="rejection_sampling"),
+    ]),
+    "prml-pca-spectrum.svg": dict(title="PCA explained variance",subtitle="Eigenvalues show variance per component; cumulative variance guides retained dimension.",panels=[
+        dict(title="scree bars and cumulative variance",kind="pca_spectrum"),
+    ]),
+
     "prml-generative-discriminative.svg": dict(title="Generative and discriminative classification",subtitle="Generative models build class-conditionals; discriminative models directly parameterize class posteriors or boundaries.",panels=[
         dict(title="two modelling routes",kind="generative_discriminative"),
         dict(title="logistic vs probit link",kind="sigmoid_probit"),
@@ -3465,28 +3794,28 @@ REFERENCE_FIGURE_META = {
 
 REFERENCE_VISUALS = {
     ("cs231n","classification"): ["cs-knn-distance.svg","cs-split.svg"],
-    ("cs231n","linear"): ["cs-linear-score.svg","cs-softmax-loss.svg","cs-decision-boundary.svg"],
+    ("cs231n","linear"): ["cs-linear-score.svg","cs-softmax-loss.svg","cs-decision-boundary.svg","cs-regularization-objective.svg"],
     ("cs231n","optimization"): ["cs-computational-chain.svg","cs-optimizers.svg","cs-lr-saddle.svg","cs-gradient-stability.svg"],
     ("cs231n","nn"): ["cs-activations.svg","cs-init-bn.svg","cs-reg-dropout.svg","cs-dropout-fit.svg"],
     ("cs231n","training"): ["cs-training-diagnostics.svg","cs-augmentation.svg"],
-    ("cs231n","cnn"): ["cs-conv-shape.svg","cs-conv-channels-rf.svg","cs-pooling-hierarchy.svg","cs-fc-conv.svg"],
+    ("cs231n","cnn"): ["cs-conv-shape.svg","cs-conv-sliding-response.svg","cs-conv-channels-rf.svg","cs-pooling-hierarchy.svg","cs-fc-conv.svg"],
     ("cs231n","architectures"): ["cs-architectures-residual.svg","cs-vgg-transfer.svg"],
     ("cs231n","visualization"): ["cs-visualization.svg","cs-interpretability.svg"],
     ("cs231n","transfer"): ["cs-transfer.svg"],
     ("cs231n","modern"): ["cs-task-suite.svg","cs-iou-nms-instance.svg","cs-attention.svg","cs-modern.svg"],
 
-    ("prml","ch1"): ["prml-bayes-density.svg"],
-    ("prml","ch2"): ["prml-gaussian-beta.svg","prml-discrete-map.svg"],
+    ("prml","ch1"): ["prml-bayes-density.svg","prml-posterior-predictive.svg"],
+    ("prml","ch2"): ["prml-gaussian-beta.svg","prml-discrete-map.svg","prml-dirichlet-multinomial.svg"],
     ("prml","ch3"): ["prml-regression-basis.svg","prml-bias-reg.svg"],
     ("prml","ch4"): ["prml-sigmoid-boundary.svg","prml-multiclass.svg","prml-generative-discriminative.svg"],
     ("prml","ch5"): ["prml-nn-boundary.svg","prml-forward-backprop.svg"],
     ("prml","ch6"): ["prml-kernel-feature.svg","prml-kernel-gp.svg"],
-    ("prml","ch7"): ["prml-svm.svg"],
+    ("prml","ch7"): ["prml-svm.svg","prml-svm-c-rvm.svg"],
     ("prml","ch8"): ["prml-graph-mrf.svg","prml-graph-inference.svg"],
-    ("prml","ch9"): ["prml-gmm-em.svg"],
+    ("prml","ch9"): ["prml-gmm-em.svg","prml-em-evolution.svg"],
     ("prml","ch10"): ["prml-vi-elbo.svg","prml-vi-meanfield.svg"],
-    ("prml","ch11"): ["prml-monte-mcmc.svg","prml-sampling-diagnostics.svg"],
-    ("prml","ch12"): ["prml-pca-dim.svg","prml-ppca.svg"],
+    ("prml","ch11"): ["prml-monte-mcmc.svg","prml-rejection-sampling.svg","prml-sampling-diagnostics.svg"],
+    ("prml","ch12"): ["prml-pca-dim.svg","prml-pca-spectrum.svg","prml-ppca.svg"],
     ("prml","ch13"): ["prml-hmm-filter.svg","prml-state-space.svg"],
     ("prml","ch14"): ["prml-ensemble-moe.svg","prml-ensemble-boosting.svg"],
     ("prml","vision-bridge"): ["prml-vision-bridge.svg"],

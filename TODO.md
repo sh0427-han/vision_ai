@@ -15,6 +15,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] 핵심 누락 figure 8개 추가: regularization/L2, convolution sliding/edge response, posterior predictive, Dirichlet, SVM C/RVM, EM evolution, rejection sampling, PCA explained variance
 - [x] Pages artifact 전체 raster QA에서 Korean SVG fallback 문제 재현 후 NanumGothic/Noto CJK/Malgun fallback 보강
 - [x] `cs-pooling-hierarchy.svg` feature hierarchy pipeline의 긴 label 실제 겹침 수정 및 pipeline 자동 2줄 wrapping 적용
 - [x] 실제 Pages artifact raster QA에서 잘못된 extra teaching curve 3종(optimization / overfit / threshold) 발견·교정
@@ -39,7 +40,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] CNN / ViT / PatchCore에 paper-style multi-panel figure 적용
 - [x] CS231n / PRML에 대형 reference figure atlas 추가
 - [x] `scripts/reference_figures.py` 추가
-- [x] reference atlas를 CS231n 28개 + PRML 27개 = 총 55개 SVG로 확장
+- [x] reference atlas를 CS231n 30개 + PRML 33개 = 총 63개 SVG로 확장
 - [x] 기존 simple diagram 일부는 종합 페이지에서 중복되지 않도록 비활성화
 - [x] build / validate / GitHub Pages deploy 성공
 - [x] figure를 1열 전체 폭으로 표시하여 크기 문제 완화
@@ -88,7 +89,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] linear score `Wx+b`를 입력 vector와 weight matrix 관점에서 시각화
 - [x] softmax와 hinge loss 비교 figure 개선
 - [x] linear decision boundary vs nonlinear boundary 비교
-- [ ] regularization term이 data loss에 더해지는 구조를 별도 작은 figure로 설명
+- [x] regularization term이 data loss에 더해지는 구조를 별도 작은 figure로 설명
 
 ## 1-3. Optimization / Backpropagation
 
@@ -107,14 +108,14 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] initialization이 activation variance에 미치는 영향
 - [x] BatchNorm train vs inference 차이
 - [x] dropout train vs inference 구조
-- [ ] L2 weight decay 직관
+- [x] L2 weight decay 직관
 - [x] underfit / good fit / overfit 학습곡선 비교
 - [x] augmentation 전/후 예시를 더 이미지다운 형태로 표현
 
 ## 1-5. CNN
 
 - [x] 3×3 convolution 실제 숫자 계산 figure
-- [ ] kernel sliding animation 느낌의 multi-panel figure
+- [x] kernel sliding animation 느낌의 multi-panel figure
 - [x] stride 1 vs 2
 - [x] padding 0 vs same padding
 - [x] dilation 비교
@@ -127,7 +128,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] receptive field growth
 - [x] max pooling vs average pooling
 - [x] early / middle / deep layer feature hierarchy
-- [ ] 실제 feature-map / edge-response 느낌의 synthetic visualization 추가
+- [x] 실제 feature-map / edge-response 느낌의 synthetic visualization 추가
 
 ## 1-6. Architecture
 
@@ -176,7 +177,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] prior / likelihood / posterior를 서로 다른 density curve로 표현
 - [x] Bayesian decision / expected risk
 - [x] entropy / information intuition
-- [ ] posterior와 posterior predictive를 명확히 구분하는 figure
+- [x] posterior와 posterior predictive를 명확히 구분하는 figure
 
 ## 2-2. Chapter 2 — Probability Distributions
 
@@ -185,7 +186,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] covariance ellipse
 - [x] Bernoulli / Binomial 관계
 - [x] Beta prior → observations → posterior
-- [ ] Dirichlet / multinomial intuition
+- [x] Dirichlet / multinomial intuition
 - [x] maximum likelihood vs MAP 비교
 
 ## 2-3. Chapter 3 — Linear Models for Regression
@@ -230,8 +231,8 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] SVM margin
 - [x] support vectors 강조
 - [x] hinge loss
-- [ ] soft margin / C parameter effect
-- [ ] RVM vs SVM sparsity intuition
+- [x] soft margin / C parameter effect
+- [x] RVM vs SVM sparsity intuition
 
 ## 2-8. Chapter 8 — Graphical Models
 
@@ -249,7 +250,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] responsibility `r_nk`
 - [x] E-step
 - [x] M-step
-- [ ] EM iteration에 따라 mean/covariance가 이동하는 sequence figure
+- [x] EM iteration에 따라 mean/covariance가 이동하는 sequence figure
 
 ## 2-10. Chapter 10 — Approximate Inference
 
@@ -266,7 +267,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 - [x] Monte Carlo sampling
 - [x] importance sampling
-- [ ] rejection sampling
+- [x] rejection sampling
 - [x] MCMC random walk
 - [x] burn-in
 - [x] autocorrelation
@@ -278,7 +279,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] PCA principal axis
 - [x] 2D → 1D projection
 - [x] reconstruction
-- [ ] eigenvalue / explained variance
+- [x] eigenvalue / explained variance
 - [x] PPCA generative model
 - [ ] factor analysis comparison
 - [ ] ICA intuition
