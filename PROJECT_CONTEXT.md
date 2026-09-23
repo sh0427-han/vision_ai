@@ -72,9 +72,9 @@ CS231n 공개 강의 노트의 전체 학습 흐름과 Bishop PRML 14개 장 전
 
 ## 주제와 논문 배치 규칙
 
-- 상단 내비게이션은 `핵심 주제`와 `강의·교과서 정리`를 기본 축으로 사용한다.
+- 상단 내비게이션은 `이미지·CNN`, `Transformer·Attention`, `Vision Tasks·Segmentation`, `학습·평가`, `Anomaly Detection`, `종합 이론`처럼 실제 학습 주제를 기본 축으로 사용한다.
 - `논문 해설`을 별도 최상위 카테고리로 두지 않는다.
-- ResNet은 CNN, U-Net은 Segmentation/Vision Tasks, ViT는 Transformer Vision, PatchCore는 Anomaly Detection 안에서 설명한다.
+- ResNet은 CNN 페이지 안에, U-Net은 Vision Tasks·Segmentation 페이지 안에 직접 병합한다. ViT 페이지는 Transformer·Attention 자체를 먼저 설명한 뒤 ViT 논문을 대표 사례로, PatchCore 페이지는 Anomaly Detection을 먼저 설명한 뒤 PatchCore 논문을 대표 사례로 다룬다.
 - 논문 섹션에서는 원 논문의 문제 설정 → 구조/수식 → 계산 예시 → 실험에서 주장한 범위 → 한계를 분리한다.
 - 새 논문을 추가할 때는 먼저 기존 큰 주제에 붙일 수 있는지 확인하고, 새 주제 자체가 필요한 경우에만 새 최상위 문서를 만든다.
 
