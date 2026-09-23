@@ -2,6 +2,7 @@
 
 from html import escape
 from pathlib import Path
+import math
 
 
 def _e(value):
@@ -2591,26 +2592,56 @@ def _generative_discriminative(x, y, w, h):
 
 
 def _sigmoid_probit(x, y, w, h):
-    """Sigmoid and probit links are similar S-shaped mappings with different forms."""
+    """Plot the actual logistic CDF and standard-normal CDF on one axis."""
     left = x + 45
     right = x + w - 25
     top = y + 55
     bottom = y + h - 50
-    parts = [f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>']
-    parts.append(
-        f'<path d="M{left} {bottom-10} C{x+w*.35} {bottom-8} {x+w*.40} {top+55} '
-        f'{x+w*.50} {(top+bottom)/2} C{x+w*.60} {bottom-55} {x+w*.65} {top+8} '
-        f'{right} {top+8}" stroke="#2454d8" stroke-width="4" fill="none"/>'
-    )
-    parts.append(
-        f'<path d="M{left} {bottom-8} C{x+w*.37} {bottom-5} {x+w*.43} {top+48} '
-        f'{x+w*.50} {(top+bottom)/2} C{x+w*.57} {bottom-48} {x+w*.63} {top+5} '
-        f'{right} {top+5}" stroke="#08796f" stroke-width="3" fill="none"/>'
-    )
-    parts.append(f'<text x="{x+18}" y="{y+35}" class="small" fill="#2454d8">logistic sigmoid</text>')
-    parts.append(f'<text x="{x+145}" y="{y+35}" class="small" fill="#08796f">probit CDF</text>')
-    return "".join(parts)
+    parts = [
+        f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>'
+    ]
 
+    def map_point(a, prob):
+        px = left + (a + 5.0) / 10.0 * (right - left)
+        py = bottom - prob * (bottom - top)
+        return px, py
+
+    logistic_points = []
+    probit_points = []
+    for idx in range(61):
+        a = -5.0 + idx * (10.0 / 60.0)
+        logistic = 1.0 / (1.0 + math.exp(-a))
+        probit = 0.5 * (1.0 + math.erf(a / math.sqrt(2.0)))
+        lx, ly = map_point(a, logistic)
+        px, py = map_point(a, probit)
+        logistic_points.append(f"{lx:.1f},{ly:.1f}")
+        probit_points.append(f"{px:.1f},{py:.1f}")
+
+    parts.append(
+        f'<polyline points="{" ".join(logistic_points)}" fill="none" '
+        'stroke="#2454d8" stroke-width="4"/>'
+    )
+    parts.append(
+        f'<polyline points="{" ".join(probit_points)}" fill="none" '
+        'stroke="#08796f" stroke-width="3"/>'
+    )
+    parts.append(
+        f'<path d="M{x+w*.50} {top} V{bottom}" stroke="#c3cedd" '
+        'stroke-width="2" stroke-dasharray="5 5"/>'
+    )
+    parts.append(
+        f'<text x="{x+18}" y="{y+35}" class="small" fill="#2454d8">'
+        "logistic sigmoid</text>"
+    )
+    parts.append(
+        f'<text x="{x+145}" y="{y+35}" class="small" fill="#08796f">'
+        "probit CDF</text>"
+    )
+    parts.append(
+        f'<text x="{right-20}" y="{bottom+25}" text-anchor="end" '
+        'class="small">linear score a</text>'
+    )
+    return "".join(parts)
 
 def _rbf_similarity(x, y, w, h):
     """RBF similarity decays smoothly with Euclidean distance."""
