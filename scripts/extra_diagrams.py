@@ -10,7 +10,7 @@ def _esc(value):
 def _frame(title, subtitle, body):
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520">
 <style>
-text{{font-family:Arial,'Noto Sans KR',sans-serif}}
+text{{font-family:'NanumGothic','Noto Sans CJK KR','Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif}}
 .t{{font-size:30px;font-weight:700;fill:#203455}}
 .s{{font-size:18px;fill:#5b6880}}
 .l{{font-size:20px;font-weight:700;fill:#203455}}
