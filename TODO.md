@@ -99,9 +99,9 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 - [x] 3×3 convolution 실제 숫자 계산 figure
 - [ ] kernel sliding animation 느낌의 multi-panel figure
-- [ ] stride 1 vs 2
-- [ ] padding 0 vs same padding
-- [ ] dilation 비교
+- [x] stride 1 vs 2
+- [x] padding 0 vs same padding
+- [x] dilation 비교
 - [x] multi-channel convolution
   - RGB input
   - 3×3×3 filter
@@ -231,8 +231,8 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] Gaussian mixture density
 - [ ] component별 cluster coloring
 - [x] responsibility `r_nk`
-- [ ] E-step
-- [ ] M-step
+- [x] E-step
+- [x] M-step
 - [ ] EM iteration에 따라 mean/covariance가 이동하는 sequence figure
 
 ## 2-10. Chapter 10 — Approximate Inference
