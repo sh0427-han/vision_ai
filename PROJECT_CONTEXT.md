@@ -84,3 +84,6 @@ CS231n 공개 강의 노트의 전체 학습 흐름과 Bishop PRML 14개 장 전
 - PRML은 Bayes/확률분포, Gaussian/Beta, regression, bias-variance, logistic/multiclass, neural network, kernel/SVM, graphical model/MRF, GMM/EM, VI/ELBO, Monte Carlo/MCMC, PCA/PPCA, HMM, ensemble/MoE까지 시각적으로 커버한다.
 - 종합 강의 페이지에서는 같은 개념의 기존 simple diagram을 중복 삽입하지 않고 reference figure를 우선한다.
 - figure는 논문 원본을 복제하지 않고, 개념을 설명하기 위해 독자 제작한 scatter/curve/heatmap/matrix/network figure로 구성한다.
+- reference figure 내부에는 문장형 bullet card를 두지 않고, 짧은 label과 실제 plot/matrix/graph/trajectory를 우선한다.
+- panel title이 길어지면 글자 크기를 자동 조정하고, 모바일에서는 reference figure를 넓게 유지한 채 가로 스크롤로 읽도록 한다.
+- `scripts/validate.py`에서 reference SVG XML/viewBox/text anchor와 과도하게 긴 내부 label을 정적 검증한다.
