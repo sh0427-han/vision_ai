@@ -556,20 +556,20 @@ SECTION_VISUALS = {
 
     ("tasks", "overview"): ["tasks-three-way.svg"],
     ("tasks", "visual"): ["tasks-segmentation.svg"],
-    ("tasks", "pipeline"): ["tasks-output-types.svg", "tasks-label-box-mask.svg"],
+    ("tasks", "pipeline"): [],
 
-    ("training", "loop"): ["train-overfit.svg"],
+    ("training", "loop"): [],
     ("training", "split"): ["train-leakage.svg"],
-    ("training", "metrics"): ["train-confusion.svg", "train-prf.svg", "train-threshold.svg", "train-curves.svg"],
+    ("training", "metrics"): ["train-confusion.svg", "train-curves.svg"],
 
     ("cnn", "resnet_problem"): ["resnet-plain-vs.svg"],
-    ("cnn", "residual_block"): ["resnet-function.svg"],
+    ("cnn", "residual_block"): [],
     ("cnn", "residual_shape"): ["resnet-shortcuts.svg"],
-    ("cnn", "resnet_bottleneck"): ["resnet-gradient.svg"],
+    ("cnn", "resnet_bottleneck"): [],
 
     ("tasks", "segmentation_context"): ["unet-mask-triplet.svg"],
-    ("tasks", "unet_architecture"): ["unet-pyramid.svg", "unet-skip-why.svg"],
-    ("tasks", "unet_original"): ["unet-pixel-class.svg"],
+    ("tasks", "unet_architecture"): [],
+    ("tasks", "unet_original"): [],
 
     ("patchcore", "problem"): [],
     ("patchcore", "pipeline"): [],

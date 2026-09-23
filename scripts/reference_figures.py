@@ -5,7 +5,12 @@ from pathlib import Path
 
 
 def _e(value):
-    return escape(str(value))
+    """Escape labels and normalize glyphs that are fragile across SVG renderers."""
+    text = str(value)
+    text = text.replace("→", " to ")
+    text = text.replace("↔", " / ")
+    text = text.replace("⇒", " so ")
+    return escape(text)
 
 
 def _svg(title, subtitle, body, height=620):
@@ -258,7 +263,7 @@ def _distribution(x, y, w, h, mode="gaussian"):
             'stroke="#a24d18" stroke-width="4" fill="none"/>',
             f'<text x="{x+20}" y="{y+42}" class="small" fill="#2454d8">prior</text>',
             f'<text x="{x+82}" y="{y+42}" class="small" fill="#a24d18">posterior after data</text>',
-            f'<text x="{x+20}" y="{y+h-18}" class="small">Beta(a,b) + m successes + ℓ failures → Beta(a+m,b+ℓ)</text>',
+            f'<text x="{x+20}" y="{y+h-18}" class="small">Beta(a,b) + observations gives Beta(a+m,b+ℓ)</text>',
         ])
     return "".join(parts)
 
@@ -462,7 +467,7 @@ def _score_softmax_ce(x, y, w, h):
     parts.append(f'<text x="{loss_x+14}" y="{y+154}" class="label">≈ 0.417</text>')
     parts.append(
         f'<text x="{x+18}" y="{y+h-25}" class="small">'
-        "logits → normalized probability → penalty for the correct class</text>"
+        "logits / normalized probability / correct-class penalty</text>"
     )
     return "".join(parts)
 
@@ -488,7 +493,7 @@ def _loss_compare(x, y, w, h):
         'stroke="#2454d8" stroke-width="4" fill="none"/>'
     )
     parts.append(
-        f'<text x="{lx+4}" y="{bottom+22}" class="small">pᵧ→0</text>'
+        f'<text x="{lx+4}" y="{bottom+22}" class="small">p_y to 0</text>'
     )
     parts.append(
         f'<text x="{rx-38}" y="{bottom+22}" class="small">pᵧ=1</text>'
@@ -519,7 +524,7 @@ def _loss_compare(x, y, w, h):
         f'<text x="{margin_x+5}" y="{bottom-10}" class="small">m=1</text>'
     )
     parts.append(
-        f'<text x="{oright-90}" y="{bottom+22}" class="small">m=yf(x) →</text>'
+        f'<text x="{oright-90}" y="{bottom+22}" class="small">margin m=yf(x)</text>'
     )
     return "".join(parts)
 
@@ -800,7 +805,7 @@ def _modern_visual(x, y, w, h):
                 f'<polygon points="{px+70},{py+80} {px+82},{py+73} '
                 f'{px+82},{py+87}" fill="#08796f"/>'
             )
-            parts.append(f'<text x="{px+22}" y="{py+108}" class="small">data → noise</text>')
+            parts.append(f'<text x="{px+22}" y="{py+108}" class="small">data to noise</text>')
             parts.append(f'<text x="{px+108}" y="{py+108}" class="small">denoise ←</text>')
         else:
             parts.append(_grid(px + 35, py + 40, 4, 4, 17, "heat", [5, 6, 9, 10]))
@@ -828,7 +833,7 @@ def _bayes_update_density(x, y, w, h):
         f'<text x="{left+4}" y="{top+18}" class="small" fill="#2454d8">prior p(θ)</text>',
         f'<text x="{left+92}" y="{top+18}" class="small" fill="#a24d18">likelihood L(θ)</text>',
         f'<text x="{left+215}" y="{top+18}" class="small" fill="#08796f">posterior p(θ|D)</text>',
-        f'<text x="{right-22}" y="{bottom+24}" text-anchor="end" class="small">parameter θ →</text>',
+        f'<text x="{right-22}" y="{bottom+24}" text-anchor="end" class="small">parameter theta</text>',
         f'<text x="{left+5}" y="{y+h-15}" class="small">schematic shapes over θ</text>',
     ]
     return "".join(parts)
@@ -912,7 +917,7 @@ def _factor_graph(x, y, w, h):
     ]
     for x1, y1, x2, y2 in edges:
         parts.append(f'<path d="M{x1} {y1} L{x2} {y2}" class="line"/>')
-    parts.append(f'<text x="{x+24}" y="{y+h-35}" class="small">variables ↔ factors</text>')
+    parts.append(f'<text x="{x+24}" y="{y+h-35}" class="small">variables / factors</text>')
     return "".join(parts)
 
 
@@ -960,7 +965,7 @@ def _elbo_decomposition(x, y, w, h):
         f'<text x="{x+22}" y="{y+h-48}" class="small">'
         "log p(x) = ELBO(q) + KL(q(z)||p(z|x))</text>",
         f'<text x="{x+22}" y="{y+h-24}" class="small">'
-        "KL ≥ 0 ⇒ ELBO ≤ log p(x)</text>",
+        "KL is nonnegative; ELBO is a lower bound on log p(x)</text>",
     ]
     return "".join(parts)
 
@@ -1134,7 +1139,7 @@ def _chain_rule_numeric(x, y, w, h):
             parts.append(_arrow(cx + 44, y + 120, next_x - 44, y + 120))
     parts.append(
         f'<text x="{x+18}" y="{y+42}" class="small">'
-        "forward: values →</text>"
+        "forward values</text>"
     )
     parts.append(
         f'<path d="M{x+w-114} {y+205} L{x+w*.50+44} {y+205}" '
@@ -1267,7 +1272,7 @@ def _lr_curves(x, y, w, h):
             f'fill="{color}">{_e(label)}</text>'
         )
     parts.append(
-        f'<text x="{x+w-90}" y="{y+h-20}" class="small">steps →</text>'
+        f'<text x="{x+w-90}" y="{y+h-20}" class="small">steps</text>'
     )
     return "".join(parts)
 
@@ -1662,7 +1667,7 @@ def _svm_hinge(x, y, w, h):
         'stroke="#a24d18" stroke-width="4" fill="none"/>',
         f'<path d="M{margin_x} {top} V{bottom}" stroke="#9aa9be" stroke-width="2" '
         'stroke-dasharray="6 5"/>',
-        f'<text x="{margin_x+6}" y="{bottom-10}" class="small">m=1 → loss 0</text>',
+        f'<text x="{margin_x+6}" y="{bottom-10}" class="small">m=1 gives loss 0</text>',
         f'<text x="{right-120}" y="{bottom+25}" class="small">m = y f(x) →</text>',
         f'<text x="{left+5}" y="{top+12}" class="small">max(0, 1−m)</text>',
     ]
@@ -1938,7 +1943,7 @@ def _conv_channel_sum(x, y, w, h):
     )
     parts.append(
         f'<text x="{x+16}" y="{y+h-25}" class="small">'
-        "one 3×3×C_in filter → one output channel</text>"
+        "one 3×3×C_in filter gives one output channel</text>"
     )
     return "".join(parts)
 
@@ -1993,7 +1998,7 @@ def _receptive_field_growth(x, y, w, h):
         )
     parts.append(
         f'<text x="{x+w/2}" y="{y+h-28}" text-anchor="middle" class="small">'
-        "stride 1, no dilation: receptive field 3→5→7</text>"
+        "stride 1, no dilation: receptive field 3 / 5 / 7</text>"
     )
     return "".join(parts)
 
