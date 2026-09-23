@@ -107,8 +107,8 @@ for path, parser in pages.items():
 extra_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'extra').glob('*.svg'))
 paper_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'paper').glob('*.svg'))
 reference_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'reference').glob('*.svg'))
-if len(reference_diagrams) != 63:
-    errors.append(f'Expected 63 CS231n/PRML reference figures, found {len(reference_diagrams)}')
+if len(reference_diagrams) != 68:
+    errors.append(f'Expected 68 CS231n/PRML reference figures, found {len(reference_diagrams)}')
 if len(paper_diagrams) != 18:
     errors.append(f'Expected 18 paper-style diagrams, found {len(paper_diagrams)}')
 if len(extra_diagrams) < 60:
@@ -224,6 +224,11 @@ for required in [
     'prml-em-evolution.svg',
     'prml-rejection-sampling.svg',
     'prml-pca-spectrum.svg',
+    'prml-nn-regularization.svg',
+    'prml-polynomial-kernel.svg',
+    'prml-ep-vi.svg',
+    'prml-factor-ica.svg',
+    'prml-tree-ensemble.svg',
 ]:
     if required not in reference_source:
         errors.append(f'Missing required corrected reference figure: {required}')
