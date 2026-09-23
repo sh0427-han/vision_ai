@@ -3260,45 +3260,87 @@ def _nn_regularization_paths(x, y, w, h):
 
 
 def _polynomial_kernel(x, y, w, h):
-    """A |x|-based class pattern becomes linearly separable after adding x²."""
+    """Show the explicit 1D -> (x, x^2) map behind a degree-2 kernel intuition."""
     samples = [
         (-.86, 0), (-.70, 0), (-.42, 1), (-.16, 1),
         (.16, 1), (.42, 1), (.70, 0), (.86, 0),
     ]
     parts = [
-        f'<text x="{x+25}" y="{y+48}" class="label">input x</text>',
-        f'<text x="{x+w*.56}" y="{y+48}" class="label">feature φ(x) = [x, x²]</text>',
+        f'<text x="{x+25}" y="{y+48}" class="label">1D input x</text>',
+        f'<text x="{x+w*.57}" y="{y+48}" class="label">explicit feature map φ(x)=[x,x²]</text>',
     ]
+
+    # Left: class pattern on a single x axis. Inner and outer intervals are not
+    # separable by one threshold in 1D.
+    left_l = x + 42
+    left_r = x + w*.41
     base = y + h*.62
+    parts.append(f'<path d="M{left_l} {base} H{left_r}" class="thin"/>')
+    parts.append(f'<text x="{left_r-8}" y="{base+26}" text-anchor="end" class="small">x →</text>')
     for xv, cls in samples:
-        xx = x + w*.21 + xv*w*.18
+        xx = x + w*.215 + xv*w*.18
         color = "#2454d8" if cls == 0 else "#08796f"
         parts.append(f'<circle cx="{xx}" cy="{base}" r="8" fill="{color}"/>')
-    parts.append(f'<path d="M{x+35} {base+28} H{x+w*.42}" class="thin"/>')
     parts.append(
-        f'<text x="{x+35}" y="{base+55}" class="small">'
-        "outer vs inner intervals need two thresholds in 1D</text>"
+        f'<text x="{left_l}" y="{base+55}" class="small">'
+        "outer / inner classes need two cuts on this 1D axis</text>"
     )
 
-    feature_bottom = y + h*.76
-    feature_scale = h*.36
+    # Mapping arrow between the two views.
+    parts.append(_arrow(x+w*.43, y+h*.47, x+w*.51, y+h*.47))
+    parts.append(
+        f'<text x="{x+w*.47}" y="{y+h*.42}" text-anchor="middle" class="small">'
+        "map x → (x,x²)</text>"
+    )
+
+    # Right: plot the actual mapped coordinates. Every point lies on x².
+    x_center = x + w*.75
+    x_scale = w*.19
+    feature_bottom = y + h*.80
+    feature_scale = h*.43
+    axis_left = x + w*.54
+    axis_right = x + w*.97
+    axis_top = y + h*.17
+
+    parts.append(
+        f'<path d="M{axis_left} {feature_bottom} H{axis_right} '
+        f'M{x_center} {feature_bottom} V{axis_top}" class="thin"/>'
+    )
+    parts.append(
+        f'<text x="{axis_right-4}" y="{feature_bottom+24}" text-anchor="end" class="small">x →</text>'
+    )
+    parts.append(
+        f'<text x="{x_center+10}" y="{axis_top+12}" class="small">x² ↑</text>'
+    )
+
+    curve_points = []
+    for xv in [-.95,-.80,-.60,-.40,-.20,0,.20,.40,.60,.80,.95]:
+        px = x_center + xv*x_scale
+        py = feature_bottom - (xv*xv)*feature_scale
+        curve_points.append(f"{px},{py}")
+    parts.append(
+        f'<polyline points="{" ".join(curve_points)}" fill="none" '
+        'stroke="#a8b5c8" stroke-width="2.5" stroke-dasharray="6 5"/>'
+    )
+
     for xv, cls in samples:
-        xx = x + w*.74 + xv*w*.18
+        xx = x_center + xv*x_scale
         yy = feature_bottom - (xv*xv)*feature_scale
         color = "#2454d8" if cls == 0 else "#08796f"
         parts.append(f'<circle cx="{xx}" cy="{yy}" r="8" fill="{color}"/>')
+
     threshold_y = feature_bottom - (.55*.55)*feature_scale
     parts.append(
-        f'<path d="M{x+w*.52} {threshold_y} L{x+w*.96} {threshold_y}" '
+        f'<path d="M{axis_left+8} {threshold_y} H{axis_right-8}" '
         'stroke="#a24d18" stroke-width="3"/>'
     )
     parts.append(
-        f'<text x="{x+w*.69}" y="{threshold_y-12}" class="small" fill="#a24d18">'
-        "x² threshold = linear separator</text>"
+        f'<text x="{axis_right-12}" y="{threshold_y-12}" text-anchor="end" '
+        'class="small" fill="#a24d18">linear separator in feature space</text>'
     )
     parts.append(
-        f'<text x="{x+25}" y="{y+h-20}" class="small">'
-        "kernel computes polynomial-feature inner products implicitly</text>"
+        f'<text x="{x+25}" y="{y+h-18}" class="small">'
+        "kernel trick evaluates inner products in such polynomial features without explicitly building them</text>"
     )
     return "".join(parts)
 
