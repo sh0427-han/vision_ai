@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" role="img" aria-labelledby="t d">
+<title id="t">합성 사과 이미지에서 픽셀 격자까지</title>
+<desc id="d">사진처럼 보이는 합성 사과 장면을 디코딩된 raster로 보고, 일부 영역을 확대해 픽셀 격자와 RGB 숫자로 연결하는 설명용 그림</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6efe2"/>
+      <stop offset="0.55" stop-color="#e8efe9"/>
+      <stop offset="1" stop-color="#d7e1e8"/>
+    </linearGradient>
+    <radialGradient id="apple" cx="36%" cy="28%" r="75%">
+      <stop offset="0" stop-color="#ff7569"/>
+      <stop offset="0.55" stop-color="#d93436"/>
+      <stop offset="1" stop-color="#8e1723"/>
+    </radialGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7ec46d"/>
+      <stop offset="1" stop-color="#285d39"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="11"/>
+      <feOffset dx="0" dy="12" result="off"/>
+      <feColorMatrix in="off" type="matrix"
+        values="0 0 0 0 0.08  0 0 0 0 0.12  0 0 0 0 0.16  0 0 0 .28 0"/>
+      <feBlend in="SourceGraphic"/>
+    </filter>
+    <clipPath id="photoClip"><rect x="70" y="105" width="560" height="390" rx="28"/></clipPath>
+    <style>
+      .title{font:700 30px system-ui,-apple-system,'Noto Sans KR',sans-serif;fill:#17233a}
+      .sub{font:500 16px system-ui,-apple-system,'Noto Sans KR',sans-serif;fill:#607087}
+      .label{font:700 17px system-ui,-apple-system,'Noto Sans KR',sans-serif;fill:#203455}
+      .small{font:500 14px system-ui,-apple-system,'Noto Sans KR',sans-serif;fill:#526681}
+      .num{font:700 11px ui-monospace,SFMono-Regular,Consolas,monospace;fill:#0e2038}
+    </style>
+  </defs>
+<text x="60" y="55" class="title">한 장의 이미지도 모델에게는 숫자 격자다</text>
+<text x="60" y="84" class="sub">설명용 합성 이미지 · photo.jpg → decode → raster → pixel values</text>
+
+<g clip-path="url(#photoClip)">
+  <rect x="70" y="105" width="560" height="390" fill="url(#bg)"/>
+  <rect x="70" y="392" width="560" height="103" fill="#b9a178"/>
+  <path d="M70 392 C190 360 330 370 630 350 L630 495 L70 495Z" fill="#c9b48b" opacity=".85"/>
+  <g id="appleScene" transform="translate(350 270) scale(1.05)">
+    <ellipse cx="0" cy="118" rx="92" ry="28" fill="#203455" opacity=".18"/>
+    <path d="M-17 -44 C-7 -71 7 -82 17 -88" fill="none" stroke="#5b3a28" stroke-width="12" stroke-linecap="round"/>
+    <path d="M15 -77 C42 -94 72 -82 79 -54 C49 -49 28 -53 15 -77Z" fill="url(#leaf)"/>
+    <path d="M0 -34
+             C-48 -65 -105 -34 -114 23
+             C-125 89 -76 146 -15 143
+             C-1 142 8 136 17 136
+             C27 136 38 144 55 144
+             C118 144 151 82 130 22
+             C111 -34 56 -59 17 -31
+             C11 -27 6 -27 0 -34Z"
+          fill="url(#apple)"/>
+    <ellipse cx="-42" cy="-4" rx="24" ry="41" fill="#fff" opacity=".20" transform="rotate(20 -42 -4)"/>
+    <circle cx="64" cy="77" r="7" fill="#7a111c" opacity=".45"/>
+  </g>
+  <circle cx="465" cy="342" r="48" fill="none" stroke="#fff" stroke-width="5"/>
+  <circle cx="465" cy="342" r="53" fill="none" stroke="#2454d8" stroke-width="3"/>
+</g>
+<rect x="70" y="105" width="560" height="390" rx="28" fill="none" stroke="#d4deeb" stroke-width="3"/>
+<text x="90" y="135" class="label">decoded RGB raster</text>
+<text x="90" y="160" class="small">예: H × W × 3</text>
+
+<path d="M520 330 C650 300 680 250 742 224" fill="none" stroke="#2454d8" stroke-width="4"/>
+<path d="M520 365 C650 385 684 420 742 448" fill="none" stroke="#2454d8" stroke-width="4"/>
+
+<text x="750" y="145" class="label">확대한 8 × 8 pixel region</text>
+<text x="750" y="166" class="small">각 칸은 한 공간 위치의 RGB 값을 가짐</text>
+<rect x="750" y="185" width="39" height="39" rx="3" fill="#a0242c"/><rect x="793" y="185" width="39" height="39" rx="3" fill="#ad2a31"/><rect x="836" y="185" width="39" height="39" rx="3" fill="#ba3339"/><rect x="879" y="185" width="39" height="39" rx="3" fill="#c33e42"/><rect x="922" y="185" width="39" height="39" rx="3" fill="#c74647"/><rect x="965" y="185" width="39" height="39" rx="3" fill="#b9383d"/><rect x="1008" y="185" width="39" height="39" rx="3" fill="#a52931"/><rect x="1051" y="185" width="39" height="39" rx="3" fill="#8f1e28"/><rect x="750" y="228" width="39" height="39" rx="3" fill="#a32930"/><rect x="793" y="228" width="39" height="39" rx="3" fill="#b83439"/><rect x="836" y="228" width="39" height="39" rx="3" fill="#ca4446"/><rect x="879" y="228" width="39" height="39" rx="3" fill="#d65250"/><rect x="922" y="228" width="39" height="39" rx="3" fill="#d85a55"/><rect x="965" y="228" width="39" height="39" rx="3" fill="#c84948"/><rect x="1008" y="228" width="39" height="39" rx="3" fill="#b43538"/><rect x="1051" y="228" width="39" height="39" rx="3" fill="#98232b"/><rect x="750" y="271" width="39" height="39" rx="3" fill="#a82e34"/><rect x="793" y="271" width="39" height="39" rx="3" fill="#bf3b40"/><rect x="836" y="271" width="39" height="39" rx="3" fill="#d24d4c"/><rect x="879" y="271" width="39" height="39" rx="3" fill="#df5f57"/><rect x="922" y="271" width="39" height="39" rx="3" fill="#e66c61"/><rect x="965" y="271" width="39" height="39" rx="3" fill="#d65b52"/><rect x="1008" y="271" width="39" height="39" rx="3" fill="#be4141"/><rect x="1051" y="271" width="39" height="39" rx="3" fill="#9f2930"/><rect x="750" y="314" width="39" height="39" rx="3" fill="#a62b33"/><rect x="793" y="314" width="39" height="39" rx="3" fill="#bd3a40"/><rect x="836" y="314" width="39" height="39" rx="3" fill="#d45050"/><rect x="879" y="314" width="39" height="39" rx="3" fill="#e56a60"/><rect x="922" y="314" width="39" height="39" rx="3" fill="#f07c6c"/><rect x="965" y="314" width="39" height="39" rx="3" fill="#dd6157"/><rect x="1008" y="314" width="39" height="39" rx="3" fill="#c34643"/><rect x="1051" y="314" width="39" height="39" rx="3" fill="#a12a31"/><rect x="750" y="357" width="39" height="39" rx="3" fill="#9e2730"/><rect x="793" y="357" width="39" height="39" rx="3" fill="#b6353b"/><rect x="836" y="357" width="39" height="39" rx="3" fill="#ca4849"/><rect x="879" y="357" width="39" height="39" rx="3" fill="#dc6057"/><rect x="922" y="357" width="39" height="39" rx="3" fill="#e67266"/><rect x="965" y="357" width="39" height="39" rx="3" fill="#d15a52"/><rect x="1008" y="357" width="39" height="39" rx="3" fill="#b93e40"/><rect x="1051" y="357" width="39" height="39" rx="3" fill="#98242d"/><rect x="750" y="400" width="39" height="39" rx="3" fill="#93222b"/><rect x="793" y="400" width="39" height="39" rx="3" fill="#a92e34"/><rect x="836" y="400" width="39" height="39" rx="3" fill="#bc3b3e"/><rect x="879" y="400" width="39" height="39" rx="3" fill="#c94a49"/><rect x="922" y="400" width="39" height="39" rx="3" fill="#cf524e"/><rect x="965" y="400" width="39" height="39" rx="3" fill="#c04342"/><rect x="1008" y="400" width="39" height="39" rx="3" fill="#aa3237"/><rect x="1051" y="400" width="39" height="39" rx="3" fill="#8d2028"/><rect x="750" y="443" width="39" height="39" rx="3" fill="#7e1c27"/><rect x="793" y="443" width="39" height="39" rx="3" fill="#91242d"/><rect x="836" y="443" width="39" height="39" rx="3" fill="#a62d33"/><rect x="879" y="443" width="39" height="39" rx="3" fill="#b43639"/><rect x="922" y="443" width="39" height="39" rx="3" fill="#b83b3d"/><rect x="965" y="443" width="39" height="39" rx="3" fill="#ac3135"/><rect x="1008" y="443" width="39" height="39" rx="3" fill="#972730"/><rect x="1051" y="443" width="39" height="39" rx="3" fill="#7c1c26"/><rect x="750" y="486" width="39" height="39" rx="3" fill="#6d1923"/><rect x="793" y="486" width="39" height="39" rx="3" fill="#7d1f28"/><rect x="836" y="486" width="39" height="39" rx="3" fill="#8f252d"/><rect x="879" y="486" width="39" height="39" rx="3" fill="#9c2b31"/><rect x="922" y="486" width="39" height="39" rx="3" fill="#9f2d33"/><rect x="965" y="486" width="39" height="39" rx="3" fill="#93272e"/><rect x="1008" y="486" width="39" height="39" rx="3" fill="#84212a"/><rect x="1051" y="486" width="39" height="39" rx="3" fill="#6d1923"/>
+
+<g>
+  <rect x="750" y="548" width="350" height="56" rx="14" fill="#eef3fb"/>
+  <circle cx="786" cy="576" r="12" fill="#e67266"/>
+  <text x="810" y="570" class="small">sample pixel</text>
+  <text x="810" y="591" class="label">[R,G,B] = [230,114,102]</text>
+</g>
+<text x="70" y="560" class="small">JPEG/PNG 파일은 저장 형식이고, decode 뒤에야 이런 픽셀 배열을 얻는다.</text>
+<text x="70" y="588" class="small">압축 파일 크기 ≠ 디코딩된 H×W×C 값의 개수</text>
+</svg>
