@@ -18,8 +18,8 @@ def register_cs231n(
             "Stanford CS231n 공개 노트를 따라 분류의 출발점부터 최적화, "
             "신경망, CNN, 시각화, 전이학습과 현대 Vision 모델까지 연결합니다."
         ),
-        "강의·교과서 정리",
-        "09 · CS231N COURSE MAP",
+        "종합 이론",
+        "07 · CS231N COURSE MAP",
         70,
         [
             section(
