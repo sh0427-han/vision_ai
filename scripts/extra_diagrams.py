@@ -435,15 +435,15 @@ def _pixels_channels():
         (690,150,"G plane","#e9f7f2","#08796f",[[30,38,45],[55,60,72],[35,44,40]]),
         (935,150,"B plane","#e8eefc","#2454d8",[[28,35,42],[48,30,52],[31,39,36]]),
     ]
-    for x0,title,fill,stroke,vals in planes:
+    for x0,y0,title,fill,stroke,vals in planes:
         body.append(
-            f'<rect x="{x0}" y="145" width="205" height="285" rx="18" fill="#fff" '
+            f'<rect x="{x0}" y="{y0}" width="205" height="285" rx="18" fill="#fff" '
             f'stroke="{stroke}" stroke-width="3"/>'
         )
-        body.append(f'<text x="{x0+102}" y="182" text-anchor="middle" class="l">{title}</text>')
+        body.append(f'<text x="{x0+102}" y="{y0+37}" text-anchor="middle" class="l">{title}</text>')
         cell=46
         sx=x0+33
-        sy=220
+        sy=y0+70
         for r,row in enumerate(vals):
             for c,v in enumerate(row):
                 body.append(
