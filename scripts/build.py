@@ -780,59 +780,6 @@ register_reference_notes(
 )
 
 
-def merge_related_note(parent_slug, child_slug, anchor_prefix, title_prefix):
-    """Merge a model/paper note into the broader topic that explains it."""
-
-    parent = next(item for item in NOTES if item["slug"] == parent_slug)
-    child = next(item for item in NOTES if item["slug"] == child_slug)
-
-    for anchor, title, content in child["sections"]:
-        parent["sections"].append(
-            (
-                f"{anchor_prefix}-{anchor}",
-                f"{title_prefix} · {title}",
-                content,
-            )
-        )
-
-    known_urls = {url for _, url, _ in parent["sources"]}
-    for source in child["sources"]:
-        if source[1] not in known_urls:
-            parent["sources"].append(source)
-            known_urls.add(source[1])
-
-    parent["minutes"] += child["minutes"]
-    NOTES.remove(child)
-
-
-merge_related_note("cnn", "resnet", "resnet", "대표 CNN 아키텍처 ResNet")
-merge_related_note("tasks", "unet", "unet", "Segmentation 대표 구조 U-Net")
-
-# The paper is evidence/example inside a topic, not a top-level taxonomy.
-topic_meta = {
-    "pixels": ("핵심 주제", "01 · IMAGE & TENSOR"),
-    "cnn": ("핵심 주제", "02 · CNN & RESNET"),
-    "vit": ("핵심 주제", "03 · TRANSFORMER & VIT"),
-    "tasks": ("핵심 주제", "04 · VISION TASKS & U-NET"),
-    "training": ("핵심 주제", "05 · TRAINING & EVALUATION"),
-    "patchcore": ("핵심 주제", "06 · ANOMALY DETECTION"),
-    "cs231n": ("강의·교과서 정리", "07 · CS231N COURSE MAP"),
-    "prml": ("강의·교과서 정리", "08 · PRML"),
-}
-for item in NOTES:
-    item["group"], item["label"] = topic_meta[item["slug"]]
-
-# The merged parent pages also explain the terminology of their child methods.
-for parent_slug, child_slug in [("cnn", "resnet"), ("tasks", "unet")]:
-    existing = {short for short, _, _ in PAGE_TERMS[parent_slug]}
-    for term in PAGE_TERMS[child_slug]:
-        if term[0] not in existing:
-            PAGE_TERMS[parent_slug].append(term)
-            existing.add(term[0])
-    for (slug, short), pattern in list(TERM_ALIASES.items()):
-        if slug == child_slug:
-            TERM_ALIASES[(parent_slug, short)] = pattern
-
 # Make the representative-paper role explicit in the section headings.
 vit = next(item for item in NOTES if item["slug"] == "vit")
 vit["sections"][0] = (
