@@ -218,18 +218,48 @@ def _task_panel(x, y, w, h, mode):
     return "".join(parts)
 
 
-def _distribution(x, y, w, h, mode="gaussian"):
-    parts=[f'<path d="M{x+35} {y+h-35} H{x+w-20}" class="thin"/>']
-    if mode=="gaussian":
-        parts.append(f'<path d="M{x+45} {y+h-40} C{x+w*.28} {y+h-40} {x+w*.34} {y+55} {x+w*.50} {y+55} C{x+w*.66} {y+55} {x+w*.72} {y+h-40} {x+w-35} {y+h-40}" stroke="#2454d8" stroke-width="4" fill="none"/>')
-    elif mode=="mixture":
-        parts.append(f'<path d="M{x+45} {y+h-40} C{x+w*.20} {y+h-40} {x+w*.25} {y+90} {x+w*.37} {y+90} C{x+w*.47} {y+90} {x+w*.50} {y+h-40} {x+w*.58} {y+h-40}" stroke="#2454d8" stroke-width="4" fill="none"/>')
-        parts.append(f'<path d="M{x+w*.38} {y+h-40} C{x+w*.53} {y+h-40} {x+w*.58} {y+120} {x+w*.70} {y+120} C{x+w*.82} {y+120} {x+w*.85} {y+h-40} {x+w-35} {y+h-40}" stroke="#08796f" stroke-width="4" fill="none"/>')
-    elif mode=="beta":
-        parts.append(f'<path d="M{x+45} {y+h-40} C{x+w*.20} {y+120} {x+w*.37} {y+70} {x+w*.52} {y+95} C{x+w*.65} {y+120} {x+w*.78} {y+h-45} {x+w-35} {y+h-40}" stroke="#2454d8" stroke-width="4" fill="none"/>')
-        parts.append(f'<path d="M{x+45} {y+h-40} C{x+w*.25} {y+h-35} {x+w*.40} {y+145} {x+w*.58} {y+75} C{x+w*.72} {y+55} {x+w*.83} {y+h-35} {x+w-35} {y+h-40}" stroke="#a24d18" stroke-width="4" fill="none"/>')
-    return "".join(parts)
 
+def _distribution(x, y, w, h, mode="gaussian"):
+    parts = [f'<path d="M{x+35} {y+h-35} H{x+w-20}" class="thin"/>']
+    if mode == "gaussian":
+        parts.append(
+            f'<path d="M{x+45} {y+h-40} C{x+w*.28} {y+h-40} '
+            f'{x+w*.34} {y+55} {x+w*.50} {y+55} '
+            f'C{x+w*.66} {y+55} {x+w*.72} {y+h-40} {x+w-35} {y+h-40}" '
+            'stroke="#2454d8" stroke-width="4" fill="none"/>'
+        )
+    elif mode == "mixture":
+        base = y + h - 40
+        parts.extend([
+            f'<path d="M{x+45} {base} C{x+w*.18} {base} {x+w*.24} {y+92} '
+            f'{x+w*.34} {y+92} C{x+w*.44} {y+92} {x+w*.48} {base} '
+            f'{x+w*.58} {base}" stroke="#2454d8" stroke-width="3" fill="none"/>',
+            f'<path d="M{x+w*.36} {base} C{x+w*.52} {base} {x+w*.58} {y+122} '
+            f'{x+w*.70} {y+122} C{x+w*.82} {y+122} {x+w*.86} {base} '
+            f'{x+w-35} {base}" stroke="#08796f" stroke-width="3" fill="none"/>',
+            f'<path d="M{x+45} {base} C{x+w*.18} {base} {x+w*.24} {y+105} '
+            f'{x+w*.34} {y+105} C{x+w*.45} {y+105} {x+w*.50} {y+155} '
+            f'{x+w*.58} {y+142} C{x+w*.64} {y+126} {x+w*.66} {y+112} '
+            f'{x+w*.70} {y+112} C{x+w*.82} {y+112} {x+w*.87} {base} '
+            f'{x+w-35} {base}" stroke="#7f5fbf" stroke-width="5" fill="none"/>',
+            f'<text x="{x+20}" y="{y+42}" class="small" fill="#2454d8">π₁N₁(x)</text>',
+            f'<text x="{x+98}" y="{y+42}" class="small" fill="#08796f">π₂N₂(x)</text>',
+            f'<text x="{x+178}" y="{y+42}" class="small" fill="#7f5fbf">sum p(x)</text>',
+        ])
+    elif mode == "beta":
+        parts.extend([
+            f'<path d="M{x+45} {y+h-40} C{x+w*.20} {y+120} '
+            f'{x+w*.37} {y+70} {x+w*.52} {y+95} '
+            f'C{x+w*.65} {y+120} {x+w*.78} {y+h-45} {x+w-35} {y+h-40}" '
+            'stroke="#2454d8" stroke-width="4" fill="none"/>',
+            f'<path d="M{x+45} {y+h-40} C{x+w*.25} {y+h-35} '
+            f'{x+w*.40} {y+145} {x+w*.58} {y+75} '
+            f'C{x+w*.72} {y+55} {x+w*.83} {y+h-35} {x+w-35} {y+h-40}" '
+            'stroke="#a24d18" stroke-width="4" fill="none"/>',
+            f'<text x="{x+20}" y="{y+42}" class="small" fill="#2454d8">prior</text>',
+            f'<text x="{x+82}" y="{y+42}" class="small" fill="#a24d18">posterior after data</text>',
+        ])
+    return "".join(parts)
 
 def _graphical(x, y, w, h, undirected=False):
     pts=[(x+w*.22,y+h*.38),(x+w*.50,y+h*.23),(x+w*.50,y+h*.63),(x+w*.80,y+h*.42)]
@@ -1954,30 +1984,35 @@ def _bernoulli_binomial(x, y, w, h):
     return "".join(parts)
 
 
+
 def _ml_map(x, y, w, h):
+    """Illustrate ML as likelihood mode and MAP as posterior mode."""
     left = x + 42
     right = x + w - 25
     base = y + h - 48
     ml_x = x + w * 0.68
+    prior_x = x + w * 0.42
     map_x = x + w * 0.56
     parts = [
         f'<path d="M{left} {base} H{right}" class="thin"/>',
         f'<path d="M{left+5} {base} C{x+w*.35} {base} {x+w*.52} {y+72} '
         f'{ml_x} {y+72} C{x+w*.82} {y+72} {x+w*.88} {base} {right} {base}" '
         'stroke="#2454d8" stroke-width="4" fill="none"/>',
-        f'<path d="M{left+5} {base} C{x+w*.25} {base} {x+w*.38} {y+118} '
-        f'{x+w*.48} {y+118} C{x+w*.60} {y+118} {x+w*.68} {base} {right} {base}" '
+        f'<path d="M{left+5} {base} C{x+w*.20} {base} {x+w*.30} {y+130} '
+        f'{prior_x} {y+130} C{x+w*.55} {y+130} {x+w*.68} {base} {right} {base}" '
         'stroke="#e0ae82" stroke-width="3" fill="none"/>',
+        f'<path d="M{left+5} {base} C{x+w*.30} {base} {x+w*.43} {y+92} '
+        f'{map_x} {y+92} C{x+w*.68} {y+92} {x+w*.77} {base} {right} {base}" '
+        'stroke="#08796f" stroke-width="4" fill="none"/>',
         f'<path d="M{ml_x} {y+62} V{base}" stroke="#2454d8" stroke-width="2" stroke-dasharray="5 4"/>',
-        f'<path d="M{map_x} {y+92} V{base}" stroke="#08796f" stroke-width="2" stroke-dasharray="5 4"/>',
-        f'<text x="{x+18}" y="{y+38}" class="small" fill="#2454d8">likelihood</text>',
-        f'<text x="{x+105}" y="{y+38}" class="small" fill="#a24d18">prior</text>',
+        f'<path d="M{map_x} {y+82} V{base}" stroke="#08796f" stroke-width="2" stroke-dasharray="5 4"/>',
+        f'<text x="{x+18}" y="{y+38}" class="small" fill="#2454d8">likelihood p(D|θ)</text>',
+        f'<text x="{x+130}" y="{y+38}" class="small" fill="#a24d18">prior p(θ)</text>',
+        f'<text x="{x+220}" y="{y+38}" class="small" fill="#08796f">posterior ∝ product</text>',
         f'<text x="{ml_x}" y="{base+25}" text-anchor="middle" class="small">ML</text>',
         f'<text x="{map_x}" y="{base+25}" text-anchor="middle" class="small">MAP</text>',
-        f'<text x="{x+18}" y="{y+h-18}" class="small">MAP maximizes likelihood × prior</text>',
     ]
     return "".join(parts)
-
 
 def _gmm_responsibility(x, y, w, h):
     """Soft component assignments for overlapping Gaussian components."""
