@@ -15,6 +15,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] PRML 내용 TODO의 마지막 6개 보강: early stopping, polynomial kernel, EP vs VI, Factor Analysis, ICA, decision-tree ensemble
 - [x] 핵심 누락 figure 8개 추가: regularization/L2, convolution sliding/edge response, posterior predictive, Dirichlet, SVM C/RVM, EM evolution, rejection sampling, PCA explained variance
 - [x] Pages artifact 전체 raster QA에서 Korean SVG fallback 문제 재현 후 NanumGothic/Noto CJK/Malgun fallback 보강
 - [x] `cs-pooling-hierarchy.svg` feature hierarchy pipeline의 긴 label 실제 겹침 수정 및 pipeline 자동 2줄 wrapping 적용
@@ -40,7 +41,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] CNN / ViT / PatchCore에 paper-style multi-panel figure 적용
 - [x] CS231n / PRML에 대형 reference figure atlas 추가
 - [x] `scripts/reference_figures.py` 추가
-- [x] reference atlas를 CS231n 30개 + PRML 33개 = 총 63개 SVG로 확장
+- [x] reference atlas를 CS231n 30개 + PRML 38개 = 총 68개 SVG로 확장
 - [x] 기존 simple diagram 일부는 종합 페이지에서 중복되지 않도록 비활성화
 - [x] build / validate / GitHub Pages deploy 성공
 - [x] figure를 1열 전체 폭으로 표시하여 크기 문제 완화
@@ -215,13 +216,13 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] forward propagation
 - [x] backpropagation
 - [x] nonlinear decision boundary
-- [ ] regularization and early stopping
+- [x] regularization and early stopping
 
 ## 2-6. Chapter 6 — Kernel Methods
 
 - [x] input space → feature space mapping
 - [x] kernel trick
-- [ ] polynomial kernel
+- [x] polynomial kernel
 - [x] RBF kernel similarity 변화
 - [x] Gaussian Process mean / uncertainty band
 - [x] kernel matrix heatmap
@@ -261,7 +262,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
   - log evidence gap
 - [x] mean-field factorization
 - [x] coordinate ascent VI intuition
-- [ ] expectation propagation이 VI와 어떻게 다른지 간단 비교
+- [x] expectation propagation이 VI와 어떻게 다른지 간단 비교
 
 ## 2-11. Chapter 11 — Sampling Methods
 
@@ -281,8 +282,8 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] reconstruction
 - [x] eigenvalue / explained variance
 - [x] PPCA generative model
-- [ ] factor analysis comparison
-- [ ] ICA intuition
+- [x] factor analysis comparison
+- [x] ICA intuition
 
 ## 2-13. Chapter 13 — Sequential Data
 
@@ -299,7 +300,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] Bayesian model averaging
 - [x] simple ensemble averaging
 - [x] boosting intuition
-- [ ] decision tree / ensemble concept
+- [x] decision tree / ensemble concept
 - [x] mixture of experts
 - [x] gating network
 - [x] bias/variance reduction through ensembles

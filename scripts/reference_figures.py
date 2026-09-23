@@ -3224,7 +3224,181 @@ def _pca_spectrum(x, y, w, h):
 
 
 
+
+def _early_stopping(x, y, w, h):
+    """Training/validation loss with a validation-selected stopping point."""
+    left=x+38; right=x+w-25; top=y+48; bottom=y+h-50
+    parts=[f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>']
+    train=f'M{left+8} {top+55} C{x+w*.30} {top+105} {x+w*.55} {bottom-35} {right-10} {bottom-18}'
+    val=f'M{left+8} {top+62} C{x+w*.30} {top+115} {x+w*.48} {bottom-65} {x+w*.62} {bottom-74} C{x+w*.75} {bottom-82} {x+w*.86} {bottom-58} {right-10} {bottom-42}'
+    parts += [
+        f'<path d="{train}" stroke="#2454d8" stroke-width="4" fill="none"/>',
+        f'<path d="{val}" stroke="#a24d18" stroke-width="4" fill="none"/>',
+        f'<path d="M{x+w*.62} {top+25} V{bottom}" stroke="#08796f" stroke-width="3" stroke-dasharray="7 5"/>',
+        f'<text x="{left+8}" y="{top+18}" class="small" fill="#2454d8">training loss</text>',
+        f'<text x="{left+118}" y="{top+18}" class="small" fill="#a24d18">validation loss</text>',
+        f'<text x="{x+w*.62+8}" y="{top+42}" class="small" fill="#08796f">best validation point</text>',
+    ]
+    return "".join(parts)
+
+
+def _nn_regularization_paths(x, y, w, h):
+    """Three common controls on neural-network complexity."""
+    rows=[
+        ("weight penalty", "discourage large weights", "#edf3ff"),
+        ("early stopping", "stop before validation degrades", "#e9f7f2"),
+        ("data / augmentation", "constrain behavior with examples", "#fff7e9"),
+    ]
+    parts=[]
+    for i,(title,note,fill) in enumerate(rows):
+        yy=y+62+i*88
+        parts.append(f'<rect x="{x+28}" y="{yy}" width="{w-56}" height="64" rx="11" fill="{fill}" stroke="#c7d2e4"/>')
+        parts.append(f'<text x="{x+46}" y="{yy+27}" class="label">{title}</text>')
+        parts.append(f'<text x="{x+46}" y="{yy+49}" class="small">{note}</text>')
+    return "".join(parts)
+
+
+def _polynomial_kernel(x, y, w, h):
+    """Map a nonlinear 1D relation to polynomial features."""
+    parts=[
+        f'<text x="{x+25}" y="{y+48}" class="label">input x</text>',
+        f'<text x="{x+w*.56}" y="{y+48}" class="label">feature φ(x) = [x, x²]</text>',
+    ]
+    base=y+h*.62
+    # Left: alternating classes along x, not linearly separable by one threshold.
+    for xv, cls in [(-.8,0),(-.55,1),(-.30,0),(.05,1),(.35,0),(.65,1),(.86,0)]:
+        xx=x+w*.20+xv*w*.18
+        color="#2454d8" if cls==0 else "#08796f"
+        parts.append(f'<circle cx="{xx}" cy="{base}" r="8" fill="{color}"/>')
+    parts.append(f'<path d="M{x+35} {base+28} H{x+w*.42}" class="thin"/>')
+    # Right: schematic lifted parabola with a straight separator.
+    pts=[]
+    for xv, cls in [(-.8,0),(-.55,1),(-.30,0),(.05,1),(.35,0),(.65,1),(.86,0)]:
+        xx=x+w*.73+xv*w*.18
+        yy=y+h*.70-(xv*xv)*(h*.36)
+        color="#2454d8" if cls==0 else "#08796f"
+        pts.append((xx,yy))
+        parts.append(f'<circle cx="{xx}" cy="{yy}" r="8" fill="{color}"/>')
+    parts.append(f'<path d="M{x+w*.52} {y+h*.52} L{x+w*.96} {y+h*.52}" stroke="#a24d18" stroke-width="3"/>')
+    parts.append(f'<text x="{x+w*.70}" y="{y+h*.48}" class="small" fill="#a24d18">linear separator in feature space</text>')
+    parts.append(f'<text x="{x+25}" y="{y+h-28}" class="small">kernel computes polynomial-feature inner products implicitly</text>')
+    return "".join(parts)
+
+
+def _ep_vi_compare(x, y, w, h):
+    """Conceptual distinction between mean-field VI and expectation propagation."""
+    parts=[]
+    cols=[(x+22,"Variational inference","global q(z)","often KL(q || p)","#edf3ff","#2454d8"),
+          (x+w/2+10,"Expectation propagation","site approximations","local moment matching","#e9f7f2","#08796f")]
+    cw=w/2-32
+    for ox,title,line1,line2,fill,color in cols:
+        parts.append(f'<rect x="{ox}" y="{y+62}" width="{cw}" height="{h-125}" rx="13" fill="{fill}" stroke="{color}" stroke-opacity=".55"/>')
+        parts.append(f'<text x="{ox+cw/2}" y="{y+95}" text-anchor="middle" class="label">{title}</text>')
+        parts.append(f'<text x="{ox+22}" y="{y+135}" class="body">{line1}</text>')
+        parts.append(f'<text x="{ox+22}" y="{y+168}" class="body">{line2}</text>')
+        if "Variational" in title:
+            parts.append(f'<ellipse cx="{ox+cw*.53}" cy="{y+255}" rx="{cw*.22}" ry="55" fill="none" stroke="#a24d18" stroke-width="3"/>')
+            parts.append(f'<ellipse cx="{ox+cw*.49}" cy="{y+255}" rx="{cw*.14}" ry="38" fill="#2454d8" fill-opacity=".18" stroke="#2454d8" stroke-width="3"/>')
+            parts.append(f'<text x="{ox+22}" y="{y+h-45}" class="small">single tractable q may focus on one mode</text>')
+        else:
+            for j in range(3):
+                cx=ox+cw*(.32+.18*j)
+                parts.append(f'<circle cx="{cx}" cy="{y+250}" r="{36-5*j}" fill="#08796f" fill-opacity="{.12+.06*j}" stroke="#08796f" stroke-width="2"/>')
+            parts.append(f'<text x="{ox+22}" y="{y+h-45}" class="small">refine one factor/site, match moments, iterate</text>')
+    return "".join(parts)
+
+
+def _factor_analysis_compare(x, y, w, h):
+    """PCA versus factor-analysis noise structure."""
+    parts=[]
+    for idx,(title,noise_label) in enumerate([("PCA / PPCA","isotropic residual"),("Factor Analysis","feature-specific noise")]):
+        ox=x+idx*w/2
+        parts.append(f'<text x="{ox+w/4}" y="{y+48}" text-anchor="middle" class="label">{title}</text>')
+        # latent factor
+        parts.append(f'<circle cx="{ox+w*.12}" cy="{y+150}" r="25" fill="#2454d8"/>')
+        parts.append(f'<text x="{ox+w*.12}" y="{y+156}" text-anchor="middle" class="white">z</text>')
+        for j in range(3):
+            yy=y+95+j*65
+            parts.append(_arrow(ox+w*.17, y+150, ox+w*.34, yy))
+            parts.append(f'<circle cx="{ox+w*.38}" cy="{yy}" r="22" fill="#e9f7f2" stroke="#8ccdbb"/>')
+            parts.append(f'<text x="{ox+w*.38}" y="{yy+6}" text-anchor="middle" class="label">x{j+1}</text>')
+            nr=9 if idx==0 else [6,12,18][j]
+            parts.append(f'<circle cx="{ox+w*.44}" cy="{yy}" r="{nr}" fill="#e0ae82" fill-opacity=".65"/>')
+        parts.append(f'<text x="{ox+w*.23}" y="{y+h-38}" text-anchor="middle" class="small">{noise_label}</text>')
+    return "".join(parts)
+
+
+def _ica_unmixing(x, y, w, h):
+    """Observed linear mixtures unmixed into statistically independent sources."""
+    parts=[
+        f'<text x="{x+32}" y="{y+45}" class="label">independent sources s</text>',
+        f'<text x="{x+w*.40}" y="{y+45}" class="label">observed mixtures x = A s</text>',
+        f'<text x="{x+w*.76}" y="{y+45}" class="label">unmix W x</text>',
+    ]
+    # source waveforms
+    for k,color in enumerate(["#2454d8","#08796f"]):
+        yy=y+110+k*95
+        path=[]
+        for i in range(9):
+            xx=x+28+i*22
+            val=(i%2 if k==0 else ((i*3)%5)/4)
+            py=yy-25*val
+            path.append(f'{xx},{py}')
+        parts.append(f'<polyline points="{" ".join(path)}" fill="none" stroke="{color}" stroke-width="3"/>')
+    parts.append(_arrow(x+w*.25,y+165,x+w*.35,y+165))
+    # mixtures
+    for k,color in enumerate(["#6d7f9b","#a24d18"]):
+        yy=y+110+k*95
+        parts.append(f'<path d="M{x+w*.40} {yy} C{x+w*.48} {yy-45} {x+w*.53} {yy+35} {x+w*.60} {yy-10}" stroke="{color}" stroke-width="3" fill="none"/>')
+    parts.append(_arrow(x+w*.64,y+165,x+w*.73,y+165))
+    for k,color in enumerate(["#2454d8","#08796f"]):
+        yy=y+110+k*95
+        parts.append(f'<path d="M{x+w*.77} {yy} C{x+w*.83} {yy-40 if k==0 else yy+20} {x+w*.90} {yy+30 if k==0 else yy-35} {x+w*.96} {yy-5}" stroke="{color}" stroke-width="3" fill="none"/>')
+    parts.append(f'<text x="{x+28}" y="{y+h-30}" class="small">linear mixtures → statistically independent components</text>')
+    return "".join(parts)
+
+
+def _tree_ensemble(x, y, w, h):
+    """Parallel decision trees combined by vote or averaging."""
+    parts=[]
+    tree_x=[x+80,x+w*.32,x+w*.54]
+    for tx in tree_x:
+        root=(tx,y+95)
+        children=[(tx-28,y+150),(tx+28,y+150)]
+        leaves=[(tx-42,y+205),(tx-14,y+205),(tx+14,y+205),(tx+42,y+205)]
+        parts.append(f'<circle cx="{root[0]}" cy="{root[1]}" r="12" fill="#2454d8"/>')
+        for ch in children:
+            parts.append(f'<path d="M{root[0]} {root[1]+12} L{ch[0]} {ch[1]-10}" class="thin"/>')
+            parts.append(f'<circle cx="{ch[0]}" cy="{ch[1]}" r="10" fill="#89a9ec"/>')
+        for j,leaf in enumerate(leaves):
+            ch=children[0 if j<2 else 1]
+            parts.append(f'<path d="M{ch[0]} {ch[1]+10} L{leaf[0]} {leaf[1]-7}" class="thin"/>')
+            parts.append(f'<rect x="{leaf[0]-8}" y="{leaf[1]-7}" width="16" height="14" rx="3" fill="#e9f7f2" stroke="#08796f"/>')
+    parts.append(_arrow(x+w*.64,y+150,x+w*.73,y+150))
+    parts.append(f'<rect x="{x+w*.76}" y="{y+103}" width="{w*.20}" height="94" rx="12" fill="#2454d8"/>')
+    parts.append(f'<text x="{x+w*.86}" y="{y+137}" text-anchor="middle" class="white">combine</text>')
+    parts.append(f'<text x="{x+w*.86}" y="{y+166}" text-anchor="middle" class="white">vote / average</text>')
+    parts.append(f'<text x="{x+28}" y="{y+h-32}" class="small">bagging: parallel diversity · boosting: sequential correction</text>')
+    return "".join(parts)
+
+
+
 def _panel_content(kind, x, y, w, h, data):
+    if kind=="early_stopping":
+        return _early_stopping(x,y,w,h)
+    if kind=="nn_regularization_paths":
+        return _nn_regularization_paths(x,y,w,h)
+    if kind=="polynomial_kernel":
+        return _polynomial_kernel(x,y,w,h)
+    if kind=="ep_vi_compare":
+        return _ep_vi_compare(x,y,w,h)
+    if kind=="factor_analysis_compare":
+        return _factor_analysis_compare(x,y,w,h)
+    if kind=="ica_unmixing":
+        return _ica_unmixing(x,y,w,h)
+    if kind=="tree_ensemble":
+        return _tree_ensemble(x,y,w,h)
+
     if kind=="regularization_objective":
         return _regularization_objective(x,y,w,h)
     if kind=="l2_shrink":
@@ -3667,6 +3841,24 @@ FIGURES = {
         dict(title="scree bars and cumulative variance",kind="pca_spectrum"),
     ]),
 
+    "prml-nn-regularization.svg": dict(title="Neural-network regularization and early stopping",subtitle="Regularization controls effective complexity; validation loss can select when to stop training.",panels=[
+        dict(title="validation-selected early stopping",kind="early_stopping"),
+        dict(title="complementary regularization mechanisms",kind="nn_regularization_paths"),
+    ]),
+    "prml-polynomial-kernel.svg": dict(title="Polynomial kernel intuition",subtitle="Polynomial kernels evaluate similarity in an implicit feature space containing interaction and power terms.",panels=[
+        dict(title="nonlinear input relation → polynomial features",kind="polynomial_kernel"),
+    ]),
+    "prml-ep-vi.svg": dict(title="Expectation propagation vs variational inference",subtitle="VI optimizes a global approximation; EP iteratively refines local site approximations using moment matching.",panels=[
+        dict(title="two approximation strategies",kind="ep_vi_compare"),
+    ]),
+    "prml-factor-ica.svg": dict(title="Factor analysis and independent components",subtitle="Factor Analysis uses latent factors with feature-specific noise; ICA seeks statistically independent source components.",panels=[
+        dict(title="PCA / PPCA vs Factor Analysis",kind="factor_analysis_compare"),
+        dict(title="ICA: mixtures → independent sources",kind="ica_unmixing"),
+    ]),
+    "prml-tree-ensemble.svg": dict(title="Decision trees and ensembles",subtitle="Tree ensembles combine multiple partitioning models; bagging and boosting obtain diversity in different ways.",panels=[
+        dict(title="parallel trees → vote / average",kind="tree_ensemble"),
+    ]),
+
     "prml-generative-discriminative.svg": dict(title="Generative and discriminative classification",subtitle="Generative models build class-conditionals; discriminative models directly parameterize class posteriors or boundaries.",panels=[
         dict(title="two modelling routes",kind="generative_discriminative"),
         dict(title="logistic vs probit link",kind="sigmoid_probit"),
@@ -3808,16 +4000,16 @@ REFERENCE_VISUALS = {
     ("prml","ch2"): ["prml-gaussian-beta.svg","prml-discrete-map.svg","prml-dirichlet-multinomial.svg"],
     ("prml","ch3"): ["prml-regression-basis.svg","prml-bias-reg.svg"],
     ("prml","ch4"): ["prml-sigmoid-boundary.svg","prml-multiclass.svg","prml-generative-discriminative.svg"],
-    ("prml","ch5"): ["prml-nn-boundary.svg","prml-forward-backprop.svg"],
-    ("prml","ch6"): ["prml-kernel-feature.svg","prml-kernel-gp.svg"],
+    ("prml","ch5"): ["prml-nn-boundary.svg","prml-forward-backprop.svg","prml-nn-regularization.svg"],
+    ("prml","ch6"): ["prml-kernel-feature.svg","prml-polynomial-kernel.svg","prml-kernel-gp.svg"],
     ("prml","ch7"): ["prml-svm.svg","prml-svm-c-rvm.svg"],
     ("prml","ch8"): ["prml-graph-mrf.svg","prml-graph-inference.svg"],
     ("prml","ch9"): ["prml-gmm-em.svg","prml-em-evolution.svg"],
-    ("prml","ch10"): ["prml-vi-elbo.svg","prml-vi-meanfield.svg"],
+    ("prml","ch10"): ["prml-vi-elbo.svg","prml-vi-meanfield.svg","prml-ep-vi.svg"],
     ("prml","ch11"): ["prml-monte-mcmc.svg","prml-rejection-sampling.svg","prml-sampling-diagnostics.svg"],
-    ("prml","ch12"): ["prml-pca-dim.svg","prml-pca-spectrum.svg","prml-ppca.svg"],
+    ("prml","ch12"): ["prml-pca-dim.svg","prml-pca-spectrum.svg","prml-ppca.svg","prml-factor-ica.svg"],
     ("prml","ch13"): ["prml-hmm-filter.svg","prml-state-space.svg"],
-    ("prml","ch14"): ["prml-ensemble-moe.svg","prml-ensemble-boosting.svg"],
+    ("prml","ch14"): ["prml-ensemble-moe.svg","prml-ensemble-boosting.svg","prml-tree-ensemble.svg"],
     ("prml","vision-bridge"): ["prml-vision-bridge.svg"],
 }
 
