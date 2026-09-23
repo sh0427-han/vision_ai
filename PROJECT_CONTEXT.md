@@ -22,6 +22,7 @@
 - 구조 설명은 SVG 등 실제 도식을 사용한다. 문자 화살표만 나열하지 않는다.
 - 직관이 핵심인 장면·비교 그림은 `assets/diagrams/illustrations/<chapter>/` 아래에 정적 illustration asset으로 직접 저장하고 페이지에서 사용한다. 모든 시각자료를 box/arrow generator로 만들지 않는다.
 - 정확한 축·수치·행렬·연산 순서가 핵심인 figure는 코드 생성 SVG/plot을 사용하고, 실제 장면·조명·채널·resize처럼 시각적 직관이 중요한 내용은 image-like illustration을 우선한다.
+- 실제 물체를 보여 주는 장면형 figure는 단순 path/ellipse로 그린 SVG 물체를 사용하지 않는다. 실사형 PNG/WebP asset을 사용하고, resize·조명 등 비교는 동일 raster source를 HTML/CSS 또는 정확한 image transform으로 재사용한다.
 - 그림·도식은 정보를 전달해야 한다. 가상 시각화를 실제 모델 결과로 표시하지 않는다.
 - 공통 CSS를 사용하고 본문 가독성, 모바일, 키보드 접근성, 인쇄를 고려한다.
 - 새 글은 기존 관련 글과 연결한다. 구현되지 않은 메뉴나 빈 페이지를 게시하지 않는다.
