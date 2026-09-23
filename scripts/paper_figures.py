@@ -762,6 +762,49 @@ def _pc_score_aggregation():
         660,
     )
 
+
+BUILDERS = {
+    "cnn-paper-overview.svg": _cnn_overview,
+    "cnn-paper-convolution.svg": _cnn_convolution,
+    "cnn-paper-multichannel.svg": _cnn_multichannel,
+    "cnn-paper-stride-padding.svg": _cnn_stride_padding,
+    "cnn-paper-receptive-field.svg": _cnn_receptive,
+    "cnn-paper-pooling.svg": _cnn_pooling,
+    "vit-paper-overview.svg": _vit_overview,
+    "vit-paper-patch-embedding.svg": _vit_patch_embedding,
+    "vit-paper-cls-position.svg": _vit_cls_position,
+    "vit-paper-attention.svg": _vit_attention,
+    "vit-paper-multihead.svg": _vit_multihead,
+    "vit-paper-attention-map.svg": _vit_attention_map,
+    "patchcore-paper-overview.svg": _pc_overview,
+    "patchcore-paper-features.svg": _pc_features,
+    "patchcore-paper-coreset.svg": _pc_coreset,
+    "patchcore-paper-nearest.svg": _pc_nearest,
+    "patchcore-paper-heatmap.svg": _pc_heatmap,
+    "patchcore-paper-score.svg": _pc_score_aggregation,
+}
+
+PAPER_FIGURE_META = {
+    "cnn-paper-overview.svg": ("CNN overview", "입력에서 feature hierarchy와 prediction까지 한 화면에서 연결합니다."),
+    "cnn-paper-convolution.svg": ("Convolution mechanics", "3×3 patch와 kernel의 곱셈-합산을 실제 숫자 grid로 보여줍니다."),
+    "cnn-paper-multichannel.svg": ("Multi-channel convolution", "RGB channel별 response가 output channel로 합쳐지는 구조입니다."),
+    "cnn-paper-stride-padding.svg": ("Stride and padding", "stride와 padding에 따른 sampling과 output 크기를 비교합니다."),
+    "cnn-paper-receptive-field.svg": ("Receptive-field growth", "layer depth에 따라 입력에서 연결되는 공간 범위가 넓어지는 모습을 보여줍니다."),
+    "cnn-paper-pooling.svg": ("Pooling", "max/average pooling의 수치 예와 의미를 비교합니다."),
+    "vit-paper-overview.svg": ("Vision Transformer overview", "image에서 patch token을 거쳐 classification까지 이어지는 전체 과정입니다."),
+    "vit-paper-patch-embedding.svg": ("Patch embedding", "patching, flatten, projection을 숫자/벡터 관점에서 연결합니다."),
+    "vit-paper-cls-position.svg": ("CLS and position", "CLS token과 positional embedding이 sequence에 들어가는 방식을 보여줍니다."),
+    "vit-paper-attention.svg": ("Self-attention", "Q/K/V, attention matrix, weighted value mixing을 한 figure로 연결합니다."),
+    "vit-paper-multihead.svg": ("Multi-head attention", "여러 head가 서로 다른 token relation을 병렬로 표현하는 개념도입니다."),
+    "vit-paper-attention-map.svg": ("Attention heatmap", "attention matrix를 image patch 위치에 대응한 heatmap으로 읽는 예시입니다."),
+    "patchcore-paper-overview.svg": ("PatchCore overview", "정상 feature memory와 test nearest-neighbor distance를 연결합니다."),
+    "patchcore-paper-features.svg": ("Local feature descriptors", "중간 CNN feature map에서 지역 descriptor가 만들어지는 과정을 보여줍니다."),
+    "patchcore-paper-coreset.svg": ("Coreset selection", "전체 normal feature cloud와 representative subset을 scatter 형태로 비교합니다."),
+    "patchcore-paper-nearest.svg": ("Nearest-neighbor scoring", "feature space에서 정상과 가까운 query, 먼 query의 거리 차이를 보여줍니다."),
+    "patchcore-paper-heatmap.svg": ("Anomaly heatmap", "patch score가 spatial heatmap과 overlay로 변환되는 과정을 보여줍니다."),
+    "patchcore-paper-score.svg": ("Image-level score", "patch-score distribution을 image-level decision으로 연결하는 개념입니다."),
+}
+
 def build_paper_figures(output_dir):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
