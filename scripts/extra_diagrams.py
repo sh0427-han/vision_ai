@@ -388,7 +388,7 @@ def _pixels_human_array():
         [22,110,190,132,29],
         [17,30,42,33,18],
     ]
-    start_x,start_y,cell=790,220,48
+    start_x,start_y,cell=820,215,37
     for r,row in enumerate(vals):
         for col,v in enumerate(row):
             shade=max(0,min(255,245-v//2))
@@ -400,7 +400,7 @@ def _pixels_human_array():
                 f'<text x="{start_x+col*cell+21}" y="{start_y+r*cell+27}" text-anchor="middle" '
                 f'font-size="13" fill="#203455">{v}</text>'
             )
-    body.append('<text x="915" y="415" text-anchor="middle" class="m">조명·노이즈가 바뀌면 숫자도 바뀜</text>')
+    body.append('<text x="915" y="430" text-anchor="middle" class="m">조명·노이즈가 바뀌면 숫자도 바뀜</text>')
     body.append(_arrow(505,295,680,295))
     return _frame("사람이 보는 이미지 vs 컴퓨터 입력", "같은 장면도 모델에는 픽셀 값으로 전달됩니다.", "".join(body))
 
@@ -633,35 +633,58 @@ def _roc_pr_visual():
     body += [
         '<path d="M145 390 C170 310 225 255 305 235 C380 215 440 212 490 210" stroke="#2454d8" stroke-width="6" fill="none"/>',
         '<path d="M145 400 L490 220" stroke="#a8b5c8" stroke-width="3" stroke-dasharray="8 6"/>',
-        '<path d="M725 245 C790 255 845 275 900 300 C960 328 1010 350 1070 385" stroke="#08796f" stroke-width="6" fill="none"/>',
+        '<path d="M725 248 L780 242 L830 270 L875 260 L925 305 L970 292 L1020 352 L1070 338" stroke="#08796f" stroke-width="6" fill="none"/>',
         '<text x="310" y="320" text-anchor="middle" class="m">threshold sweep</text>',
-        '<text x="890" y="215" text-anchor="middle" class="m">class imbalance에서 PR도 함께 확인</text>',
+        '<text x="890" y="210" text-anchor="middle" class="m">schematic: precision은 recall에 대해 단조일 필요가 없음</text>',
     ]
     return _frame("ROC curve와 Precision–Recall curve", "두 curve 모두 threshold를 바꾸며 얻는 성능 trade-off를 보여줍니다.", "".join(body))
 
 
 def _train_leakage_visual():
+    """Contrast frame-random leakage with group-preserving assignment."""
     body=[
         '<text x="300" y="145" text-anchor="middle" class="l">나쁜 예: frame random split</text>',
         '<text x="900" y="145" text-anchor="middle" class="l">좋은 예: grouped split</text>',
     ]
     colors=["#8faee8","#8ccdbb","#e0ae82","#b8a6d9"]
     labels=["video A","video B","video C","video D"]
+    random_tags=["Tr","V","Tr","Te","V","Tr"]
+    split_x={"Tr":650,"V":835,"Te":1020}
+    grouped_assignment=["Tr","Tr","V","Te"]
+
     for i,(color,label) in enumerate(zip(colors,labels)):
         y=190+i*58
         body.append(f'<text x="70" y="{y+24}" class="m">{label}</text>')
-        for j in range(6):
-            body.append(f'<rect x="{150+j*58}" y="{y}" width="46" height="38" rx="5" fill="{color}" opacity="{0.55+0.07*j}"/>')
-        # random frames spread across train/val/test columns
-        for j in range(6):
-            dx=650 + (j%3)*145 + (j//3)*36
-            body.append(f'<rect x="{dx}" y="{y}" width="30" height="38" rx="4" fill="{color}" opacity="{0.6+0.05*j}"/>')
+
+        # Same source video is randomly scattered across train/val/test.
+        for j,tag in enumerate(random_tags):
+            x=150+j*58
+            body.append(
+                f'<rect x="{x}" y="{y}" width="46" height="38" rx="5" '
+                f'fill="{color}" opacity="{0.58+0.06*j}" stroke="#ffffff" stroke-width="2"/>'
+            )
+            body.append(
+                f'<text x="{x+23}" y="{y+25}" text-anchor="middle" '
+                f'font-size="12" font-weight="700" fill="#203455">{tag}</text>'
+            )
+
+        # All frames from one video are kept in exactly one split.
+        tag=grouped_assignment[i]
+        x0=split_x[tag]
+        for j in range(4):
+            x=x0+j*27
+            body.append(
+                f'<rect x="{x}" y="{y}" width="22" height="38" rx="4" '
+                f'fill="{color}" opacity="{0.68+0.06*j}"/>'
+            )
+
     body += [
-        '<text x="235" y="460" text-anchor="middle" class="m">같은 원본의 near-duplicate가 split 사이에 섞일 수 있음</text>',
-        '<text x="685" y="460" class="m">Train</text><text x="830" y="460" class="m">Val</text><text x="975" y="460" class="m">Test</text>',
+        '<text x="300" y="460" text-anchor="middle" class="m">한 원본의 near-duplicate가 Train/Val/Test에 동시에 들어갈 수 있음</text>',
+        '<text x="700" y="460" text-anchor="middle" class="m">Train</text>',
+        '<text x="885" y="460" text-anchor="middle" class="m">Val</text>',
+        '<text x="1070" y="460" text-anchor="middle" class="m">Test</text>',
     ]
     return _frame("좋은 분할 vs Data leakage", "영상·burst 데이터는 원본 그룹 전체를 하나의 split에 배정해야 누수를 줄일 수 있습니다.", "".join(body))
-
 
 def _resnet_plain_vs_visual():
     body=[
@@ -678,9 +701,9 @@ def _resnet_plain_vs_visual():
         '<text x="1030" y="268" text-anchor="middle" class="l">+</text>',
         _arrow(770,260,810,260),
         _arrow(960,260,994,260),
-        '<path d="M710 218 C760 150 960 150 1030 224" stroke="#08796f" stroke-width="5" fill="none"/>',
+        '<path d="M710 218 C775 175 950 175 1030 224" stroke="#08796f" stroke-width="5" fill="none"/>',
         '<polygon points="1030,224 1014,209 1038,209" fill="#08796f"/>',
-        '<text x="870" y="150" text-anchor="middle" class="m">identity shortcut x</text>',
+        '<text x="870" y="195" text-anchor="middle" class="m">identity shortcut x</text>',
         '<text x="300" y="385" text-anchor="middle" class="m">H(x)를 직접 근사</text>',
         '<text x="900" y="385" text-anchor="middle" class="m">H(x)=F(x)+x</text>',
     ]
@@ -760,7 +783,7 @@ def _vi_visual():
 def _ensemble_visual():
     body=[_card(50,205,140,100,"Input x","")]
     ys=[135,235,335]
-    for i,yy in enumerate(ys):
+    for i,yy in enumerate(ys, start=1):
         body.append(_card(315,yy,170,72,f"Model {chr(64+i)}","prediction"))
         body.append(_arrow(190,255,309,yy+36))
     body += [
