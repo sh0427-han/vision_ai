@@ -1167,7 +1167,7 @@ def _gradient_check(x, y, w, h):
     )
     parts.append(
         f'<text x="{x+w-165}" y="{y+38}" class="small">'
-        "example: error < 1e−5</text>"
+        "example: relative error ≈ 1e−6</text>"
     )
     return "".join(parts)
 
@@ -1267,7 +1267,7 @@ def _init_variance(x, y, w, h):
         )
     parts.append(
         f'<text x="{x+w/2}" y="{y+h-28}" text-anchor="middle" class="small">'
-        "schematic: variance should neither collapse nor explode across layers</text>"
+        "avoid variance collapse / explosion</text>"
     )
     return "".join(parts)
 
@@ -1485,7 +1485,7 @@ def _pca_projection(x, y, w, h):
         parts.append(f'<circle cx="{rx}" cy="{ry}" r="4" fill="#08796f"/>')
     parts.append(
         f'<text x="{x+18}" y="{y+34}" class="small">'
-        "orthogonal projection onto PC1; reconstruction stays on that 1D subspace</text>"
+        "orthogonal projection onto PC1</text>"
     )
     return "".join(parts)
 
@@ -1957,7 +1957,7 @@ def _receptive_field_growth(x, y, w, h):
         )
     parts.append(
         f'<text x="{x+w/2}" y="{y+h-28}" text-anchor="middle" class="small">'
-        "for stride 1, no dilation: each extra 3×3 layer adds 2 pixels per side span</text>"
+        "stride 1, no dilation: receptive field 3→5→7</text>"
     )
     return "".join(parts)
 
@@ -2151,7 +2151,7 @@ def _gmm_responsibility(x, y, w, h):
         )
     parts.append(
         f'<text x="{x+18}" y="{y+35}" class="small">'
-        "responsibility γₙₖ = p(zₖ=1 | xₙ): soft assignment, not a hard label</text>"
+        "γₙₖ = p(zₖ=1|xₙ): soft assignment</text>"
     )
     return "".join(parts)
 
