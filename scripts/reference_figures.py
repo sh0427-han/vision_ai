@@ -3281,7 +3281,7 @@ def _polynomial_kernel(x, y, w, h):
         parts.append(f'<circle cx="{xx}" cy="{yy}" r="8" fill="{color}"/>')
     parts.append(f'<path d="M{x+w*.52} {y+h*.52} L{x+w*.96} {y+h*.52}" stroke="#a24d18" stroke-width="3"/>')
     parts.append(f'<text x="{x+w*.70}" y="{y+h*.48}" class="small" fill="#a24d18">linear separator in feature space</text>')
-    parts.append(f'<text x="{x+25}" y="{y+h-28}" class="small">k(x,z)=(x z + c)^d computes inner products without explicitly storing all monomials</text>')
+    parts.append(f'<text x="{x+25}" y="{y+h-28}" class="small">kernel computes polynomial-feature inner products implicitly</text>')
     return "".join(parts)
 
 
@@ -3354,7 +3354,7 @@ def _ica_unmixing(x, y, w, h):
     for k,color in enumerate(["#2454d8","#08796f"]):
         yy=y+110+k*95
         parts.append(f'<path d="M{x+w*.77} {yy} C{x+w*.83} {yy-40 if k==0 else yy+20} {x+w*.90} {yy+30 if k==0 else yy-35} {x+w*.96} {yy-5}" stroke="{color}" stroke-width="3" fill="none"/>')
-    parts.append(f'<text x="{x+28}" y="{y+h-30}" class="small">ICA assumes a linear mixture and seeks components that are as statistically independent as possible</text>')
+    parts.append(f'<text x="{x+28}" y="{y+h-30}" class="small">linear mixtures → statistically independent components</text>')
     return "".join(parts)
 
 
@@ -3378,7 +3378,7 @@ def _tree_ensemble(x, y, w, h):
     parts.append(f'<rect x="{x+w*.76}" y="{y+103}" width="{w*.20}" height="94" rx="12" fill="#2454d8"/>')
     parts.append(f'<text x="{x+w*.86}" y="{y+137}" text-anchor="middle" class="white">combine</text>')
     parts.append(f'<text x="{x+w*.86}" y="{y+166}" text-anchor="middle" class="white">vote / average</text>')
-    parts.append(f'<text x="{x+28}" y="{y+h-32}" class="small">bagging/random forests seek diverse trees; boosting instead builds learners sequentially</text>')
+    parts.append(f'<text x="{x+28}" y="{y+h-32}" class="small">bagging: parallel diversity · boosting: sequential correction</text>')
     return "".join(parts)
 
 
