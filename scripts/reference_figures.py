@@ -140,6 +140,7 @@ def _curves(x, y, w, h, kind):
         ],
         "activations": [
             ("#2454d8", f'M{x+45} {y+h-55} L{x+w*.48} {y+h-55} L{x+w-40} {y+50}', "ReLU"),
+            ("#6d7f9b", f'M{x+45} {y+h-70} L{x+w*.48} {y+h-55} L{x+w-40} {y+65}', "Leaky ReLU"),
             ("#08796f", f'M{x+45} {y+h-70} C{x+w*.35} {y+h-70} {x+w*.48} {y+70} {x+w-40} {y+65}', "sigmoid"),
             ("#a24d18", f'M{x+45} {y+h-85} C{x+w*.35} {y+h-120} {x+w*.60} {y+85} {x+w-40} {y+55}', "tanh"),
         ],
@@ -158,6 +159,7 @@ def _curves(x, y, w, h, kind):
         "gaussian": [
             ("#2454d8", f'M{x+45} {y+h-50} C{x+w*.25} {y+h-50} {x+w*.35} {y+55} {x+w*.50} {y+55} C{x+w*.65} {y+55} {x+w*.75} {y+h-50} {x+w-35} {y+h-50}', "small σ"),
             ("#a24d18", f'M{x+45} {y+h-50} C{x+w*.18} {y+h-55} {x+w*.30} {y+115} {x+w*.50} {y+115} C{x+w*.70} {y+115} {x+w*.82} {y+h-55} {x+w-35} {y+h-50}', "large σ"),
+            ("#08796f", f'M{x+45} {y+h-50} C{x+w*.38} {y+h-50} {x+w*.48} {y+85} {x+w*.64} {y+85} C{x+w*.78} {y+85} {x+w*.85} {y+h-50} {x+w-35} {y+h-50}', "shifted μ"),
         ],
         "regression": [
             ("#2454d8", f'M{x+45} {y+h-60} L{x+w-40} {y+60}', "fit"),
@@ -748,9 +750,11 @@ def _basis_functions(x, y, w, h):
         f'<path d="M{left+5} {bottom-55} L{right-5} {top+45}" stroke="#2454d8" stroke-width="3" fill="none"/>',
         f'<path d="M{left+5} {bottom-25} C{x+w*.35} {top+35} {x+w*.62} {bottom-20} {right-5} {top+65}" stroke="#a24d18" stroke-width="3" fill="none"/>',
         f'<path d="M{left+5} {bottom-8} C{x+w*.34} {bottom-8} {x+w*.43} {top+55} {x+w*.52} {top+55} C{x+w*.62} {top+55} {x+w*.70} {bottom-8} {right-5} {bottom-8}" stroke="#08796f" stroke-width="3" fill="none"/>',
+        f'<path d="M{left+5} {bottom-18} C{x+w*.34} {bottom-18} {x+w*.45} {top+95} {x+w*.58} {top+95} C{x+w*.70} {top+95} {x+w*.78} {top+35} {right-5} {top+35}" stroke="#7f5fbf" stroke-width="3" fill="none"/>',
         f'<text x="{left+8}" y="{top+15}" class="small" fill="#2454d8">linear</text>',
         f'<text x="{left+70}" y="{top+15}" class="small" fill="#a24d18">polynomial</text>',
-        f'<text x="{left+162}" y="{top+15}" class="small" fill="#08796f">Gaussian basis</text>',
+        f'<text x="{left+8}" y="{top+37}" class="small" fill="#08796f">Gaussian</text>',
+        f'<text x="{left+92}" y="{top+37}" class="small" fill="#7f5fbf">sigmoid</text>',
     ])
     return "".join(parts)
 
