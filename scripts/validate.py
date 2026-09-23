@@ -58,6 +58,9 @@ for path, parser in pages.items():
 
 extra_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'extra').glob('*.svg'))
 paper_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'paper').glob('*.svg'))
+reference_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'reference').glob('*.svg'))
+if len(reference_diagrams) != 41:
+    errors.append(f'Expected 41 CS231n/PRML reference figures, found {len(reference_diagrams)}')
 if len(paper_diagrams) != 18:
     errors.append(f'Expected 18 paper-style diagrams, found {len(paper_diagrams)}')
 if len(extra_diagrams) < 60:
@@ -67,6 +70,7 @@ for svg_path in [
     *sorted((ROOT / 'assets' / 'diagrams').glob('*.svg')),
     *extra_diagrams,
     *paper_diagrams,
+    *reference_diagrams,
 ]:
     svg_text = svg_path.read_text(encoding='utf-8')
     if re.search(r'text\s*\{[^}]*fill\s*:', svg_text):

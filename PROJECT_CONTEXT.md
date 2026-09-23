@@ -75,3 +75,12 @@ CS231n 공개 강의 노트의 전체 학습 흐름과 Bishop PRML 14개 장 전
 - 패널은 (a), (b), (c)처럼 표시하고 실제 matrix, heatmap, scatter, feature map, score distribution 등 개념에 맞는 시각 표현을 사용한다.
 - paper-style figure는 `scripts/paper_figures.py`에서 생성하고 `PAPER_VISUALS`에서 섹션별 위치를 관리한다.
 - 같은 개념의 단순 diagram과 paper-style figure를 한 페이지에 중복 배치하지 않는다.
+
+
+## CS231n / PRML 시각 아틀라스
+
+- `scripts/reference_figures.py`에서 CS231n 22개, PRML 19개, 총 41개의 대형 multi-panel SVG figure를 생성한다.
+- CS231n은 kNN, split, linear classifier, softmax/hinge, optimization/backprop, activation/init/BN/regularization/dropout, CNN, architecture, transfer learning, detection/segmentation, visualization, modern topics를 시각적으로 커버한다.
+- PRML은 Bayes/확률분포, Gaussian/Beta, regression, bias-variance, logistic/multiclass, neural network, kernel/SVM, graphical model/MRF, GMM/EM, VI/ELBO, Monte Carlo/MCMC, PCA/PPCA, HMM, ensemble/MoE까지 시각적으로 커버한다.
+- 종합 강의 페이지에서는 같은 개념의 기존 simple diagram을 중복 삽입하지 않고 reference figure를 우선한다.
+- figure는 논문 원본을 복제하지 않고, 개념을 설명하기 위해 독자 제작한 scatter/curve/heatmap/matrix/network figure로 구성한다.
