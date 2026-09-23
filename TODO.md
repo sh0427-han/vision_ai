@@ -2,7 +2,7 @@
 
 > Repository: https://github.com/sh0427-han/vision_ai  
 > Pages: https://sh0427-han.github.io/vision_ai/  
-> 최근 inventory 재검수 기준 main commit: `d0103b19a3e5d68e8da69c383a007af9d43775aa`
+> 최근 inventory 재검수 기준 main commit: `dea42ace075ced294702d26ddd7bc1b35ff0f959`
 
 ## 작업 목적
 
@@ -15,6 +15,8 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] Pages artifact raster contact-sheet 전수 QA: reference 68개 + paper-style 18개 + extra 67개 + core SVG 10개 검수, 문제 항목은 full-size 재검수
+- [x] raster QA에서 발견한 RGB/QKV/multi-head/ensemble/task output/U-Net comparison/grouped split/ROC-PR/ResNet 구조 오류와 Korean font fallback 교정
 - [x] PRML 내용 TODO의 마지막 6개 보강: early stopping, polynomial kernel, EP vs VI, Factor Analysis, ICA, decision-tree ensemble
 - [x] 핵심 누락 figure 8개 추가: regularization/L2, convolution sliding/edge response, posterior predictive, Dirichlet, SVM C/RVM, EM evolution, rejection sampling, PCA explained variance
 - [x] Pages artifact 전체 raster QA에서 Korean SVG fallback 문제 재현 후 NanumGothic/Noto CJK/Malgun fallback 보강
@@ -52,13 +54,13 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 확인된 문제
 
-- [ ] 일부 SVG 내부 텍스트가 패널 경계/도형과 겹치거나 잘리는지 계속 확인한다. (현재 확인된 pooling hierarchy overlap은 수정)
+- [x] 데스크톱 raster artifact 기준 SVG 내부 text overflow/겹침 전수 확인 및 발견 항목 교정
 - [ ] figure 내부에 설명문이 너무 많아 축소 시 읽기 어렵다.
 - [ ] 여러 figure가 box / pipeline / bar 형태로 비슷하게 보여 시각적 다양성이 부족하다.
 - [ ] 일부 개념은 “그림 수”는 많지만 핵심 intuition을 보여주는 대표 figure가 부족하다.
 - [ ] 일부 figure는 실제 plot/heatmap/feature map보다 개념 요약 카드에 가깝다.
 - [ ] 모바일/좁은 화면에서 text와 panel spacing을 다시 확인해야 한다. (SVG 내부 Korean font fallback은 보강)
-- [ ] 모든 figure의 최종 브라우저 육안 QA는 계속 진행 중. Pages artifact를 rasterize해 reference/paper/extra를 검수했고, 현재 발견된 semantic curve 오류는 교정 완료했으나 모바일 실제 브라우저와 한글 font fallback 확인이 남아 있다.
+- [ ] 데스크톱 Pages artifact raster QA는 완료. 모바일 실제 브라우저의 scroll/spacing과 플랫폼별 Korean font fallback 최종 확인이 남아 있다.
 
 ### 공통 수정 원칙
 
