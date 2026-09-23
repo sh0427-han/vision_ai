@@ -96,8 +96,8 @@ def _cnn_overview():
     b.append(_panel(150,415,900,250,"f","Feature hierarchy is learned, not manually assigned"))
     b.append('<text x="200" y="485" class="body">초기 layer: 밝기 변화·방향성 경계 같은 단순 패턴에 반응</text>')
     b.append('<text x="200" y="530" class="body">중간 layer: 여러 edge를 조합해 반복 무늬·모서리·부분 형태 표현</text>')
-    b.append('<text x="200" y="575" class="body">깊은 layer: task에 유용한 복합 특징을 형성하지만, 각 channel이 항상 사람이 붙인 의미와 1:1 대응하지는 않음</text>')
-    b.append('<text x="200" y="620" class="small">그림은 개념적 예시이며 실제 학습된 feature map은 모델·데이터에 따라 달라집니다.</text>')
+    b.append('<text x="200" y="575" class="body">깊은 layer: 더 넓은 문맥을 조합한 task-dependent 특징</text>')
+    b.append('<text x="200" y="620" class="small">개념 예시 · 실제 feature는 모델·데이터에 따라 달라짐</text>')
     return _svg("Figure 1. CNN: pixels → local responses → task features",
                 "논문 figure처럼 입력·중간 표현·출력을 한 화면에서 연결합니다.", "".join(b), 720)
 
@@ -365,9 +365,9 @@ def _vit_overview():
         b.append(f'<text x="1018" y="{y+43}" class="small">{name}</text>')
     for x in [240,480,720,960]: b.append(_arrow(x,240,x+25,240))
     b.append(_panel(165,430,870,210,"f","Core idea"))
-    b.append('<text x="205" y="500" class="body">이미지를 작은 patch로 나누고 각 patch를 token vector로 바꾼 뒤, self-attention으로 token 간 관계를 학습합니다.</text>')
-    b.append('<text x="205" y="550" class="body">CNN의 sliding kernel 대신 token sequence + attention을 기본 계산 단위로 사용합니다.</text>')
-    b.append('<text x="205" y="600" class="small">ViT-B/16 예: 224×224 image → 16×16 patch → 196 patch tokens + 1 CLS token.</text>')
+    b.append('<text x="205" y="500" class="body">patch → token → self-attention으로 token 관계 학습</text>')
+    b.append('<text x="205" y="550" class="body">CNN: local shared kernel · ViT: token sequence + attention</text>')
+    b.append('<text x="205" y="600" class="small">ViT-B/16: 224², 16² patch → 196 tokens + CLS</text>')
     return _svg("Figure 1. Vision Transformer overview",
                 "image → patch → token → transformer encoder → classification head", "".join(b), 690)
 
@@ -458,8 +458,8 @@ def _vit_cls_position():
     b.append('<text x="100" y="395" class="label">= Transformer input sequence</text>')
     for i,x in enumerate(xs):
         b.append(f'<rect x="{x}" y="430" width="105" height="55" rx="10" fill="{"#dbe7fb" if i else "#7fa4ec"}" stroke="#8faee8"/>')
-    b.append('<text x="100" y="550" class="body">CLS는 처음부터 이미지 의미를 아는 token이 아니라, encoder를 거치며 patch들과 정보를 주고받는 학습 가능한 vector입니다.</text>')
-    b.append('<text x="100" y="585" class="small">position embedding은 token이 원래 이미지에서 어디에 있었는지에 대한 위치 정보를 제공합니다.</text>')
+    b.append('<text x="100" y="550" class="body">CLS = 학습 가능한 token · encoder에서 patch 정보와 상호작용</text>')
+    b.append('<text x="100" y="585" class="small">position embedding = token의 원래 patch 위치 정보</text>')
     return _svg("Figure 3. CLS token and positional embedding",
                 "content embedding에 위치 정보를 더하고, 분류용 CLS token을 sequence 앞에 붙입니다.", "".join(b), 670)
 
@@ -545,8 +545,8 @@ def _vit_multihead():
     )
     b.append(
         '<text x="115" y="560" class="small">'
-        '각 head의 사람이 붙인 의미는 고정되지 않습니다. '
-        '서로 다른 learned projections에서 관계를 병렬 계산하는 예시입니다.</text>'
+        'Head 의미는 고정되지 않음 · '
+        '서로 다른 projection의 관계 패턴 예시입니다.</text>'
     )
     return _svg(
         "Figure 5. Multi-head self-attention",
@@ -645,7 +645,7 @@ def _pc_features():
             fill="#2454d8" if (r,c) in [(1,3),(2,3),(3,3)] else "#e6eefb"
             b.append(f'<rect x="{x}" y="{y}" width="45" height="45" rx="6" fill="{fill}" stroke="#afc2e7"/>')
     b.append('<text x="820" y="510" class="body">각 spatial location → D-dimensional feature vector</text>')
-    b.append('<text x="820" y="550" class="small">PatchCore의 “patch”는 RGB crop 자체가 아니라 CNN feature map의 지역 descriptor입니다.</text>')
+    b.append('<text x="820" y="550" class="small">Patch = CNN feature map의 local descriptor</text>')
     return _svg("Figure 2. From image to local feature descriptors",
                 "중간 layer feature map의 각 위치를 정상 패턴을 설명하는 descriptor로 사용합니다.", "".join(b), 650)
 
