@@ -3258,32 +3258,49 @@ def _nn_regularization_paths(x, y, w, h):
     return "".join(parts)
 
 
+
 def _polynomial_kernel(x, y, w, h):
-    """Map a nonlinear 1D relation to polynomial features."""
-    parts=[
+    """A |x|-based class pattern becomes linearly separable after adding x²."""
+    samples = [
+        (-.86, 0), (-.70, 0), (-.42, 1), (-.16, 1),
+        (.16, 1), (.42, 1), (.70, 0), (.86, 0),
+    ]
+    parts = [
         f'<text x="{x+25}" y="{y+48}" class="label">input x</text>',
         f'<text x="{x+w*.56}" y="{y+48}" class="label">feature φ(x) = [x, x²]</text>',
     ]
-    base=y+h*.62
-    # Left: alternating classes along x, not linearly separable by one threshold.
-    for xv, cls in [(-.8,0),(-.55,1),(-.30,0),(.05,1),(.35,0),(.65,1),(.86,0)]:
-        xx=x+w*.20+xv*w*.18
-        color="#2454d8" if cls==0 else "#08796f"
+    base = y + h*.62
+    for xv, cls in samples:
+        xx = x + w*.21 + xv*w*.18
+        color = "#2454d8" if cls == 0 else "#08796f"
         parts.append(f'<circle cx="{xx}" cy="{base}" r="8" fill="{color}"/>')
     parts.append(f'<path d="M{x+35} {base+28} H{x+w*.42}" class="thin"/>')
-    # Right: schematic lifted parabola with a straight separator.
-    pts=[]
-    for xv, cls in [(-.8,0),(-.55,1),(-.30,0),(.05,1),(.35,0),(.65,1),(.86,0)]:
-        xx=x+w*.73+xv*w*.18
-        yy=y+h*.70-(xv*xv)*(h*.36)
-        color="#2454d8" if cls==0 else "#08796f"
-        pts.append((xx,yy))
-        parts.append(f'<circle cx="{xx}" cy="{yy}" r="8" fill="{color}"/>')
-    parts.append(f'<path d="M{x+w*.52} {y+h*.52} L{x+w*.96} {y+h*.52}" stroke="#a24d18" stroke-width="3"/>')
-    parts.append(f'<text x="{x+w*.70}" y="{y+h*.48}" class="small" fill="#a24d18">linear separator in feature space</text>')
-    parts.append(f'<text x="{x+25}" y="{y+h-28}" class="small">kernel computes polynomial-feature inner products implicitly</text>')
-    return "".join(parts)
+    parts.append(
+        f'<text x="{x+35}" y="{base+55}" class="small">'
+        "outer vs inner intervals need two thresholds in 1D</text>"
+    )
 
+    feature_bottom = y + h*.76
+    feature_scale = h*.36
+    for xv, cls in samples:
+        xx = x + w*.74 + xv*w*.18
+        yy = feature_bottom - (xv*xv)*feature_scale
+        color = "#2454d8" if cls == 0 else "#08796f"
+        parts.append(f'<circle cx="{xx}" cy="{yy}" r="8" fill="{color}"/>')
+    threshold_y = feature_bottom - (.55*.55)*feature_scale
+    parts.append(
+        f'<path d="M{x+w*.52} {threshold_y} L{x+w*.96} {threshold_y}" '
+        'stroke="#a24d18" stroke-width="3"/>'
+    )
+    parts.append(
+        f'<text x="{x+w*.69}" y="{threshold_y-12}" class="small" fill="#a24d18">'
+        "x² threshold = linear separator</text>"
+    )
+    parts.append(
+        f'<text x="{x+25}" y="{y+h-20}" class="small">'
+        "kernel computes polynomial-feature inner products implicitly</text>"
+    )
+    return "".join(parts)
 
 def _ep_vi_compare(x, y, w, h):
     """Conceptual distinction between mean-field VI and expectation propagation."""
@@ -3299,7 +3316,7 @@ def _ep_vi_compare(x, y, w, h):
         if "Variational" in title:
             parts.append(f'<ellipse cx="{ox+cw*.53}" cy="{y+255}" rx="{cw*.22}" ry="55" fill="none" stroke="#a24d18" stroke-width="3"/>')
             parts.append(f'<ellipse cx="{ox+cw*.49}" cy="{y+255}" rx="{cw*.14}" ry="38" fill="#2454d8" fill-opacity=".18" stroke="#2454d8" stroke-width="3"/>')
-            parts.append(f'<text x="{ox+22}" y="{y+h-45}" class="small">single tractable q may focus on one mode</text>')
+            parts.append(f'<text x="{ox+22}" y="{y+h-45}" class="small">one tractable global approximation q(z)</text>')
         else:
             for j in range(3):
                 cx=ox+cw*(.32+.18*j)
@@ -3328,35 +3345,49 @@ def _factor_analysis_compare(x, y, w, h):
     return "".join(parts)
 
 
+
 def _ica_unmixing(x, y, w, h):
     """Observed linear mixtures unmixed into statistically independent sources."""
-    parts=[
-        f'<text x="{x+32}" y="{y+45}" class="label">independent sources s</text>',
-        f'<text x="{x+w*.40}" y="{y+45}" class="label">observed mixtures x = A s</text>',
-        f'<text x="{x+w*.76}" y="{y+45}" class="label">unmix W x</text>',
+    thirds = [x+w*.16, x+w*.50, x+w*.84]
+    parts = [
+        f'<text x="{thirds[0]}" y="{y+45}" text-anchor="middle" class="label">sources s</text>',
+        f'<text x="{thirds[1]}" y="{y+45}" text-anchor="middle" class="label">mixtures x = A s</text>',
+        f'<text x="{thirds[2]}" y="{y+45}" text-anchor="middle" class="label">estimated sources W x</text>',
     ]
-    # source waveforms
-    for k,color in enumerate(["#2454d8","#08796f"]):
-        yy=y+110+k*95
-        path=[]
+    for k, color in enumerate(["#2454d8", "#08796f"]):
+        yy = y + 110 + k*95
+        path = []
         for i in range(9):
-            xx=x+28+i*22
-            val=(i%2 if k==0 else ((i*3)%5)/4)
-            py=yy-25*val
-            path.append(f'{xx},{py}')
-        parts.append(f'<polyline points="{" ".join(path)}" fill="none" stroke="{color}" stroke-width="3"/>')
-    parts.append(_arrow(x+w*.25,y+165,x+w*.35,y+165))
-    # mixtures
-    for k,color in enumerate(["#6d7f9b","#a24d18"]):
-        yy=y+110+k*95
-        parts.append(f'<path d="M{x+w*.40} {yy} C{x+w*.48} {yy-45} {x+w*.53} {yy+35} {x+w*.60} {yy-10}" stroke="{color}" stroke-width="3" fill="none"/>')
-    parts.append(_arrow(x+w*.64,y+165,x+w*.73,y+165))
-    for k,color in enumerate(["#2454d8","#08796f"]):
-        yy=y+110+k*95
-        parts.append(f'<path d="M{x+w*.77} {yy} C{x+w*.83} {yy-40 if k==0 else yy+20} {x+w*.90} {yy+30 if k==0 else yy-35} {x+w*.96} {yy-5}" stroke="{color}" stroke-width="3" fill="none"/>')
-    parts.append(f'<text x="{x+28}" y="{y+h-30}" class="small">linear mixtures → statistically independent components</text>')
+            xx = x + 28 + i*22
+            val = i % 2 if k == 0 else ((i*3) % 5) / 4
+            path.append(f'{xx},{yy-25*val}')
+        parts.append(
+            f'<polyline points="{" ".join(path)}" fill="none" '
+            f'stroke="{color}" stroke-width="3"/>'
+        )
+    parts.append(_arrow(x+w*.25, y+165, x+w*.35, y+165))
+    for k, color in enumerate(["#6d7f9b", "#a24d18"]):
+        yy = y + 110 + k*95
+        parts.append(
+            f'<path d="M{x+w*.40} {yy} '
+            f'C{x+w*.48} {yy-45} {x+w*.53} {yy+35} {x+w*.60} {yy-10}" '
+            f'stroke="{color}" stroke-width="3" fill="none"/>'
+        )
+    parts.append(_arrow(x+w*.64, y+165, x+w*.73, y+165))
+    for k, color in enumerate(["#2454d8", "#08796f"]):
+        yy = y + 110 + k*95
+        dy1 = -40 if k == 0 else 20
+        dy2 = 30 if k == 0 else -35
+        parts.append(
+            f'<path d="M{x+w*.77} {yy} '
+            f'C{x+w*.83} {yy+dy1} {x+w*.90} {yy+dy2} {x+w*.96} {yy-5}" '
+            f'stroke="{color}" stroke-width="3" fill="none"/>'
+        )
+    parts.append(
+        f'<text x="{x+28}" y="{y+h-30}" class="small">'
+        "linear mixtures → statistically independent components</text>"
+    )
     return "".join(parts)
-
 
 def _tree_ensemble(x, y, w, h):
     """Parallel decision trees combined by vote or averaging."""
