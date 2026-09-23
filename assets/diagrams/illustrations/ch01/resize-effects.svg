@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="t d">
+<title id="t">Resize 전략에 따른 이미지 변화</title>
+<desc id="d">같은 합성 장면을 원본, 정사각형 직접 resize, 종횡비 유지 crop, 종횡비 유지 pad로 비교하는 설명용 그림</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6efe2"/><stop offset="1" stop-color="#d7e1e8"/></linearGradient>
+  <radialGradient id="apple" cx="36%" cy="28%" r="75%"><stop offset="0" stop-color="#ff7569"/><stop offset=".55" stop-color="#d93436"/><stop offset="1" stop-color="#8e1723"/></radialGradient>
+  <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ec46d"/><stop offset="1" stop-color="#285d39"/></linearGradient>
+  <style>
+    .title{font:700 30px system-ui,-apple-system,'Noto Sans KR',sans-serif;fill:#17233a}
+    .sub{font:500 16px system-ui,-apple-system,'Noto Sans KR',sans-serif;fill:#607087}
+    .label{font:700 17px system-ui,-apple-system,'Noto Sans KR',sans-serif;fill:#203455}
+    .small{font:500 14px system-ui,-apple-system,'Noto Sans KR',sans-serif;fill:#526681}
+    .warn{font:700 14px system-ui,-apple-system,'Noto Sans KR',sans-serif;fill:#a24d18}
+  </style>
+</defs>
+
+<text x="60" y="55" class="title">Resize는 “크기 변경”과 동시에 geometry와 정보량을 바꾼다</text>
+<text x="60" y="84" class="sub">설명용 합성 이미지 · 파란 점은 작은 defect/feature의 위치를 나타냄</text>
+
+<rect x="55" y="125" width="510" height="285" rx="18" fill="url(#bg)"/>
+  <rect x="55" y="335.9" width="510" height="74.10000000000001" fill="#c9b48b"/><ellipse cx="310" cy="344.45" rx="37.391999999999996" ry="11.286" fill="#203455" opacity=".16"/><path d="M300 233.01500000000001 C305 222.755 318 219.164 326 215.06" fill="none" stroke="#5b3a28" stroke-width="7.140000000000001" stroke-linecap="round"/><path d="M322 220.19 C344 213.52100000000002 364 219.164 368 231.476 C348 234.554 332 231.476 322 220.19Z" fill="url(#leaf)"/><ellipse cx="310" cy="281.75" rx="45.6" ry="51.3" fill="url(#apple)"/><ellipse cx="294.04" cy="266.36" rx="10.032" ry="13.851" fill="#fff" opacity=".20" transform="rotate(20 294.04 266.36)"/><circle cx="473.2" cy="301.7" r="9.18" fill="#2454d8" opacity=".9"/><rect x="55" y="125" width="510" height="285" rx="18" fill="none" stroke="#d4deeb" stroke-width="2"/>
+<text x="75" y="157" class="label">Original · 16:9</text>
+<text x="75" y="435" class="small">형태와 작은 feature의 상대 위치가 원본 기준</text>
+
+<rect x="625" y="125" width="235" height="285" rx="18" fill="url(#bg)"/>
+  <rect x="625" y="335.9" width="235" height="74.10000000000001" fill="#c9b48b"/><ellipse cx="742.5" cy="344.45" rx="42.394" ry="16.026999999999997" fill="#203455" opacity=".16"/><path d="M732.5 212.54250000000002 C737.5 197.97250000000003 750.5 192.873 758.5 187.04500000000002" fill="none" stroke="#5b3a28" stroke-width="5" stroke-linecap="round"/><path d="M754.5 194.33 C776.5 184.8595 796.5 192.873 800.5 210.35700000000003 C780.5 214.728 764.5 210.35700000000003 754.5 194.33Z" fill="url(#leaf)"/><ellipse cx="742.5" cy="281.75" rx="51.7" ry="72.85" fill="url(#apple)"/><ellipse cx="724.405" cy="259.895" rx="11.374" ry="19.6695" fill="#fff" opacity=".20" transform="rotate(20 724.405 259.895)"/><circle cx="817.7" cy="301.7" r="5" fill="#2454d8" opacity=".9"/><rect x="625" y="125" width="235" height="285" rx="18" fill="none" stroke="#d4deeb" stroke-width="2"/>
+<text x="645" y="157" class="label">직접 224×224 stretch</text>
+<text x="645" y="435" class="warn">형태 왜곡 가능</text>
+
+<rect x="900" y="125" width="235" height="285" rx="18" fill="url(#bg)"/>
+  <rect x="900" y="335.9" width="235" height="74.10000000000001" fill="#c9b48b"/><ellipse cx="1017.5" cy="344.45" rx="30.832" ry="9.306" fill="#203455" opacity=".16"/><path d="M1007.5 241.565 C1012.5 233.10500000000002 1025.5 230.144 1033.5 226.76" fill="none" stroke="#5b3a28" stroke-width="5" stroke-linecap="round"/><path d="M1029.5 230.99 C1051.5 225.49099999999999 1071.5 230.144 1075.5 240.296 C1055.5 242.834 1039.5 240.296 1029.5 230.99Z" fill="url(#leaf)"/><ellipse cx="1017.5" cy="281.75" rx="37.6" ry="42.3" fill="url(#apple)"/><ellipse cx="1004.34" cy="269.06" rx="8.272" ry="11.421" fill="#fff" opacity=".20" transform="rotate(20 1004.34 269.06)"/><circle cx="1092.7" cy="301.7" r="5" fill="#2454d8" opacity=".9"/><rect x="900" y="125" width="23.5" height="285" fill="#fff" opacity=".72"/>
+           <rect x="1111.5" y="125" width="23.5" height="285" fill="#fff" opacity=".72"/><rect x="900" y="125" width="235" height="285" rx="18" fill="none" stroke="#d4deeb" stroke-width="2"/>
+<text x="920" y="157" class="label">비율 유지 + crop</text>
+<text x="920" y="435" class="warn">가장자리 정보 손실 가능</text>
+
+<rect x="625" y="485" width="235" height="170" rx="18" fill="url(#bg)"/>
+  <rect x="625" y="610.8" width="235" height="44.2" fill="#c9b48b"/><ellipse cx="742.5" cy="615.9" rx="22.304" ry="6.731999999999999" fill="#203455" opacity=".16"/><path d="M732.5 549.43 C737.5 543.31 750.5 541.168 758.5 538.72" fill="none" stroke="#5b3a28" stroke-width="5" stroke-linecap="round"/><path d="M754.5 541.78 C776.5 537.802 796.5 541.168 800.5 548.5120000000001 C780.5 550.348 764.5 548.5120000000001 754.5 541.78Z" fill="url(#leaf)"/><ellipse cx="742.5" cy="578.5" rx="27.2" ry="30.599999999999998" fill="url(#apple)"/><ellipse cx="732.98" cy="569.32" rx="5.984" ry="8.262" fill="#fff" opacity=".20" transform="rotate(20 732.98 569.32)"/><circle cx="817.7" cy="590.4" r="5" fill="#2454d8" opacity=".9"/><rect x="625" y="485" width="235" height="20.4" fill="#263446"/>
+           <rect x="625" y="634.6" width="235" height="20.4" fill="#263446"/><rect x="625" y="485" width="235" height="170" rx="18" fill="none" stroke="#d4deeb" stroke-width="2"/>
+<text x="645" y="517" class="label">비율 유지 + pad</text>
+<text x="645" y="683" class="small">전체 장면 유지</text>
+
+<g transform="translate(900 485)">
+  <rect x="0" y="0" width="235" height="170" rx="18" fill="#fbfcfe" stroke="#d4deeb" stroke-width="2"/>
+  <path d="M25 125 C75 95 115 118 150 72 C172 44 195 48 212 25" fill="none" stroke="#2454d8" stroke-width="5"/>
+  <circle cx="150" cy="72" r="8" fill="#a24d18"/>
+  <text x="18" y="32" class="label">강한 downsample</text>
+  <text x="18" y="58" class="small">작은 pattern이 몇 pixel로</text>
+  <text x="18" y="80" class="small">축소되거나 사라질 수 있음</text>
+</g>
+
+<text x="55" y="535" class="label">작은 defect가 중요한 경우</text>
+<text x="55" y="568" class="small">“최종 model input에서 defect가 몇 pixel로 남는가?”를 확인해야 한다.</text>
+<text x="55" y="600" class="small">사전학습 weight를 쓰면 해당 weight의 공식 resize/crop transform을 우선 확인한다.</text>
+</svg>
