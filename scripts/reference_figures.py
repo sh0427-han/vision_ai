@@ -917,7 +917,429 @@ def _vision_bridge(x, y, w, h):
 
 
 
+
+def _linear_score_matrix(x, y, w, h):
+    """Show x, W, b and class scores as actual numeric arrays."""
+    parts = []
+    vector = [[0.6], [-1.2], [0.8], [0.3]]
+    weights = [
+        [0.8, -0.2, 0.5, 0.1],
+        [-0.4, 0.9, 0.2, -0.3],
+        [0.1, 0.3, -0.7, 0.8],
+    ]
+    scores = [1.37, -1.27, 0.02]
+    parts.append(f'<text x="{x+18}" y="{y+42}" class="small">x ∈ R⁴</text>')
+    parts.append(_value_grid(x + 18, y + 62, vector, 34, "#edf3ff"))
+    parts.append(f'<text x="{x+92}" y="{y+42}" class="small">W ∈ R³ˣ⁴</text>')
+    parts.append(_value_grid(x + 92, y + 62, weights, 34, "#e9f7f2"))
+    parts.append(f'<text x="{x+246}" y="{y+42}" class="small">+ b</text>')
+    parts.append(_value_grid(x + 246, y + 62, [[0.1], [-0.2], [0.0]], 34, "#fff1e7"))
+    parts.append(_arrow(x + 292, y + 116, x + 334, y + 116))
+    parts.append(f'<text x="{x+338}" y="{y+42}" class="small">scores</text>')
+    parts.append(_value_grid(x + 338, y + 62, [[v] for v in scores], 40, "#edf3ff"))
+    parts.append(
+        f'<text x="{x+18}" y="{y+h-22}" class="small">'
+        "each row of W is one class template</text>"
+    )
+    return "".join(parts)
+
+
+def _chain_rule_numeric(x, y, w, h):
+    """Numeric forward/backward example with local derivatives."""
+    nodes = [
+        (x + 70, "x", "2"),
+        (x + w * 0.50, "u=3x", "6"),
+        (x + w - 70, "L=u²", "36"),
+    ]
+    parts = []
+    for idx, (cx, name, value) in enumerate(nodes):
+        parts.append(
+            f'<circle cx="{cx}" cy="{y+120}" r="42" fill="#edf3ff" '
+            'stroke="#8faee8" stroke-width="2"/>'
+        )
+        parts.append(
+            f'<text x="{cx}" y="{y+112}" text-anchor="middle" class="small">'
+            f'{_e(name)}</text>'
+        )
+        parts.append(
+            f'<text x="{cx}" y="{y+137}" text-anchor="middle" class="label">'
+            f'{_e(value)}</text>'
+        )
+        if idx < 2:
+            next_x = nodes[idx + 1][0]
+            parts.append(_arrow(cx + 44, y + 120, next_x - 44, y + 120))
+    parts.append(
+        f'<text x="{x+18}" y="{y+42}" class="small">'
+        "forward: values →</text>"
+    )
+    parts.append(
+        f'<path d="M{x+w-114} {y+205} L{x+w*.50+44} {y+205}" '
+        'stroke="#a24d18" stroke-width="3"/>'
+    )
+    parts.append(
+        f'<polygon points="{x+w*.50+44},{y+205} {x+w*.50+57},{y+197} '
+        f'{x+w*.50+57},{y+213}" fill="#a24d18"/>'
+    )
+    parts.append(
+        f'<path d="M{x+w*.50-44} {y+205} L{x+114} {y+205}" '
+        'stroke="#a24d18" stroke-width="3"/>'
+    )
+    parts.append(
+        f'<polygon points="{x+114},{y+205} {x+127},{y+197} '
+        f'{x+127},{y+213}" fill="#a24d18"/>'
+    )
+    parts.append(
+        f'<text x="{x+w*.69}" y="{y+194}" text-anchor="middle" '
+        'class="small" fill="#a24d18">dL/du = 12</text>'
+    )
+    parts.append(
+        f'<text x="{x+w*.31}" y="{y+194}" text-anchor="middle" '
+        'class="small" fill="#a24d18">du/dx = 3</text>'
+    )
+    parts.append(
+        f'<text x="{x+w*.50}" y="{y+250}" text-anchor="middle" '
+        'class="label" fill="#a24d18">dL/dx = 12 × 3 = 36</text>'
+    )
+    return "".join(parts)
+
+
+def _gradient_check(x, y, w, h):
+    """Compare analytic and central-difference gradients."""
+    parts = [
+        f'<path d="M{x+42} {y+h-58} H{x+w-24} M{x+42} {y+h-58} V{y+48}" '
+        'class="thin"/>'
+    ]
+    analytic = [0.82, -0.36, 0.19]
+    numeric = [0.819, -0.361, 0.190]
+    scale = (h - 130) / 1.1
+    zero_y = y + h - 105
+    parts.append(
+        f'<path d="M{x+42} {zero_y} H{x+w-24}" '
+        'stroke="#c5cfdd" stroke-width="1.5" stroke-dasharray="5 5"/>'
+    )
+    for idx, (ga, gn) in enumerate(zip(analytic, numeric)):
+        cx = x + 95 + idx * ((w - 150) / 2)
+        for offset, val, color in [(-10, ga, "#2454d8"), (10, gn, "#08796f")]:
+            yy = zero_y - val * scale
+            parts.append(
+                f'<circle cx="{cx+offset}" cy="{yy}" r="7" fill="{color}"/>'
+            )
+        parts.append(
+            f'<text x="{cx}" y="{y+h-35}" text-anchor="middle" '
+            f'class="small">w{idx+1}</text>'
+        )
+    parts.append(
+        f'<text x="{x+18}" y="{y+38}" class="small" fill="#2454d8">'
+        "● analytic</text>"
+    )
+    parts.append(
+        f'<text x="{x+110}" y="{y+38}" class="small" fill="#08796f">'
+        "● numeric</text>"
+    )
+    parts.append(
+        f'<text x="{x+w-170}" y="{y+38}" class="small">'
+        "relative error ≪ 1e−4</text>"
+    )
+    return "".join(parts)
+
+
+def _optimizer_paths(x, y, w, h):
+    """Compare SGD, Momentum and Adam on one contour landscape."""
+    cx = x + w * 0.58
+    cy = y + h * 0.54
+    parts = []
+    for rx, ry in [(w*.34, h*.30), (w*.24, h*.21), (w*.14, h*.12)]:
+        parts.append(
+            f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" '
+            'fill="none" stroke="#c7d2e4" stroke-width="2"/>'
+        )
+    paths = [
+        ("#2454d8", [
+            (x+w*.16,y+h*.82),(x+w*.31,y+h*.36),(x+w*.40,y+h*.74),
+            (x+w*.49,y+h*.43),(x+w*.54,y+h*.61),(cx,cy)
+        ], "SGD"),
+        ("#08796f", [
+            (x+w*.16,y+h*.82),(x+w*.28,y+h*.63),(x+w*.40,y+h*.53),
+            (x+w*.50,y+h*.50),(cx,cy)
+        ], "Momentum"),
+        ("#a24d18", [
+            (x+w*.16,y+h*.82),(x+w*.24,y+h*.70),(x+w*.34,y+h*.60),
+            (x+w*.45,y+h*.55),(cx,cy)
+        ], "Adam"),
+    ]
+    for color, pts, label in paths:
+        d = "M" + " L".join(f"{px} {py}" for px, py in pts)
+        parts.append(
+            f'<path d="{d}" stroke="{color}" stroke-width="3.5" '
+            'fill="none" stroke-linejoin="round"/>'
+        )
+        for px, py in pts[:-1]:
+            parts.append(f'<circle cx="{px}" cy="{py}" r="4" fill="{color}"/>')
+    for idx, (color, _, label) in enumerate(paths):
+        parts.append(
+            f'<text x="{x+18}" y="{y+35+idx*23}" class="small" '
+            f'fill="{color}">{_e(label)}</text>'
+        )
+    return "".join(parts)
+
+
+def _lr_curves(x, y, w, h):
+    """Loss-vs-step curves for three learning-rate regimes."""
+    parts = [
+        f'<path d="M{x+45} {y+h-45} H{x+w-22} M{x+45} {y+h-45} V{y+42}" '
+        'class="thin"/>'
+    ]
+    curves = [
+        ("#6d7f9b", f'M{x+50} {y+65} C{x+w*.35} {y+85} {x+w*.65} {y+118} {x+w-30} {y+145}', "too small"),
+        ("#08796f", f'M{x+50} {y+65} C{x+w*.26} {y+110} {x+w*.46} {y+h-78} {x+w-30} {y+h-72}', "good"),
+        ("#a24d18", f'M{x+50} {y+70} L{x+w*.26} {y+145} L{x+w*.43} {y+55} L{x+w*.62} {y+170} L{x+w-30} {y+72}', "too large"),
+    ]
+    for idx, (color, path, label) in enumerate(curves):
+        parts.append(
+            f'<path d="{path}" stroke="{color}" stroke-width="4" fill="none"/>'
+        )
+        parts.append(
+            f'<text x="{x+w-135}" y="{y+48+idx*22}" class="small" '
+            f'fill="{color}">{_e(label)}</text>'
+        )
+    parts.append(
+        f'<text x="{x+w-90}" y="{y+h-20}" class="small">steps →</text>'
+    )
+    return "".join(parts)
+
+
+def _init_variance(x, y, w, h):
+    """Three activation histograms illustrating initialization scale."""
+    labels = ["too small", "balanced", "too large"]
+    heights = [
+        [18, 42, 82, 42, 18],
+        [34, 58, 72, 58, 34],
+        [68, 28, 12, 28, 68],
+    ]
+    panel_w = (w - 36) / 3
+    for_idx = []
+    parts = []
+    for idx, (label, vals) in enumerate(zip(labels, heights)):
+        px = x + 10 + idx * panel_w
+        base = y + h - 58
+        parts.append(
+            f'<text x="{px+panel_w/2}" y="{y+42}" text-anchor="middle" '
+            f'class="small">{_e(label)}</text>'
+        )
+        for j, bh in enumerate(vals):
+            parts.append(
+                f'<rect x="{px+18+j*(panel_w-40)/5}" y="{base-bh}" '
+                f'width="{(panel_w-50)/5}" height="{bh}" rx="3" '
+                f'fill="{"#08796f" if idx==1 else "#91abe2"}"/>'
+            )
+        parts.append(
+            f'<path d="M{px+12} {base} H{px+panel_w-14}" class="thin"/>'
+        )
+    return "".join(parts)
+
+
+def _pool_compare(x, y, w, h):
+    """Numeric max-pooling and average-pooling comparison."""
+    values = [
+        [1, 3, 2, 4],
+        [5, 9, 1, 2],
+        [0, 2, 8, 6],
+        [4, 1, 3, 7],
+    ]
+    parts = [_value_grid(x + 18, y + 70, values, 42, "#edf3ff")]
+    parts.append(
+        f'<text x="{x+18}" y="{y+48}" class="small">4×4 input</text>'
+    )
+    parts.append(_arrow(x + 198, y + 150, x + 248, y + 150))
+    parts.append(
+        f'<text x="{x+258}" y="{y+48}" class="small">max pool</text>'
+    )
+    parts.append(_value_grid(
+        x + 258, y + 95, [[9, 4], [4, 8]], 48, "#e9f7f2"
+    ))
+    parts.append(
+        f'<text x="{x+258}" y="{y+218}" class="small">average pool</text>'
+    )
+    parts.append(_value_grid(
+        x + 258, y + 235, [[4.5, 2.25], [1.75, 6.0]], 48, "#fff1e7"
+    ))
+    return "".join(parts)
+
+
+def _residual_flow(x, y, w, h):
+    """Plain path versus residual skip path."""
+    parts = []
+    y1 = y + 105
+    xs = [x + 38, x + w*.36, x + w*.66, x + w - 70]
+    labels = ["x", "conv", "conv", "output"]
+    for idx, (cx, label) in enumerate(zip(xs, labels)):
+        bw = 58 if idx in {0, 3} else 72
+        parts.append(
+            f'<rect x="{cx-bw/2}" y="{y1-24}" width="{bw}" height="48" '
+            f'rx="9" fill="{"#2454d8" if idx==3 else "#edf3ff"}" '
+            f'stroke="#8faee8" stroke-width="2"/>'
+        )
+        parts.append(
+            f'<text x="{cx}" y="{y1+6}" text-anchor="middle" '
+            f'class="{"white" if idx==3 else "small"}">{_e(label)}</text>'
+        )
+        if idx < 3:
+            parts.append(_arrow(cx + bw/2, y1, xs[idx+1] - (36 if idx+1 < 3 else 29), y1))
+    parts.append(
+        f'<path d="M{x+67} {y1-30} C{x+w*.28} {y+40} '
+        f'{x+w*.70} {y+40} {x+w-102} {y1-30}" '
+        'stroke="#08796f" stroke-width="4" fill="none"/>'
+    )
+    parts.append(
+        f'<polygon points="{x+w-102},{y1-30} {x+w-116},{y1-38} '
+        f'{x+w-116},{y1-22}" fill="#08796f"/>'
+    )
+    parts.append(
+        f'<text x="{x+w*.50}" y="{y+45}" text-anchor="middle" '
+        'class="small" fill="#08796f">identity skip: gradient shortcut</text>'
+    )
+    parts.append(
+        f'<text x="{x+w*.50}" y="{y+h-35}" text-anchor="middle" class="small">'
+        "H(x) = F(x) + x</text>"
+    )
+    return "".join(parts)
+
+
+def _entropy_curve(x, y, w, h):
+    """Binary entropy H(p) with maximum uncertainty at p=0.5."""
+    left = x + 45
+    right = x + w - 28
+    base = y + h - 48
+    top = y + 58
+    parts = [
+        f'<path d="M{left} {base} H{right} M{left} {base} V{top}" class="thin"/>',
+        f'<path d="M{left} {base} C{x+w*.20} {y+88} {x+w*.36} {top} '
+        f'{x+w*.50} {top} C{x+w*.64} {top} {x+w*.80} {y+88} {right} {base}" '
+        'stroke="#2454d8" stroke-width="4" fill="none"/>',
+        f'<path d="M{x+w*.50} {top} V{base}" stroke="#a8b5c8" '
+        'stroke-width="2" stroke-dasharray="6 5"/>',
+        f'<text x="{x+w*.50}" y="{base+24}" text-anchor="middle" class="small">p=0.5</text>',
+        f'<text x="{x+w*.50}" y="{top-12}" text-anchor="middle" class="small">max entropy</text>',
+    ]
+    return "".join(parts)
+
+
+def _regression_uncertainty(x, y, w, h):
+    """Posterior predictive mean and uncertainty band for Bayesian regression."""
+    left = x + 42
+    right = x + w - 24
+    base = y + h - 45
+    parts = [
+        f'<path d="M{left} {base} H{right} M{left} {base} V{y+45}" class="thin"/>',
+        f'<path d="M{left+10} {y+h-92} C{x+w*.30} {y+165} '
+        f'{x+w*.62} {y+118} {right-8} {y+70} L{right-8} {y+128} '
+        f'C{x+w*.62} {y+172} {x+w*.30} {y+220} {left+10} {y+h-55} Z" '
+        'fill="#bcd1f6" opacity=".45"/>',
+        f'<path d="M{left+10} {y+h-74} C{x+w*.30} {y+190} '
+        f'{x+w*.62} {y+145} {right-8} {y+98}" '
+        'stroke="#2454d8" stroke-width="4" fill="none"/>',
+    ]
+    pts = [(0.16,.72),(0.29,.62),(0.42,.56),(0.56,.43),(0.70,.34),(0.82,.25)]
+    for px, py in pts:
+        parts.append(
+            f'<circle cx="{x+px*w}" cy="{y+py*h}" r="6" fill="#203455"/>'
+        )
+    parts.append(
+        f'<text x="{x+18}" y="{y+36}" class="small" fill="#2454d8">'
+        "posterior predictive mean ± uncertainty</text>"
+    )
+    return "".join(parts)
+
+
+def _importance_sampling(x, y, w, h):
+    """Importance sampling: proposal samples reweighted toward target density."""
+    base = y + h - 48
+    parts = [
+        f'<path d="M{x+40} {base} H{x+w-22}" class="thin"/>',
+        f'<path d="M{x+45} {base} C{x+w*.22} {base} {x+w*.28} {y+74} '
+        f'{x+w*.43} {y+74} C{x+w*.58} {y+74} {x+w*.63} {base} '
+        f'{x+w-32} {base}" stroke="#2454d8" stroke-width="4" fill="none"/>',
+        f'<path d="M{x+45} {base} C{x+w*.18} {base} {x+w*.34} {y+128} '
+        f'{x+w*.57} {y+128} C{x+w*.80} {y+128} {x+w*.88} {base} '
+        f'{x+w-32} {base}" stroke="#e0ae82" stroke-width="4" fill="none"/>',
+    ]
+    samples = [
+        (.23, .35), (.36, .85), (.48, 1.0), (.62, .62), (.75, .24)
+    ]
+    for px, weight in samples:
+        xx = x + px * w
+        parts.append(
+            f'<path d="M{xx} {base} V{base-58*weight}" '
+            'stroke="#08796f" stroke-width="5"/>'
+        )
+    parts.append(
+        f'<text x="{x+18}" y="{y+36}" class="small" fill="#2454d8">target p(x)</text>'
+    )
+    parts.append(
+        f'<text x="{x+105}" y="{y+36}" class="small" fill="#a24d18">proposal q(x)</text>'
+    )
+    parts.append(
+        f'<text x="{x+w-170}" y="{y+36}" class="small" fill="#08796f">'
+        "weight p/q</text>"
+    )
+    return "".join(parts)
+
+
+def _pca_projection(x, y, w, h):
+    """Project 2D samples onto PC1 and show reconstruction residuals."""
+    parts = [
+        f'<path d="M{x+35} {y+h-35} H{x+w-20} M{x+35} {y+h-35} V{y+35}" '
+        'class="thin"/>'
+    ]
+    pts = [
+        (.18,.73,.24,.70),(.29,.61,.31,.59),(.39,.58,.41,.53),
+        (.52,.45,.52,.45),(.65,.36,.64,.37),(.77,.26,.76,.28)
+    ]
+    x1, y1 = x + 45, y + h - 58
+    x2, y2 = x + w - 35, y + 55
+    parts.append(
+        f'<path d="M{x1} {y1} L{x2} {y2}" stroke="#a24d18" stroke-width="4"/>'
+    )
+    for px, py, qx, qy in pts:
+        sx, sy = x + px*w, y + py*h
+        rx, ry = x + qx*w, y + qy*h
+        parts.append(f'<circle cx="{sx}" cy="{sy}" r="7" fill="#2454d8"/>')
+        parts.append(
+            f'<path d="M{sx} {sy} L{rx} {ry}" stroke="#a8b5c8" '
+            'stroke-width="2" stroke-dasharray="5 4"/>'
+        )
+        parts.append(f'<circle cx="{rx}" cy="{ry}" r="4" fill="#08796f"/>')
+    parts.append(
+        f'<text x="{x+18}" y="{y+34}" class="small">'
+        "blue: x · green: projection/reconstruction on PC1</text>"
+    )
+    return "".join(parts)
+
 def _panel_content(kind, x, y, w, h, data):
+    if kind=="linear_score_matrix":
+        return _linear_score_matrix(x,y,w,h)
+    if kind=="chain_rule_numeric":
+        return _chain_rule_numeric(x,y,w,h)
+    if kind=="gradient_check":
+        return _gradient_check(x,y,w,h)
+    if kind=="optimizer_paths":
+        return _optimizer_paths(x,y,w,h)
+    if kind=="lr_curves":
+        return _lr_curves(x,y,w,h)
+    if kind=="init_variance":
+        return _init_variance(x,y,w,h)
+    if kind=="pool_compare":
+        return _pool_compare(x,y,w,h)
+    if kind=="residual_flow":
+        return _residual_flow(x,y,w,h)
+    if kind=="entropy_curve":
+        return _entropy_curve(x,y,w,h)
+    if kind=="regression_uncertainty":
+        return _regression_uncertainty(x,y,w,h)
+    if kind=="importance_sampling":
+        return _importance_sampling(x,y,w,h)
+    if kind=="pca_projection":
+        return _pca_projection(x,y,w,h)
     if kind=="knn":
         return _scatter(x,y,w,h,"curve",True)
     if kind=="knn_semantics":
@@ -1059,7 +1481,7 @@ FIGURES = {
         dict(title="random frames vs grouped sources",kind="grouped_split"),
     ]),
     "cs-linear-score.svg": dict(title="Linear classifier",subtitle="A single affine transformation maps an input vector to K class scores.",panels=[
-        dict(title="score function",kind="pipeline",steps=["x","W·x+b","scores"]),
+        dict(title="x · W · b → class scores",kind="linear_score_matrix"),
         dict(title="class-score bars",kind="bars",labels=["cat","dog","fox"],values=[0.82,0.31,0.12]),
     ]),
     "cs-softmax-loss.svg": dict(title="Softmax and classification losses",subtitle="Scores become probabilities, then the loss converts confidence or margin into a penalty.",panels=[
@@ -1072,15 +1494,15 @@ FIGURES = {
     ]),
     # optimization
     "cs-computational-chain.svg": dict(title="Computational graph and chain rule",subtitle="Backpropagation is repeated local differentiation through a graph.",panels=[
-        dict(title="forward graph",kind="pipeline",steps=["x","multiply W","add b","loss"]),
-        dict(title="backward chain",kind="pipeline",steps=["dL/dout","local derivative","chain rule","dL/dW"]),
+        dict(title="numeric forward / backward",kind="chain_rule_numeric"),
+        dict(title="analytic vs numerical gradient",kind="gradient_check"),
     ]),
     "cs-optimizers.svg": dict(title="SGD and momentum",subtitle="Optimization rules differ in how they use current and past gradients.",panels=[
-        dict(title="SGD path",kind="landscape"),
-        dict(title="momentum intuition",kind="pipeline",steps=["gradient","velocity","damped history","update"]),
+        dict(title="SGD / Momentum / Adam trajectories",kind="optimizer_paths"),
+        dict(title="gradient check before training",kind="gradient_check"),
     ]),
     "cs-lr-saddle.svg": dict(title="Learning rate, minima and saddle points",subtitle="Step size changes convergence behavior; nonconvex landscapes also contain flat and saddle regions.",panels=[
-        dict(title="learning-rate behavior",kind="bars",labels=["too small","useful","too large"],values=[0.25,0.72,1.0]),
+        dict(title="loss vs step for three learning rates",kind="lr_curves"),
         dict(title="loss landscape",kind="landscape"),
     ]),
     # NN/training tricks
@@ -1089,7 +1511,7 @@ FIGURES = {
         dict(title="gradient behavior",kind="activation_gradients"),
     ]),
     "cs-init-bn.svg": dict(title="Initialization and Batch Normalization",subtitle="Initialization controls signal scale; BatchNorm uses different statistics in training and evaluation.",panels=[
-        dict(title="initial activation spread",kind="bars",labels=["too small","balanced","too large"],values=[0.2,0.65,1.0]),
+        dict(title="activation variance by initialization",kind="init_variance"),
         dict(title="BatchNorm: train vs eval",kind="batchnorm_modes"),
     ]),
     "cs-reg-dropout.svg": dict(title="Regularization and dropout",subtitle="Regularization constrains the solution; dropout injects stochastic masking during training.",panels=[
@@ -1110,7 +1532,7 @@ FIGURES = {
         dict(title="stride / padding / dilation",kind="conv_controls"),
     ]),
     "cs-pooling-hierarchy.svg": dict(title="Pooling and feature hierarchy",subtitle="Spatial summarization and depth transform low-level responses into more task-specific features.",panels=[
-        dict(title="pooling response",kind="matrix",rows=4,cols=4,cell=45,mode="blue",hot=[1,6,10,15]),
+        dict(title="max pooling vs average pooling",kind="pool_compare"),
         dict(title="feature hierarchy",kind="pipeline",steps=["edges","textures","parts","object cues"]),
     ]),
     "cs-fc-conv.svg": dict(title="Fully connected vs convolutional connectivity",subtitle="Fully connected layers connect everything; convolution reuses local weights over space.",panels=[
@@ -1120,7 +1542,7 @@ FIGURES = {
     # architectures / transfer / tasks
     "cs-architectures-residual.svg": dict(title="Architecture evolution and residual learning",subtitle="The major shift is not just depth, but how information and gradients flow.",panels=[
         dict(title="LeNet → ViT",kind="architecture",names=["LeNet","AlexNet","VGG","ResNet","ViT"]),
-        dict(title="residual block",kind="pipeline",steps=["x","F(x)","x + F(x)","output"]),
+        dict(title="residual block and gradient shortcut",kind="residual_flow"),
     ]),
     "cs-transfer.svg": dict(title="Transfer learning and fine-tuning",subtitle="Reuse pretrained representations, then decide how much of the backbone to update.",panels=[
         dict(title="feature extractor",kind="pipeline",steps=["pretrained","freeze","new head","validate"]),
@@ -1149,6 +1571,7 @@ FIGURES = {
     "prml-bayes-density.svg": dict(title="Bayes update and decision risk",subtitle="Data reshapes uncertainty from prior to posterior; decisions then minimize expected risk.",panels=[
         dict(title="prior × likelihood → posterior",kind="bayes_update"),
         dict(title="Bayesian decision",kind="bayes_risk"),
+        dict(title="binary entropy / information",kind="entropy_curve"),
     ]),
     "prml-gaussian-beta.svg": dict(title="Gaussian geometry and Beta-Binomial update",subtitle="Mean, variance and covariance shape Gaussian uncertainty; conjugate priors allow analytic updates.",panels=[
         dict(title="mean / variance",kind="curve",curve="gaussian"),
@@ -1156,8 +1579,9 @@ FIGURES = {
         dict(title="Beta prior → posterior",kind="distribution",mode="beta"),
     ]),
     "prml-regression-basis.svg": dict(title="Linear regression and basis expansion",subtitle="The model can stay linear in its weights while nonlinear basis functions reshape the input.",panels=[
-        dict(title="regression fit",kind="curve",curve="regression"),
+        dict(title="raw regression fit",kind="curve",curve="regression"),
         dict(title="nonlinear basis functions",kind="basis_functions"),
+        dict(title="posterior predictive uncertainty",kind="regression_uncertainty"),
     ]),
     "prml-bias-reg.svg": dict(title="Bias–variance and regularization",subtitle="Model complexity trades approximation error against sensitivity to finite data.",panels=[
         dict(title="bias / variance trade-off",kind="curve",curve="bias_variance"),
@@ -1203,10 +1627,11 @@ FIGURES = {
     "prml-monte-mcmc.svg": dict(title="Monte Carlo and MCMC",subtitle="Monte Carlo uses samples to estimate expectations; MCMC reaches a target distribution through a dependent chain.",panels=[
         dict(title="samples from a target density",kind="mc_samples"),
         dict(title="burn-in and retained chain",kind="mcmc_path"),
+        dict(title="importance sampling weights",kind="importance_sampling"),
     ]),
     "prml-pca-dim.svg": dict(title="PCA and dimensionality reduction",subtitle="Principal components align the coordinate system with directions of largest data variance.",panels=[
         dict(title="principal axes",kind="pca"),
-        dict(title="2D → 1D projection",kind="pipeline",steps=["x ∈ R²","project PC1","z ∈ R¹"]),
+        dict(title="2D → 1D projection and reconstruction",kind="pca_projection"),
     ]),
     "prml-ppca.svg": dict(title="Probabilistic PCA",subtitle="PPCA adds a latent Gaussian variable and observation noise to a linear dimensionality-reduction model.",panels=[
         dict(title="latent generative model",kind="pipeline",steps=["z ~ N(0,I)","Wz + μ","add ε","x"]),
