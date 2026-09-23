@@ -122,6 +122,19 @@ paper_source = (ROOT / 'scripts' / 'paper_figures.py').read_text(encoding='utf-8
 extra_source = (ROOT / 'scripts' / 'extra_diagrams.py').read_text(encoding='utf-8')
 build_source = (ROOT / 'scripts' / 'build.py').read_text(encoding='utf-8')
 
+for source_name, source_text in [
+    ('reference_figures.py', reference_source),
+    ('paper_figures.py', paper_source),
+    ('extra_diagrams.py', extra_source),
+]:
+    if "'NanumGothic'" not in source_text or "'Noto Sans CJK KR'" not in source_text:
+        errors.append(
+            f'Missing Korean SVG font fallback in {source_name}'
+        )
+
+if 'automatic two-line labels for narrow boxes' not in reference_source:
+    errors.append('Missing wrapped pipeline labels in reference figures')
+
 for forbidden in [
     '"train-overfit.svg": ("curve"',
     '"train-threshold.svg": ("curve"',
