@@ -15,6 +15,8 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] Pages artifact 전체 raster QA에서 Korean SVG fallback 문제 재현 후 NanumGothic/Noto CJK/Malgun fallback 보강
+- [x] `cs-pooling-hierarchy.svg` feature hierarchy pipeline의 긴 label 실제 겹침 수정 및 pipeline 자동 2줄 wrapping 적용
 - [x] 실제 Pages artifact raster QA에서 잘못된 extra teaching curve 3종(optimization / overfit / threshold) 발견·교정
 - [x] 실제 figure inventory와 TODO를 대조하여 기존 구현 항목의 stale checkbox 정리
 - [x] gradient stability / dropout mode·fit / VGG·transfer / activation-max·Grad-CAM figure 보강
@@ -48,12 +50,12 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 확인된 문제
 
-- [ ] 일부 SVG 내부 텍스트가 패널 경계/도형과 겹치거나 잘린다.
+- [ ] 일부 SVG 내부 텍스트가 패널 경계/도형과 겹치거나 잘리는지 계속 확인한다. (현재 확인된 pooling hierarchy overlap은 수정)
 - [ ] figure 내부에 설명문이 너무 많아 축소 시 읽기 어렵다.
 - [ ] 여러 figure가 box / pipeline / bar 형태로 비슷하게 보여 시각적 다양성이 부족하다.
 - [ ] 일부 개념은 “그림 수”는 많지만 핵심 intuition을 보여주는 대표 figure가 부족하다.
 - [ ] 일부 figure는 실제 plot/heatmap/feature map보다 개념 요약 카드에 가깝다.
-- [ ] 모바일/좁은 화면에서 text와 panel spacing을 다시 확인해야 한다.
+- [ ] 모바일/좁은 화면에서 text와 panel spacing을 다시 확인해야 한다. (SVG 내부 Korean font fallback은 보강)
 - [ ] 모든 figure의 최종 브라우저 육안 QA는 계속 진행 중. Pages artifact를 rasterize해 reference/paper/extra를 검수했고, 현재 발견된 semantic curve 오류는 교정 완료했으나 모바일 실제 브라우저와 한글 font fallback 확인이 남아 있다.
 
 ### 공통 수정 원칙
