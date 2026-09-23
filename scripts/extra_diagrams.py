@@ -280,17 +280,17 @@ C990 345 1010 398 1060 405" stroke="#a24d18" stroke-width="5" fill="none"/>
 
 SPECS = {
     # pixels
-    "pixels-human-vs-array.svg": ("compare", "사람이 보는 이미지 vs 컴퓨터 입력", "같은 장면도 모델에는 숫자 배열로 들어갑니다.", "사람의 관점", ["사과라는 객체","색·형태를 한 번에 인식","조금 어두워도 여전히 사과"], "컴퓨터의 입력", ["H×W×C 숫자 배열","각 픽셀은 채널 값","조명 변화가 숫자 변화로 전달"]),
-    "pixels-channels.svg": ("flow", "RGB 채널 분리", "컬러 이미지는 Red, Green, Blue 세 채널의 조합입니다.", [["원본","H×W×3"],["R 채널","빨강 세기"],["G 채널","초록 세기"],["B 채널","파랑 세기"],["결합","RGB 이미지"]]),
-    "pixels-lighting.svg": ("compare", "같은 물체, 다른 조명", "물체의 의미는 같아도 픽셀 값 분포는 크게 달라질 수 있습니다.", "밝은 조명", ["배경 210~240","물체 120~200","그림자 약함"], "어두운 조명", ["배경 70~110","물체 40~100","그림자 대비 증가"]),
-    "pixels-resize.svg": ("compare", "Resize가 바꾸는 정보", "해상도를 줄이면 계산량은 줄지만 작은 구조가 사라질 수 있습니다.", "1920×1080", ["약 207만 위치","작은 결함 픽셀 다수","계산량 큼"], "224×224", ["약 5만 위치","미세 구조 손실 가능","계산량 작음"]),
+    "pixels-human-vs-array.svg": ("pixels_human_array", "사람이 보는 이미지 vs 컴퓨터 입력", "같은 장면도 모델에는 픽셀 값 배열로 전달됩니다."),
+    "pixels-channels.svg": ("pixels_channels", "RGB 채널 분리", "R·G·B는 같은 이미지의 병렬 채널이며 직렬 처리 단계가 아닙니다."),
+    "pixels-lighting.svg": ("lighting_visual", "같은 물체, 다른 조명", "물체의 의미는 같아도 픽셀 intensity는 크게 달라질 수 있습니다."),
+    "pixels-resize.svg": ("resize_visual", "Resize가 바꾸는 정보", "해상도를 줄이면 작은 패턴이 몇 cell로 축약되거나 사라질 수 있습니다."),
     "pixels-normalization.svg": ("flow", "픽셀 값 전처리 흐름", "학습과 추론에서 같은 전처리 계약을 사용해야 합니다.", [["uint8","0~255"],["float","0.0~1.0"],["표준화","(x-μ)/σ"],["Tensor","모델 입력"],["Model","예측"]]),
 
     # CNN
     "cnn-sliding.svg": ("flow", "Kernel sliding", "작은 커널이 입력 위를 이동하며 각 위치의 반응을 계산합니다.", [["Input patch","3×3"],["Kernel","3×3"],["Multiply","원소별 곱"],["Sum","+ bias"],["Feature","한 출력값"]]),
     "cnn-stride.svg": ("compare", "Stride 1 vs Stride 2", "Stride는 커널이 한 번에 이동하는 간격입니다.", "Stride = 1", ["촘촘히 이동","공간 해상도 보존","출력 크기 큼"], "Stride = 2", ["두 칸씩 이동","출력 크기 감소","작은 패턴 손실 가능"]),
     "cnn-padding.svg": ("compare", "Padding 없음 vs Same padding", "가장자리 처리 방식이 출력 공간 크기를 바꿉니다.", "Padding = 0", ["경계 바깥 값 없음","출력 공간 감소","가장자리 정보 덜 반영"], "Padding = 1", ["3×3에서 가장자리 1칸 추가","stride 1이면 크기 유지","경계도 동일 횟수 계산"]),
-    "cnn-multichannel.svg": ("flow", "RGB에서 하나의 출력 채널", "일반 Conv는 입력 채널별 계산을 합쳐 하나의 출력 채널을 만듭니다.", [["R","3×3"],["G","3×3"],["B","3×3"],["합산","+ bias"],["Output","1 channel"]]),
+    "cnn-multichannel.svg": ("parallel_conv_channels", "RGB에서 하나의 출력 채널", "하나의 filter가 모든 입력 채널을 병렬로 계산한 뒤 합산합니다."),
     "cnn-featuremaps.svg": ("compare", "Feature map은 무엇에 반응할까?", "각 채널은 서로 다른 패턴에 강하게 반응하도록 학습될 수 있습니다.", "초기 feature", ["수직 경계","수평 경계","밝기 변화"], "깊은 feature", ["텍스처 조합","부품 형태","클래스에 유용한 패턴"]),
     "cnn-receptive.svg": ("flow", "Receptive field 확장", "층이 깊어지면 하나의 출력이 더 넓은 입력 문맥을 보게 됩니다.", [["Layer 1","3×3"],["Layer 2","5×5"],["Layer 3","7×7"],["Deep","더 넓은 문맥"]]),
     "cnn-hierarchy.svg": ("flow", "CNN 특징의 계층적 표현", "초기에는 단순한 패턴, 깊은 층에서는 더 복합적인 조합을 표현합니다.", [["Edge","경계"],["Texture","반복 무늬"],["Part","부분 구조"],["Object cue","객체 단서"]]),
@@ -301,36 +301,36 @@ SPECS = {
     "vit-flatten.svg": ("flow", "Patch → Flatten → Embedding", "각 patch를 1차원으로 펼친 뒤 학습 가능한 선형 변환을 적용합니다.", [["16×16×3","patch"],["Flatten","768"],["Linear","W·x+b"],["Embedding","D차원"]]),
     "vit-position.svg": ("compare", "왜 위치 정보가 필요한가?", "Attention 자체는 token의 원래 2차원 위치를 자동으로 알지 못합니다.", "위치 정보 없음", ["토큰 집합처럼 처리","왼쪽/오른쪽 구분 약함","순서 변화에 둔감"], "Position embedding", ["각 patch 위치 코드 추가","공간 순서 전달","사전학습 위치 정보 활용"]),
     "vit-cls.svg": ("flow", "CLS token의 역할", "분류용 추가 token이 여러 encoder 층에서 patch 정보와 상호작용합니다.", [["CLS","초기 학습 벡터"],["Attention","patch와 교환"],["Encoder","여러 층 반복"],["CLS final","이미지 표현"],["Head","class logits"]]),
-    "vit-attention.svg": ("flow", "Self-Attention 계산 감각", "한 token이 다른 모든 token을 얼마나 참고할지 가중치를 계산합니다.", [["Query","무엇을 찾나"],["Key","비교 기준"],["Score","Q·K"],["Softmax","가중치"],["Value","정보 혼합"]]),
+    "vit-attention.svg": ("attention_qkv", "Self-Attention 계산", "Q·K로 attention weight를 만들고 그 weight로 V를 가중합합니다."),
     "vit-attention-matrix.svg": ("matrix", "Attention score matrix", "각 행은 한 query가 모든 key를 얼마나 참고하는지 나타냅니다."),
-    "vit-multihead.svg": ("flow", "Multi-Head Attention", "여러 head가 서로 다른 관계 패턴을 병렬로 볼 수 있습니다.", [["Input","tokens"],["Head 1","형태 관계"],["Head 2","위치 관계"],["Head 3","색/텍스처"],["Concat","다시 결합"]]),
+    "vit-multihead.svg": ("multihead_parallel", "Multi-Head Attention", "여러 head는 병렬 계산 후 concatenate되어 output projection으로 결합됩니다."),
     "vit-cnn-compare.svg": ("compare", "CNN과 ViT의 정보 혼합 방식", "둘 다 이미지를 학습하지만 기본 연결 방식이 다릅니다.", "CNN", ["작은 지역부터 계산","공유 kernel","깊어지며 문맥 확대"], "ViT", ["patch token으로 변환","attention으로 관계 계산","초기부터 전역 관계 가능"]),
 
     # tasks
-    "tasks-three-way.svg": ("compare", "Classification vs Detection", "Segmentation은 별도 픽셀 출력까지 만듭니다.", "Classification", ["이미지 전체 class","출력: class score","위치 정보 없음"], "Detection", ["object class + box","여러 객체 가능","대략적 위치 제공"]),
-    "tasks-segmentation.svg": ("compare", "Semantic vs Instance Segmentation", "같은 클래스 객체를 하나로 볼지 각각 나눌지의 차이입니다.", "Semantic", ["픽셀마다 class","같은 class 객체는 동일 라벨","도로/배경 등에 적합"], "Instance", ["객체별 mask","같은 class도 구분","개수와 형태 추적 가능"]),
-    "tasks-output-types.svg": ("flow", "Vision task의 출력 형태", "문제 종류에 따라 모델이 내야 하는 출력 자료구조가 달라집니다.", [["Image","입력"],["Class","K scores"],["Boxes","N×4 + score"],["Masks","H×W"],["Decision","업무 로직"]]),
-    "tasks-label-box-mask.svg": ("flow", "Label · Box · Mask의 정보량", "라벨링 비용과 위치 정밀도가 함께 증가합니다.", [["Class label","무엇인가"],["Box","어디쯤"],["Mask","정확히 어느 픽셀"],["Metric","task별 평가"]]),
+    "tasks-three-way.svg": ("task_three_way", "Classification · Detection · Segmentation", "같은 입력에서 task별 output granularity가 달라집니다."),
+    "tasks-segmentation.svg": ("semantic_instance", "Semantic vs Instance Segmentation", "같은 class 객체를 하나의 class mask로 볼지 객체별로 분리할지 비교합니다."),
+    "tasks-output-types.svg": ("task_outputs", "Vision task의 출력 형태", "class score, box, mask는 서로 다른 task output이며 직렬 단계가 아닙니다."),
+    "tasks-label-box-mask.svg": ("label_granularity", "Label · Box · Mask의 정보량", "annotation granularity와 위치 정밀도 차이를 시각적으로 비교합니다."),
 
     # training
     "train-split.svg": ("flow", "Train / Validation / Test", "세 집합은 역할이 다르며 test는 최종 평가까지 격리해야 합니다.", [["Train","가중치 학습"],["Validation","모델 선택"],["Threshold","운영 기준"],["Test","최종 일반화"]]),
-    "train-leakage.svg": ("compare", "좋은 분할 vs Data leakage", "같은 원본 영상의 유사 frame이 섞이면 성능이 부풀 수 있습니다.", "좋은 split", ["원본 그룹 단위 분리","시간대/설비 누수 방지","실제 일반화 평가"], "나쁜 split", ["frame random split","near-duplicate 섞임","평가 과대추정"]),
+    "train-leakage.svg": ("train_leakage_visual", "좋은 분할 vs Data leakage", "같은 원본 영상의 near-duplicate frame을 split 사이에 섞지 않습니다."),
     "train-confusion.svg": ("confusion",),
     "train-prf.svg": ("compare", "Precision과 Recall의 관점", "같은 confusion matrix에서 서로 다른 질문을 합니다.", "Precision", ["이상이라고 한 것 중","얼마나 진짜 이상인가?","FP에 민감"], "Recall", ["실제 이상 중","얼마나 놓치지 않았나?","FN에 민감"]),
     "train-threshold.svg": ("threshold_curve", "Threshold를 바꾸면 무엇이 변할까?", "고정된 score에서 threshold를 높이면 positive 판정 수가 줄어 Recall과 false-positive rate가 감소하거나 유지됩니다."),
-    "train-curves.svg": ("compare", "ROC curve와 PR curve", "불균형 데이터에서는 PR curve도 함께 보는 것이 중요합니다.", "ROC", ["TPR vs FPR","threshold 전 범위","음성 샘플 영향 큼"], "PR", ["Precision vs Recall","positive 성능 집중","희소 이상 탐지에 유용"]),
+    "train-curves.svg": ("roc_pr", "ROC curve와 Precision–Recall curve", "두 curve는 threshold sweep에 따른 trade-off를 보여 줍니다."),
     "train-overfit.svg": ("overfit_curve", "Overfitting의 전형적 신호", "train loss는 계속 낮아져도 validation loss가 최저점을 지난 뒤 다시 높아질 수 있습니다."),
 
     # ResNet
-    "resnet-plain-vs.svg": ("compare", "Plain network vs Residual network", "Residual connection은 깊은 네트워크의 최적화 문제를 재표현합니다.", "Plain", ["층을 순차 연결","전체 H(x)를 직접 학습","깊어지면 degradation 가능"], "Residual", ["shortcut으로 x 전달","F(x)=H(x)-x 학습","identity 경로 확보"]),
-    "resnet-shortcuts.svg": ("compare", "Identity vs Projection shortcut", "입출력 shape가 같은지에 따라 shortcut 구현이 달라집니다.", "Identity", ["shape 동일","x를 그대로 더함","추가 파라미터 없음"], "Projection", ["shape 변경 필요","1×1 Conv 등 사용","채널/해상도 맞춤"]),
-    "resnet-gradient.svg": ("flow", "Residual 경로의 gradient 흐름", "출력에서 입력까지 직접 이어지는 항이 존재합니다.", [["Output","H(x)"],["Add","x + F(x)"],["Shortcut","identity"],["Input","x"]]),
-    "resnet-function.svg": ("flow", "전체 함수보다 변화량을 학습", "입력을 유지하는 것이 좋다면 F(x)를 0에 가깝게 만들면 됩니다.", [["Input x","기준"],["F(x)","바꿀 부분"],["Add","x+F(x)"],["H(x)","목표 출력"]]),
+    "resnet-plain-vs.svg": ("resnet_plain_vs", "Plain network vs Residual network", "Residual block은 main branch와 identity shortcut을 합산합니다."),
+    "resnet-shortcuts.svg": ("resnet_shortcuts", "Identity vs Projection shortcut", "두 branch shape가 다르면 projection으로 맞춘 뒤 element-wise add합니다."),
+    "resnet-gradient.svg": ("residual_gradient", "Residual 경로의 gradient 흐름", "shortcut은 backward derivative에도 identity term을 제공합니다."),
+    "resnet-function.svg": ("residual_function", "Residual learning", "F(x)를 학습한 뒤 identity x를 합산해 H(x)를 만듭니다."),
 
     # U-Net
     "unet-pyramid.svg": ("flow", "U-Net의 해상도 피라미드", "Encoder에서 공간을 줄이고 Decoder에서 다시 복원합니다.", [["256²","64ch"],["128²","128ch"],["64²","256ch"],["128²","128ch"],["256²","classes"]]),
     "unet-skip-why.svg": ("compare", "왜 Skip connection이 필요한가?", "깊은 특징의 문맥과 얕은 특징의 위치 정보를 함께 사용합니다.", "Encoder deep", ["넓은 문맥","의미 정보 풍부","공간 세부 감소"], "Skip feature", ["높은 해상도","경계/위치 정보","Decoder에 직접 전달"]),
-    "unet-mask-triplet.svg": ("flow", "Segmentation 결과 읽기", "입력·정답·예측을 같은 위치에서 비교해야 오류를 이해하기 쉽습니다.", [["Input","원본 이미지"],["GT mask","정답"],["Pred mask","예측"],["Overlay","오류 위치"]]),
+    "unet-mask-triplet.svg": ("mask_compare", "Segmentation 결과 비교", "GT와 prediction을 같은 입력 기준으로 나란히 비교해 오류 위치를 확인합니다."),
     "unet-pixel-class.svg": ("flow", "Pixel-wise classification", "각 픽셀 위치에서 클래스별 logit을 만들고 mask로 변환합니다.", [["Feature","H×W×C"],["1×1 Conv","K logits"],["Softmax","class score"],["Argmax","mask"]]),
 
     # PatchCore
@@ -361,15 +361,460 @@ SPECS = {
     "prml-svm.svg": ("svm",),
     "prml-graphical.svg": ("graphical",),
     "prml-gmm.svg": ("gmm",),
-    "prml-variational.svg": ("flow", "Variational Inference", "복잡한 posterior 대신 다루기 쉬운 q를 최적화해 근사합니다.", [["True posterior","p(z|x)"],["Choose q","family"],["Optimize","ELBO ↑"],["KL","q→posterior"],["Approx","inference"]]),
+    "prml-variational.svg": ("vi_visual", "Variational Inference", "다루기 쉬운 q(z;φ)를 선택하고 ELBO를 최적화해 posterior를 근사합니다."),
     "prml-sampling.svg": ("flow", "Monte Carlo sampling", "분포에서 여러 샘플을 뽑아 기대값이나 posterior 특성을 근사합니다.", [["Target p(x)","분포"],["Sample","x¹,x²,…"],["Evaluate","f(xⁿ)"],["Average","1/N Σ"],["Estimate","expectation"]]),
     "prml-pca.svg": ("compare", "PCA가 찾는 방향", "데이터 분산이 큰 축을 찾아 저차원 좌표로 투영합니다.", "원 좌표", ["x₁, x₂ 축","점들이 대각선으로 퍼짐","상관 존재"], "주성분 좌표", ["PC1 = 큰 분산 방향","PC2 = 작은 분산 방향","상위 축만 남겨 축소 가능"]),
-    "prml-ensemble.svg": ("flow", "Ensemble / Mixture of Experts", "여러 모델 출력을 결합하되 결합 규칙은 방법마다 다릅니다.", [["Model A","prediction"],["Model B","prediction"],["Model C","prediction"],["Combine","average/gate"],["Output","final"]]),
+    "prml-ensemble.svg": ("ensemble_parallel", "Ensemble / Mixture of Experts", "여러 predictor는 병렬로 계산되고 평균 또는 gating weight로 결합됩니다."),
 }
 
 
+
+def _pixels_human_array():
+    """Contrast semantic perception with the numeric tensor given to a model."""
+    body = [
+        '<rect x="70" y="145" width="430" height="300" rx="20" fill="#fff" stroke="#b9c9e7" stroke-width="3"/>',
+        '<rect x="700" y="145" width="430" height="300" rx="20" fill="#fff" stroke="#8ac7a5" stroke-width="3"/>',
+        '<text x="285" y="190" text-anchor="middle" class="l">사람: 사과로 인식</text>',
+        '<circle cx="285" cy="300" r="82" fill="#e85b48"/>',
+        '<path d="M280 215 C278 185 300 170 320 160" stroke="#6d7f45" stroke-width="12" fill="none"/>',
+        '<ellipse cx="340" cy="180" rx="30" ry="15" fill="#6da76f" transform="rotate(-25 340 180)"/>',
+        '<text x="285" y="415" text-anchor="middle" class="m">모양·색·문맥을 함께 해석</text>',
+        '<text x="915" y="190" text-anchor="middle" class="l">컴퓨터: H×W×C 숫자</text>',
+    ]
+    vals = [
+        [18,28,35,42,20],
+        [24,96,172,118,31],
+        [28,148,228,164,34],
+        [22,110,190,132,29],
+        [17,30,42,33,18],
+    ]
+    start_x,start_y,cell=790,220,48
+    for r,row in enumerate(vals):
+        for col,v in enumerate(row):
+            shade=max(0,min(255,245-v//2))
+            body.append(
+                f'<rect x="{start_x+col*cell}" y="{start_y+r*cell}" width="42" height="42" rx="5" '
+                f'fill="rgb({shade},{shade},{shade})" stroke="#c7d5ee"/>'
+            )
+            body.append(
+                f'<text x="{start_x+col*cell+21}" y="{start_y+r*cell+27}" text-anchor="middle" '
+                f'font-size="13" fill="#203455">{v}</text>'
+            )
+    body.append('<text x="915" y="415" text-anchor="middle" class="m">조명·노이즈가 바뀌면 숫자도 바뀜</text>')
+    body.append(_arrow(505,295,680,295))
+    return _frame("사람이 보는 이미지 vs 컴퓨터 입력", "같은 장면도 모델에는 픽셀 값으로 전달됩니다.", "".join(body))
+
+
+def _pixels_channels():
+    """RGB channels split in parallel, not serially."""
+    body = [
+        _card(70, 200, 175, 110, "원본", "H×W×3"),
+        '<circle cx="330" cy="255" r="32" fill="#edf3ff" stroke="#7891b7" stroke-width="3"/>',
+        '<text x="330" y="262" text-anchor="middle" class="l">분리</text>',
+    ]
+    body.append(_arrow(245,255,296,255))
+    channel_y=[145,235,325]
+    colors=[("#fde8e8","#b64040","R"),("#e9f7f2","#08796f","G"),("#e8eefc","#2454d8","B")]
+    for yy,(fill,stroke,label) in zip(channel_y,colors):
+        body.append(f'<rect x="430" y="{yy}" width="180" height="72" rx="13" fill="{fill}" stroke="{stroke}" stroke-width="3"/>')
+        body.append(f'<text x="520" y="{yy+31}" text-anchor="middle" class="l">{label} channel</text>')
+        body.append(f'<text x="520" y="{yy+55}" text-anchor="middle" class="m">H×W</text>')
+        body.append(_arrow(362,255,424,yy+36))
+    body += [
+        '<circle cx="730" cy="255" r="34" fill="#fff7e9" stroke="#d79b66" stroke-width="3"/>',
+        '<text x="730" y="262" text-anchor="middle" class="l">결합</text>',
+        _card(865, 200, 210, 110, "RGB image", "H×W×3", True),
+    ]
+    for yy in channel_y:
+        body.append(_arrow(610,yy+36,696,255))
+    body.append(_arrow(764,255,860,255))
+    return _frame("RGB 채널 분리와 결합", "R·G·B는 직렬 단계가 아니라 같은 이미지의 병렬 채널입니다.", "".join(body))
+
+
+def _lighting_visual():
+    """Same object with shifted pixel intensities under different illumination."""
+    body = []
+    for x0,title,base in [(95,"밝은 조명",210),(665,"어두운 조명",75)]:
+        body.append(f'<rect x="{x0}" y="145" width="440" height="300" rx="20" fill="#fff" stroke="#c7d5ee" stroke-width="3"/>')
+        body.append(f'<text x="{x0+220}" y="190" text-anchor="middle" class="l">{title}</text>')
+        vals=[
+            [base,base+8,base+4,base+10],
+            [base-18,base-65,base-78,base-12],
+            [base-10,base-82,base-95,base-18],
+            [base+3,base-20,base-15,base+5],
+        ]
+        sx=x0+95; sy=220; cell=56
+        for r,row in enumerate(vals):
+            for col,v in enumerate(row):
+                v=max(0,min(255,v))
+                shade=v
+                body.append(f'<rect x="{sx+col*cell}" y="{sy+r*cell}" width="50" height="50" rx="6" fill="rgb({shade},{shade},{shade})" stroke="#d6deea"/>')
+                body.append(f'<text x="{sx+col*cell+25}" y="{sy+r*cell+31}" text-anchor="middle" font-size="13" fill="{"#fff" if v<130 else "#203455"}">{v}</text>')
+    body.append('<text x="600" y="475" text-anchor="middle" class="m">객체의 의미는 같아도 intensity distribution은 크게 이동할 수 있음</text>')
+    return _frame("같은 물체, 다른 조명", "조명 변화는 그대로 픽셀 값 변화로 전달됩니다.", "".join(body))
+
+
+def _resize_visual():
+    """Show loss of a small structure after aggressive downsampling."""
+    body = [
+        '<text x="285" y="155" text-anchor="middle" class="l">1920×1080 개념</text>',
+        '<text x="915" y="155" text-anchor="middle" class="l">224×224 개념</text>',
+    ]
+    def grid(x0,y0,rows,cols,cell,hot):
+        out=[]
+        for r in range(rows):
+            for cc in range(cols):
+                idx=r*cols+cc
+                fill="#2454d8" if idx in hot else "#edf3ff"
+                out.append(f'<rect x="{x0+cc*cell}" y="{y0+r*cell}" width="{cell-3}" height="{cell-3}" rx="3" fill="{fill}" stroke="#c7d5ee"/>')
+        return "".join(out)
+    body.append(grid(115,185,7,10,34,{24,25,34,35,36,44,45}))
+    body.append(_arrow(510,300,680,300))
+    body.append(grid(795,220,4,6,45,{8,14}))
+    body += [
+        '<text x="285" y="455" text-anchor="middle" class="m">작은 구조가 여러 픽셀로 남음</text>',
+        '<text x="915" y="455" text-anchor="middle" class="m">축소 후 작은 구조가 1–2 cell로 줄거나 사라질 수 있음</text>',
+    ]
+    return _frame("Resize가 바꾸는 정보", "해상도 축소는 계산량을 줄이지만 작은 패턴의 표현력을 낮출 수 있습니다.", "".join(body))
+
+
+def _parallel_conv_channels():
+    body = [_card(55,200,150,110,"RGB input","C_in=3")]
+    ys=[145,235,325]
+    labels=["R × K_R","G × K_G","B × K_B"]
+    for yy,label in zip(ys,labels):
+        body.append(_card(300,yy,190,72,label,"3×3"))
+        body.append(_arrow(205,255,294,yy+36))
+    body += [
+        '<circle cx="650" cy="255" r="42" fill="#e9f7f2" stroke="#08796f" stroke-width="3"/>',
+        '<text x="650" y="250" text-anchor="middle" class="l">Σ</text>',
+        '<text x="650" y="276" text-anchor="middle" class="m">+ bias</text>',
+        _card(820,200,260,110,"Output feature map","one filter → one channel",True),
+    ]
+    for yy in ys:
+        body.append(_arrow(490,yy+36,606,255))
+    body.append(_arrow(694,255,815,255))
+    return _frame("RGB에서 하나의 출력 채널", "한 convolution filter는 모든 입력 채널을 동시에 보고 결과를 합산합니다.", "".join(body))
+
+
+def _attention_qkv_visual():
+    body=[_card(55,200,140,110,"Input X","tokens")]
+    ys=[135,235,335]
+    labels=[("Q=XW_Q","query"),("K=XW_K","key"),("V=XW_V","value")]
+    for yy,(name,sub) in zip(ys,labels):
+        body.append(_card(285,yy,180,72,name,sub))
+        body.append(_arrow(195,255,278,yy+36))
+    body += [
+        _card(555,165,220,90,"QKᵀ / √d_k","pairwise scores"),
+        _card(555,300,220,90,"Softmax","attention weights"),
+        _card(865,215,235,110,"A · V","weighted value sum",True),
+    ]
+    body.append(_arrow(465,171,550,205))
+    body.append(_arrow(465,271,550,205))
+    body.append(_arrow(665,255,665,294))
+    body.append(_arrow(775,345,860,285))
+    body.append(_arrow(465,371,860,285))
+    return _frame("Self-Attention 계산", "Q와 K로 attention weight를 만들고, 그 weight로 V를 가중합합니다.", "".join(body))
+
+
+def _multihead_visual():
+    body=[_card(55,205,150,105,"Input X","tokens")]
+    ys=[135,235,335]
+    colors=["#edf3ff","#e9f7f2","#fff1e7"]
+    for i,(yy,fill) in enumerate(zip(ys,colors),1):
+        body.append(f'<rect x="320" y="{yy}" width="210" height="72" rx="13" fill="{fill}" stroke="#9aabc7" stroke-width="2"/>')
+        body.append(f'<text x="425" y="{yy+31}" text-anchor="middle" class="l">Head {i}</text>')
+        body.append(f'<text x="425" y="{yy+55}" text-anchor="middle" class="m">own Q/K/V projection</text>')
+        body.append(_arrow(205,257,314,yy+36))
+    body += [
+        _card(675,205,175,105,"Concat","parallel heads"),
+        _card(950,205,170,105,"W_O","project output",True),
+    ]
+    for yy in ys:
+        body.append(_arrow(530,yy+36,670,257))
+    body.append(_arrow(850,257,945,257))
+    return _frame("Multi-Head Attention", "여러 head는 순차가 아니라 병렬로 계산된 뒤 concatenate됩니다.", "".join(body))
+
+
+def _task_three_way_visual():
+    body=[]
+    panels=[(55,"Classification"),(420,"Detection"),(785,"Segmentation")]
+    for x0,title in panels:
+        body.append(f'<rect x="{x0}" y="145" width="310" height="300" rx="20" fill="#fff" stroke="#c7d5ee" stroke-width="3"/>')
+        body.append(f'<text x="{x0+155}" y="190" text-anchor="middle" class="l">{title}</text>')
+        body.append(f'<rect x="{x0+75}" y="220" width="160" height="150" rx="12" fill="#edf2f7" stroke="#d6deea"/>')
+        body.append(f'<circle cx="{x0+155}" cy="295" r="48" fill="#e0ae82"/>')
+    body += [
+        '<rect x="120" y="382" width="180" height="38" rx="8" fill="#2454d8"/><text x="210" y="407" text-anchor="middle" fill="#fff" font-size="16">class: object</text>',
+        '<rect x="515" y="245" width="125" height="105" fill="none" stroke="#2454d8" stroke-width="5"/><text x="575" y="407" text-anchor="middle" class="m">class + box</text>',
+        '<path d="M860 337 C835 300 850 252 930 248 C1010 245 1020 320 972 350 C930 376 885 365 860 337" fill="#2454d8" opacity=".35"/><text x="940" y="407" text-anchor="middle" class="m">pixel mask</text>',
+    ]
+    return _frame("Classification · Detection · Segmentation", "세 task는 같은 입력을 보더라도 요구하는 출력 구조가 다릅니다.", "".join(body))
+
+
+def _semantic_instance_visual():
+    body=[]
+    for x0,title in [(90,"Semantic"),(650,"Instance")]:
+        body.append(f'<rect x="{x0}" y="145" width="460" height="300" rx="20" fill="#fff" stroke="#c7d5ee" stroke-width="3"/>')
+        body.append(f'<text x="{x0+230}" y="190" text-anchor="middle" class="l">{title}</text>')
+        body.append(f'<rect x="{x0+70}" y="220" width="320" height="160" rx="12" fill="#eef2f6" stroke="#d6deea"/>')
+    # same class objects have same color in semantic
+    body += [
+        '<ellipse cx="275" cy="295" rx="75" ry="52" fill="#2454d8" opacity=".48"/>',
+        '<ellipse cx="390" cy="300" rx="75" ry="52" fill="#2454d8" opacity=".48"/>',
+        '<ellipse cx="835" cy="295" rx="75" ry="52" fill="#2454d8" opacity=".48"/>',
+        '<ellipse cx="950" cy="300" rx="75" ry="52" fill="#08796f" opacity=".48"/>',
+        '<text x="320" y="414" text-anchor="middle" class="m">같은 class → 같은 pixel label</text>',
+        '<text x="880" y="414" text-anchor="middle" class="m">같은 class라도 object ID를 분리</text>',
+    ]
+    return _frame("Semantic vs Instance Segmentation", "Semantic은 class 단위, instance는 객체 단위로 mask를 구분합니다.", "".join(body))
+
+
+def _task_outputs_visual():
+    body=[_card(55,205,150,105,"Image","input")]
+    targets=[(360,125,"Class scores","K"),(360,235,"Boxes","N×4 + score"),(360,345,"Masks","H×W or N masks")]
+    for x0,y0,title,sub in targets:
+        body.append(_card(x0,y0,230,72,title,sub))
+        body.append(_arrow(205,257,x0-5,y0+36))
+    body.append(_card(835,205,240,105,"Task-specific decision","postprocess / metric",True))
+    for _,y0,_,_ in targets:
+        body.append(_arrow(590,y0+36,830,257))
+    return _frame("Vision task의 출력 형태", "Class, box, mask는 순차 단계가 아니라 서로 다른 task가 요구하는 출력입니다.", "".join(body))
+
+
+def _label_granularity_visual():
+    body=[]
+    panels=[(60,"Class label","무엇인가"),(420,"Bounding box","어디쯤"),(780,"Pixel mask","정확히 어느 픽셀")]
+    for x0,title,sub in panels:
+        body.append(f'<rect x="{x0}" y="145" width="300" height="300" rx="20" fill="#fff" stroke="#c7d5ee" stroke-width="3"/>')
+        body.append(f'<text x="{x0+150}" y="190" text-anchor="middle" class="l">{title}</text>')
+        body.append(f'<text x="{x0+150}" y="218" text-anchor="middle" class="m">{sub}</text>')
+        body.append(f'<rect x="{x0+70}" y="245" width="160" height="130" rx="10" fill="#edf2f7" stroke="#d6deea"/>')
+        body.append(f'<circle cx="{x0+150}" cy="310" r="42" fill="#e0ae82"/>')
+    body += [
+        '<text x="210" y="410" text-anchor="middle" class="m">annotation cost 낮음</text>',
+        '<rect x="485" y="265" width="130" height="95" fill="none" stroke="#2454d8" stroke-width="5"/>',
+        '<path d="M850 341 C830 300 850 270 925 268 C1000 265 1010 330 970 352 C920 380 875 370 850 341" fill="#2454d8" opacity=".38"/>',
+        '<text x="930" y="410" text-anchor="middle" class="m">annotation cost 높음 · 위치 정밀도 높음</text>',
+    ]
+    return _frame("Label · Box · Mask의 정보량", "세 annotation은 서로 다른 supervision granularity를 제공합니다.", "".join(body))
+
+
+def _mask_compare_visual():
+    body=[
+        _card(50,205,170,105,"Input image","same sample"),
+        _card(360,135,205,90,"GT mask","ground truth"),
+        _card(360,315,205,90,"Pred mask","model output"),
+        _card(850,205,240,105,"Overlay / difference","error localization",True),
+    ]
+    body.append(_arrow(220,257,354,180))
+    body.append(_arrow(220,257,354,360))
+    body.append(_arrow(565,180,845,245))
+    body.append(_arrow(565,360,845,275))
+    # tiny mask previews
+    body += [
+        '<rect x="620" y="132" width="110" height="96" rx="8" fill="#eef2f6" stroke="#d6deea"/>',
+        '<circle cx="675" cy="180" r="30" fill="#2454d8" opacity=".45"/>',
+        '<rect x="620" y="312" width="110" height="96" rx="8" fill="#eef2f6" stroke="#d6deea"/>',
+        '<circle cx="683" cy="355" r="30" fill="#2454d8" opacity=".45"/>',
+    ]
+    return _frame("Segmentation 결과 비교", "GT와 prediction은 직렬 단계가 아니라 같은 입력에 대한 두 mask를 나란히 비교합니다.", "".join(body))
+
+
+def _roc_pr_visual():
+    body=[]
+    panels=[(70,"ROC","FPR","TPR"),(650,"Precision–Recall","Recall","Precision")]
+    for x0,title,xlab,ylab in panels:
+        body.append(f'<rect x="{x0}" y="135" width="480" height="330" rx="20" fill="#fff" stroke="#c7d5ee" stroke-width="3"/>')
+        body.append(f'<text x="{x0+240}" y="180" text-anchor="middle" class="l">{title}</text>')
+        body.append(f'<path d="M{x0+75} 400 H{x0+420} M{x0+75} 400 V220" class="thin"/>')
+        body.append(f'<text x="{x0+245}" y="438" text-anchor="middle" class="m">{xlab}</text>')
+        body.append(f'<text x="{x0+45}" y="235" text-anchor="middle" class="m">{ylab}</text>')
+    body += [
+        '<path d="M145 390 C170 310 225 255 305 235 C380 215 440 212 490 210" stroke="#2454d8" stroke-width="6" fill="none"/>',
+        '<path d="M145 400 L490 220" stroke="#a8b5c8" stroke-width="3" stroke-dasharray="8 6"/>',
+        '<path d="M725 245 C790 255 845 275 900 300 C960 328 1010 350 1070 385" stroke="#08796f" stroke-width="6" fill="none"/>',
+        '<text x="310" y="320" text-anchor="middle" class="m">threshold sweep</text>',
+        '<text x="890" y="215" text-anchor="middle" class="m">class imbalance에서 PR도 함께 확인</text>',
+    ]
+    return _frame("ROC curve와 Precision–Recall curve", "두 curve 모두 threshold를 바꾸며 얻는 성능 trade-off를 보여줍니다.", "".join(body))
+
+
+def _train_leakage_visual():
+    body=[
+        '<text x="300" y="145" text-anchor="middle" class="l">나쁜 예: frame random split</text>',
+        '<text x="900" y="145" text-anchor="middle" class="l">좋은 예: grouped split</text>',
+    ]
+    colors=["#8faee8","#8ccdbb","#e0ae82","#b8a6d9"]
+    labels=["video A","video B","video C","video D"]
+    for i,(color,label) in enumerate(zip(colors,labels)):
+        y=190+i*58
+        body.append(f'<text x="70" y="{y+24}" class="m">{label}</text>')
+        for j in range(6):
+            body.append(f'<rect x="{150+j*58}" y="{y}" width="46" height="38" rx="5" fill="{color}" opacity="{0.55+0.07*j}"/>')
+        # random frames spread across train/val/test columns
+        for j in range(6):
+            dx=650 + (j%3)*145 + (j//3)*36
+            body.append(f'<rect x="{dx}" y="{y}" width="30" height="38" rx="4" fill="{color}" opacity="{0.6+0.05*j}"/>')
+    body += [
+        '<text x="235" y="460" text-anchor="middle" class="m">같은 원본의 near-duplicate가 split 사이에 섞일 수 있음</text>',
+        '<text x="685" y="460" class="m">Train</text><text x="830" y="460" class="m">Val</text><text x="975" y="460" class="m">Test</text>',
+    ]
+    return _frame("좋은 분할 vs Data leakage", "영상·burst 데이터는 원본 그룹 전체를 하나의 split에 배정해야 누수를 줄일 수 있습니다.", "".join(body))
+
+
+def _resnet_plain_vs_visual():
+    body=[
+        '<text x="300" y="150" text-anchor="middle" class="l">Plain block</text>',
+        '<text x="900" y="150" text-anchor="middle" class="l">Residual block</text>',
+        _card(80,220,120,80,"x","input"),
+        _card(245,220,145,80,"F₁","conv"),
+        _card(435,220,120,80,"H(x)","output"),
+        _arrow(200,260,240,260),
+        _arrow(390,260,430,260),
+        _card(650,220,120,80,"x","input"),
+        _card(815,220,145,80,"F(x)","residual"),
+        '<circle cx="1030" cy="260" r="34" fill="#e9f7f2" stroke="#08796f" stroke-width="3"/>',
+        '<text x="1030" y="268" text-anchor="middle" class="l">+</text>',
+        _arrow(770,260,810,260),
+        _arrow(960,260,994,260),
+        '<path d="M710 218 C760 150 960 150 1030 224" stroke="#08796f" stroke-width="5" fill="none"/>',
+        '<polygon points="1030,224 1014,209 1038,209" fill="#08796f"/>',
+        '<text x="870" y="150" text-anchor="middle" class="m">identity shortcut x</text>',
+        '<text x="300" y="385" text-anchor="middle" class="m">H(x)를 직접 근사</text>',
+        '<text x="900" y="385" text-anchor="middle" class="m">H(x)=F(x)+x</text>',
+    ]
+    return _frame("Plain network vs Residual network", "Residual block은 main branch와 identity shortcut을 합산합니다.", "".join(body))
+
+
+def _resnet_shortcuts_visual():
+    body=[]
+    for x0,title in [(65,"Identity shortcut"),(635,"Projection shortcut")]:
+        body.append(f'<rect x="{x0}" y="145" width="500" height="300" rx="20" fill="#fff" stroke="#c7d5ee" stroke-width="3"/>')
+        body.append(f'<text x="{x0+250}" y="190" text-anchor="middle" class="l">{title}</text>')
+    body += [
+        _card(110,245,120,80,"x","64×56×56"),
+        _card(330,245,140,80,"F(x)","same shape"),
+        '<circle cx="510" cy="285" r="28" fill="#e9f7f2" stroke="#08796f" stroke-width="3"/><text x="510" y="293" text-anchor="middle" class="l">+</text>',
+        _arrow(230,285,325,285), _arrow(470,285,480,285),
+        '<path d="M170 242 C220 205 425 205 510 255" stroke="#08796f" stroke-width="4" fill="none"/>',
+        _card(680,245,120,80,"x","64×56×56"),
+        _card(865,205,150,72,"F(x)","128×28×28"),
+        _card(865,315,150,72,"1×1, s=2","projection"),
+        '<circle cx="1080" cy="285" r="28" fill="#e9f7f2" stroke="#08796f" stroke-width="3"/><text x="1080" y="293" text-anchor="middle" class="l">+</text>',
+        _arrow(800,285,858,241), _arrow(800,285,858,351), _arrow(1015,241,1050,275), _arrow(1015,351,1050,295),
+        '<text x="315" y="405" text-anchor="middle" class="m">shape가 같으면 parameter-free identity</text>',
+        '<text x="885" y="420" text-anchor="middle" class="m">shape가 다르면 projection으로 맞춘 뒤 add</text>',
+    ]
+    return _frame("Identity vs Projection shortcut", "element-wise add를 위해 두 branch의 output shape가 같아야 합니다.", "".join(body))
+
+
+def _residual_function_visual():
+    body=[
+        _card(55,205,145,100,"x","input"),
+        _card(340,150,190,90,"F(x)","learned residual"),
+        '<circle cx="700" cy="255" r="38" fill="#e9f7f2" stroke="#08796f" stroke-width="3"/>',
+        '<text x="700" y="263" text-anchor="middle" class="l">+</text>',
+        _card(900,205,190,100,"H(x)","F(x)+x",True),
+        _arrow(200,255,334,195),
+        _arrow(530,195,662,242),
+        _arrow(738,255,895,255),
+        '<path d="M126 202 C210 115 590 115 700 217" stroke="#08796f" stroke-width="5" fill="none"/>',
+        '<polygon points="700,217 683,202 708,201" fill="#08796f"/>',
+        '<text x="420" y="125" text-anchor="middle" class="m">identity path carries x directly</text>',
+    ]
+    return _frame("Residual learning", "블록은 전체 mapping을 직렬로 만드는 대신 F(x)를 학습하고 x를 더합니다.", "".join(body))
+
+
+def _residual_gradient_visual():
+    body=[
+        '<text x="600" y="135" text-anchor="middle" class="l">backward gradient has two routes</text>',
+        _card(80,220,150,90,"Input x",""),
+        _card(420,220,170,90,"F(x)","main branch"),
+        '<circle cx="760" cy="265" r="36" fill="#e9f7f2" stroke="#08796f" stroke-width="3"/>',
+        '<text x="760" y="273" text-anchor="middle" class="l">+</text>',
+        _card(950,220,160,90,"H(x)","output",True),
+        _arrow(230,265,414,265), _arrow(590,265,722,265), _arrow(798,265,945,265),
+        '<path d="M155 218 C260 140 650 140 760 229" stroke="#08796f" stroke-width="5" fill="none"/>',
+        '<polygon points="760,229 742,214 768,213" fill="#08796f"/>',
+        '<path d="M950 340 C760 435 410 435 230 345" stroke="#a24d18" stroke-width="4" fill="none"/>',
+        '<polygon points="230,345 248,341 240,359" fill="#a24d18"/>',
+        '<text x="600" y="455" text-anchor="middle" class="m">∂H/∂x = I + ∂F/∂x : identity term provides a direct component</text>',
+    ]
+    return _frame("Residual 경로의 gradient 흐름", "Shortcut은 forward signal뿐 아니라 backward derivative에도 직접 항을 만듭니다.", "".join(body))
+
+
+def _vi_visual():
+    body=[
+        _card(55,205,190,100,"log p(x,z)","model / joint"),
+        _card(350,205,190,100,"q(z;φ)","chosen family"),
+        _card(650,205,190,100,"maximize ELBO","optimize φ",True),
+        _card(950,205,190,100,"q*(z)","posterior approximation"),
+        _arrow(245,255,345,255), _arrow(540,255,645,255), _arrow(840,255,945,255),
+        '<text x="600" y="380" text-anchor="middle" class="m">p(z|x)는 conceptual target이며 일반적으로 직접 계산할 수 없음</text>',
+        '<text x="600" y="420" text-anchor="middle" class="m">ELBO를 최적화하면 선택한 q family 안에서 posterior에 가까운 근사를 찾음</text>',
+    ]
+    return _frame("Variational Inference", "다루기 쉬운 q(z;φ)를 정하고 ELBO를 통해 posterior를 근사합니다.", "".join(body))
+
+
+def _ensemble_visual():
+    body=[_card(50,205,140,100,"Input x","")]
+    ys=[135,235,335]
+    for i,yy in enumerate(ys):
+        body.append(_card(315,yy,170,72,f"Model {chr(64+i)}","prediction"))
+        body.append(_arrow(190,255,309,yy+36))
+    body += [
+        _card(660,205,210,100,"Combine","average / weights"),
+        _card(970,205,170,100,"Output","final",True),
+    ]
+    for yy in ys:
+        body.append(_arrow(485,yy+36,654,255))
+    body.append(_arrow(870,255,965,255))
+    body.append('<text x="600" y="435" text-anchor="middle" class="m">ensemble: fixed/equal averaging · MoE: input-dependent gating weights</text>')
+    return _frame("Ensemble / Mixture of Experts", "여러 predictor는 병렬로 계산되고 마지막에 결합됩니다.", "".join(body))
+
 def _render(spec):
     kind = spec[0]
+    if kind == "pixels_human_array":
+        return _pixels_human_array()
+    if kind == "pixels_channels":
+        return _pixels_channels()
+    if kind == "lighting_visual":
+        return _lighting_visual()
+    if kind == "resize_visual":
+        return _resize_visual()
+    if kind == "parallel_conv_channels":
+        return _parallel_conv_channels()
+    if kind == "attention_qkv":
+        return _attention_qkv_visual()
+    if kind == "multihead_parallel":
+        return _multihead_visual()
+    if kind == "task_three_way":
+        return _task_three_way_visual()
+    if kind == "semantic_instance":
+        return _semantic_instance_visual()
+    if kind == "task_outputs":
+        return _task_outputs_visual()
+    if kind == "label_granularity":
+        return _label_granularity_visual()
+    if kind == "mask_compare":
+        return _mask_compare_visual()
+    if kind == "roc_pr":
+        return _roc_pr_visual()
+    if kind == "train_leakage_visual":
+        return _train_leakage_visual()
+    if kind == "resnet_plain_vs":
+        return _resnet_plain_vs_visual()
+    if kind == "resnet_shortcuts":
+        return _resnet_shortcuts_visual()
+    if kind == "residual_function":
+        return _residual_function_visual()
+    if kind == "residual_gradient":
+        return _residual_gradient_visual()
+    if kind == "vi_visual":
+        return _vi_visual()
+    if kind == "ensemble_parallel":
+        return _ensemble_visual()
     if kind == "flow":
         return _flow(spec[1], spec[2], spec[3])
     if kind == "compare":
