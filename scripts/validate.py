@@ -2,6 +2,7 @@
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
+from xml.etree import ElementTree as ET
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,6 +66,54 @@ if len(paper_diagrams) != 18:
     errors.append(f'Expected 18 paper-style diagrams, found {len(paper_diagrams)}')
 if len(extra_diagrams) < 60:
     errors.append(f'Expected at least 60 generated extra diagrams, found {len(extra_diagrams)}')
+
+reference_source = (ROOT / 'scripts' / 'reference_figures.py').read_text(
+    encoding='utf-8'
+)
+if 'kind="text"' in reference_source:
+    errors.append(
+        'Reference figures must use visual panel kinds instead of paragraph-style '
+        'text cards.'
+    )
+
+for svg_path in reference_diagrams:
+    svg_text = svg_path.read_text(encoding='utf-8')
+    try:
+        root = ET.fromstring(svg_text)
+    except ET.ParseError as exc:
+        errors.append(f'Invalid reference SVG XML: {svg_path.name}: {exc}')
+        continue
+
+    view_box = root.attrib.get('viewBox', '').split()
+    if len(view_box) != 4:
+        errors.append(f'Missing/invalid viewBox: {svg_path.name}')
+        continue
+
+    _, _, width, height = map(float, view_box)
+    for node in root.iter():
+        if not node.tag.endswith('text'):
+            continue
+        raw_x = node.attrib.get('x')
+        raw_y = node.attrib.get('y')
+        if raw_x is None or raw_y is None:
+            continue
+        try:
+            text_x = float(raw_x)
+            text_y = float(raw_y)
+        except ValueError:
+            continue
+        if not (0 <= text_x <= width and 0 <= text_y <= height):
+            errors.append(
+                f'Text anchor outside viewBox: {svg_path.name} '
+                f'({text_x}, {text_y})'
+            )
+        text_value = ''.join(node.itertext()).strip()
+        text_class = node.attrib.get('class', '')
+        if text_class not in {'title', 'subtitle'} and len(text_value) > 64:
+            errors.append(
+                f'Overlong in-figure label ({len(text_value)} chars): '
+                f'{svg_path.name} -> {text_value[:40]}...'
+            )
 
 for svg_path in [
     *sorted((ROOT / 'assets' / 'diagrams').glob('*.svg')),
