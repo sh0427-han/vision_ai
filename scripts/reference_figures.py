@@ -2211,11 +2211,11 @@ def _linear_regression_scatter(x, y, w, h):
 
 
 def _svm_margin(x, y, w, h):
-    """Maximum-margin separator with support vectors highlighted."""
+    """Maximum-margin sketch with rings aligned to displayed closest samples."""
     parts = [_scatter(x, y, w, h, "linear", False, True)]
     support = [
-        (x+w*.42, y+h*.55),
-        (x+w*.62, y+h*.58),
+        (x + w * .42, y + h * .55),
+        (x + w * .62, y + h * .30),
     ]
     for cx, cy in support:
         parts.append(
@@ -2224,10 +2224,9 @@ def _svm_margin(x, y, w, h):
         )
     parts.append(
         f'<text x="{x+18}" y="{y+35}" class="small">'
-        "circled points lie closest to the separating boundary</text>"
+        "rings mark the displayed samples nearest the separator</text>"
     )
     return "".join(parts)
-
 
 def _em_cycle(x, y, w, h):
     """EM alternates E-step responsibilities and M-step parameter updates."""
