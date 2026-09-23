@@ -927,7 +927,7 @@ def _linear_score_matrix(x, y, w, h):
         [-0.4, 0.9, 0.2, -0.3],
         [0.1, 0.3, -0.7, 0.8],
     ]
-    scores = [1.37, -1.27, 0.02]
+    scores = [1.25, -1.45, -0.62]
     parts.append(f'<text x="{x+18}" y="{y+42}" class="small">x ∈ R⁴</text>')
     parts.append(_value_grid(x + 18, y + 62, vector, 34, "#edf3ff"))
     parts.append(f'<text x="{x+92}" y="{y+42}" class="small">W ∈ R³ˣ⁴</text>')
