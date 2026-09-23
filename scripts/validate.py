@@ -214,7 +214,17 @@ for svg_path in [*paper_diagrams, *reference_diagrams]:
             )
         text_value = ''.join(node.itertext()).strip()
         text_class = node.attrib.get('class', '')
-        if text_class not in {'title', 'subtitle'} and len(text_value) > 64:
+        if text_class == 'title' and len(text_value) > 68:
+            errors.append(
+                f'Overlong figure title ({len(text_value)} chars): '
+                f'{svg_path.name} -> {text_value[:48]}...'
+            )
+        elif text_class == 'subtitle' and len(text_value) > 120:
+            errors.append(
+                f'Overlong figure subtitle ({len(text_value)} chars): '
+                f'{svg_path.name} -> {text_value[:56]}...'
+            )
+        elif text_class not in {'title', 'subtitle'} and len(text_value) > 64:
             errors.append(
                 f'Overlong in-figure label ({len(text_value)} chars): '
                 f'{svg_path.name} -> {text_value[:40]}...'
