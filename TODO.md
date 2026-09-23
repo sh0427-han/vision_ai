@@ -15,6 +15,8 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] CS231n 핵심 figure를 numeric matrix / chain rule / optimizer trajectory / LR curve / pooling / residual flow 중심으로 보강
+- [x] PRML 핵심 figure를 entropy / posterior predictive uncertainty / importance sampling / PCA projection·reconstruction 중심으로 보강
 - [x] CNN / ViT / PatchCore에 paper-style multi-panel figure 적용
 - [x] CS231n / PRML에 대형 reference figure atlas 추가
 - [x] `scripts/reference_figures.py` 추가
@@ -64,18 +66,18 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 1-2. Linear Classifier / Loss
 
-- [ ] linear score `Wx+b`를 입력 vector와 weight matrix 관점에서 시각화
+- [x] linear score `Wx+b`를 입력 vector와 weight matrix 관점에서 시각화
 - [x] softmax와 hinge loss 비교 figure 개선
 - [ ] linear decision boundary vs nonlinear boundary 비교
 - [ ] regularization term이 data loss에 더해지는 구조를 별도 작은 figure로 설명
 
 ## 1-3. Optimization / Backpropagation
 
-- [ ] computational graph의 forward / backward 방향을 더 명확하게 표시
-- [ ] chain rule 숫자 예시 figure 추가
-- [ ] numerical gradient vs analytic gradient / gradient check figure 추가
-- [ ] SGD / Momentum / Adam을 같은 loss landscape 위 trajectory로 비교
-- [ ] learning rate too small / good / too large 비교
+- [x] computational graph의 forward / backward 방향을 더 명확하게 표시
+- [x] chain rule 숫자 예시 figure 추가
+- [x] numerical gradient vs analytic gradient / gradient check figure 추가
+- [x] SGD / Momentum / Adam을 같은 loss landscape 위 trajectory로 비교
+- [x] learning rate too small / good / too large 비교
 - [ ] local minimum / saddle point / flat region 비교 figure 보강
 
 ## 1-4. Neural Networks / Training Tricks
@@ -83,7 +85,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] sigmoid / tanh / ReLU / Leaky ReLU 함수 모양 비교
 - [x] activation별 gradient 특성 표시
 - [ ] vanishing / exploding gradient figure 추가
-- [ ] initialization이 activation variance에 미치는 영향
+- [x] initialization이 activation variance에 미치는 영향
 - [x] BatchNorm train vs inference 차이
 - [ ] dropout train vs inference 구조
 - [ ] L2 weight decay 직관
@@ -104,15 +106,15 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
   - output feature map
 - [ ] output channel 여러 개가 여러 filter에서 생성되는 구조
 - [ ] receptive field growth
-- [ ] max pooling vs average pooling
+- [x] max pooling vs average pooling
 - [ ] early / middle / deep layer feature hierarchy
 - [ ] 실제 feature-map / edge-response 느낌의 synthetic visualization 추가
 
 ## 1-6. Architecture
 
 - [ ] LeNet / AlexNet / VGG / ResNet / ViT 비교 figure
-- [ ] plain block vs residual block
-- [ ] residual connection의 gradient flow
+- [x] plain block vs residual block
+- [x] residual connection의 gradient flow
 - [ ] VGG의 repeated 3×3 stack intuition
 - [ ] architecture별 핵심 차이를 숫자표가 아닌 시각 구조로 비교
 
@@ -154,7 +156,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 - [ ] prior / likelihood / posterior를 서로 다른 density curve로 표현
 - [ ] Bayesian decision / expected risk
-- [ ] entropy / information intuition
+- [x] entropy / information intuition
 - [ ] posterior와 posterior predictive를 명확히 구분하는 figure
 
 ## 2-2. Chapter 2 — Probability Distributions
@@ -169,13 +171,13 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 2-3. Chapter 3 — Linear Models for Regression
 
-- [ ] raw linear regression
+- [x] raw linear regression
 - [x] polynomial basis
 - [x] Gaussian basis
 - [x] sigmoid basis
 - [ ] regularization에 따른 curve 변화
-- [ ] Bayesian regression mean + uncertainty band
-- [ ] posterior predictive distribution
+- [x] Bayesian regression mean + uncertainty band
+- [x] posterior predictive distribution
 
 ## 2-4. Chapter 4 — Linear Models for Classification
 
@@ -244,7 +246,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 ## 2-11. Chapter 11 — Sampling Methods
 
 - [x] Monte Carlo sampling
-- [ ] importance sampling
+- [x] importance sampling
 - [ ] rejection sampling
 - [x] MCMC random walk
 - [x] burn-in
@@ -255,8 +257,8 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 ## 2-12. Chapter 12 — Continuous Latent Variables
 
 - [ ] PCA principal axis
-- [ ] 2D → 1D projection
-- [ ] reconstruction
+- [x] 2D → 1D projection
+- [x] reconstruction
 - [ ] eigenvalue / explained variance
 - [ ] PPCA generative model
 - [ ] factor analysis comparison
