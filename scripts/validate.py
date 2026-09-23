@@ -126,6 +126,8 @@ for forbidden in [
     '"train-overfit.svg": ("curve"',
     '"train-threshold.svg": ("curve"',
     '"cs-optimization.svg": ("curve"',
+    '"train-curves.svg": ("compare"',
+    '"train-leakage.svg": ("compare"',
 ]:
     if forbidden in extra_source:
         errors.append(
@@ -136,11 +138,24 @@ for required in [
     'def _overfit_curve(',
     'def _threshold_curve(',
     'def _optimization_curve(',
+    'def _roc_pr_curves(',
+    'def _leakage_split(',
     'validation loss rises',
     'False-positive rate',
+    'Precision–Recall curve',
+    'Grouped split',
 ]:
     if required not in extra_source:
         errors.append(f'Missing audited extra-diagram safeguard: {required}')
+
+for forbidden_visual in [
+    '("tasks", "overview"): ["tasks-three-way.svg"]',
+    '("tasks", "visual"): ["tasks-segmentation.svg"]',
+]:
+    if forbidden_visual in build_source:
+        errors.append(
+            f'Duplicate weak task visual remains inserted: {forbidden_visual}'
+        )
 
 for forbidden_note in ["note('resnet'", "note('unet'"]:
     if forbidden_note in build_source:
