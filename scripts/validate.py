@@ -60,8 +60,8 @@ for path, parser in pages.items():
 extra_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'extra').glob('*.svg'))
 paper_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'paper').glob('*.svg'))
 reference_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'reference').glob('*.svg'))
-if len(reference_diagrams) != 41:
-    errors.append(f'Expected 41 CS231n/PRML reference figures, found {len(reference_diagrams)}')
+if len(reference_diagrams) != 44:
+    errors.append(f'Expected 44 CS231n/PRML reference figures, found {len(reference_diagrams)}')
 if len(paper_diagrams) != 18:
     errors.append(f'Expected 18 paper-style diagrams, found {len(paper_diagrams)}')
 if len(extra_diagrams) < 60:
@@ -70,6 +70,26 @@ if len(extra_diagrams) < 60:
 reference_source = (ROOT / 'scripts' / 'reference_figures.py').read_text(
     encoding='utf-8'
 )
+
+for forbidden in [
+    'values=[0.02,0.2,0.65,1.0]',
+    'steps=["model A","model B","model C","average"]',
+    'steps=["input","gating","experts","weighted output"]',
+    'dict(title="decision regions",kind="scatter_curve")',
+]:
+    if forbidden in reference_source:
+        errors.append(
+            f'Reference figure semantic regression remains in source: {forbidden}'
+        )
+
+for required in [
+    'cs-conv-channels-rf.svg',
+    'cs-attention.svg',
+    'prml-discrete-map.svg',
+]:
+    if required not in reference_source:
+        errors.append(f'Missing required corrected reference figure: {required}')
+
 if 'kind="text"' in reference_source:
     errors.append(
         'Reference figures must use visual panel kinds instead of paragraph-style '
