@@ -567,7 +567,9 @@ def _activation_gradients(x, y, w, h):
     return "".join(parts)
 
 
+
 def _batchnorm_modes(x, y, w, h):
+    """BatchNorm train/eval statistics and running-stat updates."""
     parts = []
     rows = [
         (y + 78, "train", "batch μB, σB²", "#2454d8"),
@@ -602,8 +604,11 @@ def _batchnorm_modes(x, y, w, h):
             f'<text x="{x+442}" y="{yy+43}" text-anchor="middle" class="small">'
             "γ, β</text>"
         )
+    parts.append(
+        f'<text x="{x+18}" y="{y+182}" class="small" fill="#6d7f9b">'
+        "train also updates running statistics</text>"
+    )
     return "".join(parts)
-
 
 def _augmentation_cards(x, y, w, h):
     parts = []
@@ -749,7 +754,7 @@ def _conv_controls(x, y, w, h):
     return "".join(parts)
 
 def _modern_visual(x, y, w, h):
-    """Compact, concept-correct views of CLIP, DINO and diffusion."""
+    """Compact views of CLIP, DINO, diffusion and attention."""
     parts = []
     cards = [
         (x + 18, y + 58, "CLIP"),
@@ -785,10 +790,18 @@ def _modern_visual(x, y, w, h):
             parts.append(f'<text x="{px+112}" y="{py+105}" text-anchor="middle" class="small">EMA params</text>')
         elif title == "diffusion":
             parts.append(_grid(px + 20, py + 43, 3, 3, 14, "blue", [1, 4, 7]))
-            parts.append(_arrow(px + 70, py + 64, px + 103, py + 64))
             parts.append(_grid(px + 111, py + 43, 3, 3, 14, "gray", [0, 2, 4, 6, 8]))
-            parts.append(f'<text x="{px+21}" y="{py+108}" class="small">forward: data → noise</text>')
-            parts.append(f'<text x="{px+116}" y="{py+108}" class="small">reverse: denoise</text>')
+            parts.append(_arrow(px + 70, py + 56, px + 103, py + 56))
+            parts.append(
+                f'<path d="M{px+103} {py+80} H{px+70}" '
+                'stroke="#08796f" stroke-width="2.5"/>'
+            )
+            parts.append(
+                f'<polygon points="{px+70},{py+80} {px+82},{py+73} '
+                f'{px+82},{py+87}" fill="#08796f"/>'
+            )
+            parts.append(f'<text x="{px+22}" y="{py+108}" class="small">data → noise</text>')
+            parts.append(f'<text x="{px+108}" y="{py+108}" class="small">denoise ←</text>')
         else:
             parts.append(_grid(px + 35, py + 40, 4, 4, 17, "heat", [5, 6, 9, 10]))
             parts.append(f'<text x="{px+116}" y="{py+62}" class="small">QKᵀ</text>')
@@ -796,6 +809,7 @@ def _modern_visual(x, y, w, h):
     return "".join(parts)
 
 def _bayes_update_density(x, y, w, h):
+    """Schematic prior, likelihood over a parameter, and posterior."""
     left = x + 40
     right = x + w - 20
     bottom = y + h - 42
@@ -811,12 +825,13 @@ def _bayes_update_density(x, y, w, h):
         f'<path d="M{left+10} {bottom} C{x+w*.42} {bottom} {x+w*.49} {top+28} '
         f'{x+w*.55} {top+28} C{x+w*.64} {top+28} {x+w*.70} {bottom} '
         f'{right-10} {bottom}" stroke="#08796f" stroke-width="5" fill="none"/>',
-        f'<text x="{left+4}" y="{top+18}" class="small" fill="#2454d8">prior</text>',
-        f'<text x="{left+72}" y="{top+18}" class="small" fill="#a24d18">likelihood</text>',
-        f'<text x="{left+170}" y="{top+18}" class="small" fill="#08796f">posterior</text>',
+        f'<text x="{left+4}" y="{top+18}" class="small" fill="#2454d8">prior p(θ)</text>',
+        f'<text x="{left+92}" y="{top+18}" class="small" fill="#a24d18">likelihood L(θ)</text>',
+        f'<text x="{left+215}" y="{top+18}" class="small" fill="#08796f">posterior p(θ|D)</text>',
+        f'<text x="{right-22}" y="{bottom+24}" text-anchor="end" class="small">parameter θ →</text>',
+        f'<text x="{left+5}" y="{y+h-15}" class="small">schematic shapes over θ</text>',
     ]
     return "".join(parts)
-
 
 def _bayes_risk(x, y, w, h):
     parts = [
@@ -922,42 +937,63 @@ def _posterior_approx(x, y, w, h):
     return "".join(parts)
 
 
+
 def _elbo_decomposition(x, y, w, h):
-    bar_x = x + 45
-    bar_y = y + 130
-    bar_w = w - 90
+    """Show ELBO as a lower bound without implying all terms are positive bars."""
+    left = x + 55
+    right = x + w - 35
+    evidence_y = y + 105
+    elbo_y = y + 245
     parts = [
-        f'<text x="{bar_x}" y="{y+62}" class="label">log p(x)</text>',
-        f'<rect x="{bar_x}" y="{bar_y}" width="{bar_w}" height="58" rx="10" fill="#eef2f7" stroke="#c8d3e2"/>',
-        f'<rect x="{bar_x}" y="{bar_y}" width="{bar_w*.72}" height="58" rx="10" fill="#2454d8" opacity=".82"/>',
-        f'<rect x="{bar_x+bar_w*.72}" y="{bar_y}" width="{bar_w*.28}" height="58" rx="10" fill="#e0ae82" opacity=".88"/>',
-        f'<text x="{bar_x+bar_w*.36}" y="{bar_y+35}" text-anchor="middle" class="white">ELBO</text>',
-        f'<text x="{bar_x+bar_w*.86}" y="{bar_y+35}" text-anchor="middle" class="body">KL gap</text>',
-        f'<text x="{bar_x}" y="{bar_y+105}" class="small">maximize ELBO → shrink KL gap</text>',
+        f'<path d="M{left} {evidence_y} H{right}" '
+        'stroke="#2454d8" stroke-width="4"/>',
+        f'<path d="M{left} {elbo_y} H{right}" '
+        'stroke="#08796f" stroke-width="4"/>',
+        f'<path d="M{x+w*.72} {evidence_y+4} V{elbo_y-4}" '
+        'stroke="#e0ae82" stroke-width="4"/>',
+        f'<text x="{left}" y="{evidence_y-16}" class="label" '
+        'fill="#2454d8">log p(x)</text>',
+        f'<text x="{left}" y="{elbo_y-16}" class="label" '
+        'fill="#08796f">ELBO(q)</text>',
+        f'<text x="{x+w*.72+10}" y="{(evidence_y+elbo_y)/2}" '
+        'class="small" fill="#a24d18">KL(q || p)</text>',
+        f'<text x="{x+22}" y="{y+h-48}" class="small">'
+        "log p(x) = ELBO(q) + KL(q(z)||p(z|x))</text>",
+        f'<text x="{x+22}" y="{y+h-24}" class="small">'
+        "KL ≥ 0 ⇒ ELBO ≤ log p(x)</text>",
     ]
     return "".join(parts)
 
 
 def _mc_samples(x, y, w, h):
+    """Target density plus a rug plot of sampled x positions."""
     left = x + 38
     right = x + w - 22
-    bottom = y + h - 48
+    baseline = y + h - 76
     top = y + 52
     parts = [
-        f'<path d="M{left} {bottom} H{right}" class="thin"/>',
-        f'<path d="M{left+5} {bottom} C{x+w*.28} {bottom} {x+w*.36} {top+45} '
-        f'{x+w*.50} {top+45} C{x+w*.64} {top+45} {x+w*.72} {bottom} '
-        f'{right-5} {bottom}" stroke="#2454d8" stroke-width="4" fill="none"/>',
+        f'<path d="M{left} {baseline} H{right}" class="thin"/>',
+        f'<path d="M{left+5} {baseline} C{x+w*.28} {baseline} '
+        f'{x+w*.36} {top+45} {x+w*.50} {top+45} '
+        f'C{x+w*.64} {top+45} {x+w*.72} {baseline} {right-5} {baseline}" '
+        'stroke="#2454d8" stroke-width="4" fill="none"/>',
     ]
     samples = [0.18, 0.27, 0.41, 0.46, 0.53, 0.61, 0.68, 0.74, 0.83]
-    heights = [36, 55, 92, 125, 142, 118, 86, 60, 31]
-    for sx, sh in zip(samples, heights):
+    for sx in samples:
         xx = x + sx * w
-        parts.append(f'<path d="M{xx} {bottom} V{bottom-sh}" stroke="#08796f" stroke-width="3"/>')
-        parts.append(f'<circle cx="{xx}" cy="{bottom-sh}" r="5" fill="#08796f"/>')
-    parts.append(f'<text x="{left+6}" y="{top+15}" class="small">target density + samples</text>')
+        parts.append(
+            f'<path d="M{xx} {baseline+8} V{baseline+29}" '
+            'stroke="#08796f" stroke-width="4"/>'
+        )
+    parts.append(
+        f'<text x="{left+6}" y="{top+15}" class="small">'
+        "target density p(x)</text>"
+    )
+    parts.append(
+        f'<text x="{left+6}" y="{baseline+55}" class="small" fill="#08796f">'
+        "rug marks = sampled x values</text>"
+    )
     return "".join(parts)
-
 
 def _mcmc_path(x, y, w, h):
     parts = [
@@ -2210,24 +2246,49 @@ def _linear_regression_scatter(x, y, w, h):
     return "".join(parts)
 
 
+
 def _svm_margin(x, y, w, h):
-    """Maximum-margin separator with support vectors highlighted."""
-    parts = [_scatter(x, y, w, h, "linear", False, True)]
-    support = [
-        (x+w*.42, y+h*.55),
-        (x+w*.62, y+h*.58),
+    """Consistent 2D maximum-margin sketch with support vectors on margins."""
+    parts = [
+        f'<path d="M{x+25} {y+h-30} H{x+w-20} '
+        f'M{x+25} {y+h-30} V{y+35}" class="thin"/>'
     ]
-    for cx, cy in support:
+    a = [(0.18,0.72),(0.28,0.60),(0.34,0.76),(0.22,0.45),(0.42,0.55)]
+    b = [(0.62,0.30),(0.72,0.42),(0.77,0.24),(0.66,0.58),(0.84,0.48)]
+    for px, py in a:
+        parts.append(
+            f'<circle cx="{x+px*w}" cy="{y+py*h}" r="8" fill="#2454d8"/>'
+        )
+    for px, py in b:
+        parts.append(
+            f'<circle cx="{x+px*w}" cy="{y+py*h}" r="8" fill="#08796f"/>'
+        )
+
+    margin_left = x + w * .42
+    boundary = x + w * .52
+    margin_right = x + w * .62
+    parts.append(
+        f'<path d="M{boundary} {y+35} V{y+h-30}" '
+        'stroke="#a24d18" stroke-width="4"/>'
+    )
+    parts.append(
+        f'<path d="M{margin_left} {y+35} V{y+h-30} '
+        f'M{margin_right} {y+35} V{y+h-30}" '
+        'stroke="#89a9ec" stroke-width="3" stroke-dasharray="8 6"/>'
+    )
+    for cx, cy in [
+        (margin_left, y + h * .55),
+        (margin_right, y + h * .30),
+    ]:
         parts.append(
             f'<circle cx="{cx}" cy="{cy}" r="15" fill="none" '
             'stroke="#a24d18" stroke-width="3"/>'
         )
     parts.append(
         f'<text x="{x+18}" y="{y+35}" class="small">'
-        "circled points lie closest to the separating boundary</text>"
+        "support vectors lie on the displayed margin</text>"
     )
     return "".join(parts)
-
 
 def _em_cycle(x, y, w, h):
     """EM alternates E-step responsibilities and M-step parameter updates."""
@@ -2417,14 +2478,23 @@ def _panel_content(kind, x, y, w, h, data):
         return "".join(parts)
     if kind=="fcconv":
         parts=[]
+        inputs=[]
+        outputs=[]
         for i in range(4):
             for j in range(4):
-                parts.append(f'<circle cx="{x+50+i*32}" cy="{y+80+j*32}" r="5" fill="#89a9ec"/>')
+                point=(x+50+i*32, y+80+j*32)
+                inputs.append(point)
+                parts.append(f'<circle cx="{point[0]}" cy="{point[1]}" r="5" fill="#89a9ec"/>')
         for j in range(5):
-            parts.append(f'<circle cx="{x+w-55}" cy="{y+70+j*38}" r="8" fill="#2454d8"/>')
-        for i in range(0,4,2):
-            for j in range(0,4,2):
-                parts.append(f'<path d="M{x+50+i*32} {y+80+j*32} L{x+w-63} {y+70+(i+j)%5*38}" class="thin"/>')
+            point=(x+w-55, y+70+j*38)
+            outputs.append(point)
+            parts.append(f'<circle cx="{point[0]}" cy="{point[1]}" r="8" fill="#2454d8"/>')
+        for ix,iy in inputs:
+            for ox,oy in outputs:
+                parts.append(
+                    f'<path d="M{ix+6} {iy} L{ox-9} {oy}" '
+                    'stroke="#c6d0de" stroke-width="0.8" opacity=".55"/>'
+                )
         return "".join(parts)
     if kind=="architecture":
         parts=[]
@@ -2625,13 +2695,13 @@ FIGURES = {
         dict(title="soft responsibilities",kind="gmm_responsibility"),
         dict(title="E-step ↔ M-step cycle",kind="em_cycle"),
     ]),
-    "prml-vi-elbo.svg": dict(title="Variational inference and ELBO",subtitle="A tractable q(z) approximates the true posterior; maximizing ELBO closes the KL gap.",panels=[
-        dict(title="true posterior vs q(z)",kind="posterior_approx"),
+    "prml-vi-elbo.svg": dict(title="Variational inference and ELBO",subtitle="A tractable q(z) approximates the posterior; maximizing ELBO tightens the lower bound and minimizes KL within the chosen variational family.",panels=[
+        dict(title="target posterior vs q(z)",kind="posterior_approx"),
         dict(title="ELBO + KL = log evidence",kind="elbo_decomp"),
     ]),
-    "prml-monte-mcmc.svg": dict(title="Monte Carlo and MCMC",subtitle="Monte Carlo uses samples to estimate expectations; MCMC reaches a target distribution through a dependent chain.",panels=[
+    "prml-monte-mcmc.svg": dict(title="Monte Carlo and MCMC",subtitle="Monte Carlo estimates expectations with samples; MCMC uses a dependent chain designed to have the target as its stationary distribution under appropriate conditions.",panels=[
         dict(title="samples from a target density",kind="mc_samples"),
-        dict(title="burn-in and retained chain",kind="mcmc_path"),
+        dict(title="illustrative burn-in and dependent chain",kind="mcmc_path"),
         dict(title="importance sampling weights",kind="importance_sampling"),
     ]),
     "prml-pca-dim.svg": dict(title="PCA and dimensionality reduction",subtitle="Principal components align the coordinate system with directions of largest data variance.",panels=[

@@ -13,13 +13,13 @@ def register_cs231n(
 
     note(
         "cs231n",
-        "CS231n: 컴퓨터 비전을 학습하는 전체 흐름",
+        "CS231n: 주제별 Vision AI 개념을 연결하는 전체 흐름",
         (
             "Stanford CS231n 공개 노트를 따라 분류의 출발점부터 최적화, "
             "신경망, CNN, 시각화, 전이학습과 현대 Vision 모델까지 연결합니다."
         ),
-        "강의·교과서 정리",
-        "09 · CS231N COURSE MAP",
+        "종합 이론",
+        "07 · CS231N COURSE MAP",
         70,
         [
             section(
@@ -303,7 +303,7 @@ downsampling 후 몇 cell로 남는지 계산하는 것이 중요합니다.</p>
                     "더 자세히",
                     (
                         '<a href="cnn.html">CNN의 원리</a>에서 커널 한 칸 계산과 채널 '
-                        'shape를, <a href="resnet.html">ResNet</a>에서 residual 연결을 '
+                        'shape를, <a href="cnn.html#resnet_problem">CNN 문서의 ResNet 섹션</a>에서 residual 연결을 '
                         "수치 예시로 확인할 수 있습니다."
                     ),
                 ),
@@ -496,8 +496,8 @@ CNN 이후의 시각 모델은 서로 결합되기도 합니다. 이 주제들�
                             "split, CV, threshold, metrics",
                         ),
                         (
-                            "Residual architecture",
-                            '<a href="resnet.html">ResNet</a>',
+                            "CNN architecture · ResNet",
+                            '<a href="cnn.html#resnet_problem">CNN · ResNet</a>',
                             "identity/projection shortcut",
                         ),
                         (
@@ -506,8 +506,8 @@ CNN 이후의 시각 모델은 서로 결합되기도 합니다. 이 주제들�
                             "patch, Q/K/V, MSA, encoder",
                         ),
                         (
-                            "Dense prediction",
-                            '<a href="unet.html">U-Net</a>',
+                            "Segmentation · U-Net",
+                            '<a href="tasks.html#unet_architecture">Vision Tasks · U-Net</a>',
                             "encoder-decoder, skip concat",
                         ),
                     ],

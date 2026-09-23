@@ -8,16 +8,27 @@ Vision AI 지식을 개념, 데이터 흐름, 수치 예시와 도식으로 정�
 
 ## 현재 자료
 
-1. 이미지와 텐서: RGB, shape, 정규화, 밝기-픽셀 실험
-2. CNN: 합성곱, 채널, stride, padding, 수용영역
-3. ViT 논문 해설: 패치 임베딩, CLS, 위치 임베딩, Q/K/V, encoder
-4. 분류·탐지·분할: 출력 구조와 IoU/Dice
-5. 학습과 평가: 그룹 분할, 3-fold CV, threshold 실험
-6. ResNet 논문 해설: degradation, residual, projection, bottleneck
-7. U-Net 논문 해설: encoder-decoder, concat, 원본 crop 구조
-8. PatchCore 논문 해설: memory bank, coreset, 최근접 거리
-9. CS231n 전체 정리: 분류 → loss → 최적화 → CNN → 전이학습 → 현대 Vision
-10. PRML 전체 정리: 14개 장의 확률·추론·잠재변수·시계열·모델 결합
+자료는 **논문 이름이 아니라 학습 주제**를 중심으로 관리합니다. 대표 논문은 해당 주제 안에서
+문제 설정·구조·수식·실험 범위·한계를 설명하는 근거로 붙입니다.
+
+1. 이미지·CNN
+   - 이미지와 텐서: RGB, shape, 정규화, 밝기-픽셀 실험
+   - CNN: 합성곱, 채널, stride/padding/dilation, receptive field
+   - ResNet: CNN architecture의 확장으로 degradation, residual, projection, bottleneck 설명
+2. Transformer·Attention
+   - token, positional embedding, Q/K/V, multi-head attention
+   - ViT 논문을 대표 사례로 patch embedding과 encoder 구조 연결
+3. Vision Tasks·Segmentation
+   - classification, detection, semantic/instance segmentation, IoU/Dice
+   - U-Net 논문을 대표 사례로 encoder-decoder와 skip concatenate 설명
+4. 학습·평가
+   - grouped split, cross-validation, metric, threshold, leakage
+5. Anomaly Detection
+   - 정상 특징 기반 anomaly detection
+   - PatchCore를 대표 사례로 memory bank, coreset, nearest-neighbor score 설명
+6. 종합 이론
+   - CS231n: 분류 → loss → optimization → CNN → transfer/modern vision
+   - PRML: 확률 → 회귀/분류 → graphical/latent model → inference/sampling → sequential/ensemble
 
 ## 구조와 수정
 

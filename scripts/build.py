@@ -279,6 +279,10 @@ PAGE_TERMS = {
         ("Padding", "Padding", "입력 가장자리에 값을 덧붙여 공간 크기를 조절하는 방법"),
         ("Feature map", "Feature map", "필터 반응이 공간 위치별로 기록된 출력 배열"),
         ("Receptive field", "Receptive field", "한 출력 값이 영향을 받을 수 있는 입력 영역"),
+        ("ResNet", "Residual Network", "residual connection을 사용하는 CNN architecture"),
+        ("BN", "Batch Normalization", "미니배치 통계를 이용하는 정규화 층"),
+        ("Residual", "Residual", "블록이 학습하는 F(x)=H(x)-x 형태의 잔차 함수"),
+        ("Shortcut", "Shortcut connection", "일부 층을 우회해 입력을 합산 지점으로 전달하는 경로"),
     ],
     "vit": [
         ("ViT", "Vision Transformer", "이미지를 패치 토큰으로 처리하는 Transformer 계열 모델"),
@@ -298,6 +302,11 @@ PAGE_TERMS = {
         ("Classification", "Classification", "이미지 전체가 어떤 클래스인지 맞히는 문제"),
         ("Detection", "Object Detection", "객체의 클래스와 위치 상자를 함께 찾는 문제"),
         ("Segmentation", "Segmentation", "픽셀 단위로 객체 영역을 구분하는 문제"),
+        ("U-Net", "U-shaped Network", "encoder와 decoder를 대칭적으로 연결한 segmentation architecture"),
+        ("Encoder", "Encoder", "해상도를 줄이며 context feature를 추출하는 경로"),
+        ("Decoder", "Decoder", "해상도를 복원하며 dense prediction을 만드는 경로"),
+        ("Skip connection", "Skip connection", "encoder feature를 decoder로 전달하는 연결"),
+        ("Concat", "Concatenation", "tensor를 channel 방향 등으로 이어 붙이는 연산"),
     ],
     "training": [
         ("TP / FP / FN / TN", "True Positive / False Positive / False Negative / True Negative", "이진 분류 결과를 네 경우로 나눈 혼동행렬 용어"),
@@ -308,21 +317,6 @@ PAGE_TERMS = {
         ("Precision", "Precision", "이상이라고 예측한 것 중 실제 이상인 비율"),
         ("Recall", "Recall", "실제 이상 중 모델이 찾아낸 비율"),
         ("Data leakage", "Data leakage", "평가 데이터 정보가 학습 과정에 새어 들어가는 문제"),
-    ],
-    "resnet": [
-        ("ResNet", "Residual Network", "잔차 연결을 사용하는 신경망"),
-        ("BN", "Batch Normalization", "미니배치 통계를 이용하는 정규화 층"),
-        ("ReLU", "Rectified Linear Unit", "음수는 0으로 만드는 활성화 함수"),
-        ("Residual", "Residual", "목표 출력에서 입력을 뺀 차이 F(x)"),
-        ("Shortcut", "Shortcut connection", "일부 층을 우회해 입력을 뒤쪽으로 직접 전달하는 경로"),
-    ],
-    "unet": [
-        ("U-Net", "U-shaped Network", "Encoder와 Decoder를 U자 형태로 연결한 분할 구조의 이름"),
-        ("Conv", "Convolution", "합성곱 연산 또는 합성곱 층"),
-        ("Encoder", "Encoder", "해상도를 줄이며 의미 특징을 추출하는 경로"),
-        ("Decoder", "Decoder", "해상도를 복원하며 픽셀 단위 출력을 만드는 경로"),
-        ("Skip connection", "Skip connection", "Encoder의 고해상도 특징을 Decoder로 직접 전달하는 연결"),
-        ("Concat", "Concatenation", "텐서를 이어 붙이는 연산"),
     ],
     "patchcore": [
         ("CNN", "Convolutional Neural Network", "지역 특징을 추출하는 합성곱 신경망"),
@@ -392,12 +386,12 @@ TERM_ALIASES = {
     ("training", "TP / FP / FN / TN"): r"TP\s*[/·]\s*FP\s*[/·]\s*FN\s*[/·]\s*TN",
     ("training", "Threshold"): r"(?:threshold|Threshold)",
     ("training", "Data leakage"): r"(?:data leakage|데이터 누수|누수)",
-    ("resnet", "Residual"): r"(?:residual|Residual|잔차)",
-    ("resnet", "Shortcut"): r"(?:shortcut|Shortcut)",
-    ("unet", "Encoder"): r"(?:encoder|Encoder|인코더)",
-    ("unet", "Decoder"): r"(?:decoder|Decoder|디코더)",
-    ("unet", "Skip connection"): r"(?:skip connection|Skip connection)",
-    ("unet", "Concat"): r"(?:concat|Concat)",
+    ("cnn", "Residual"): r"(?:residual|Residual|잔차)",
+    ("cnn", "Shortcut"): r"(?:shortcut|Shortcut)",
+    ("tasks", "Encoder"): r"(?:encoder|Encoder|인코더)",
+    ("tasks", "Decoder"): r"(?:decoder|Decoder|디코더)",
+    ("tasks", "Skip connection"): r"(?:skip connection|Skip connection)",
+    ("tasks", "Concat"): r"(?:concat|Concat)",
     ("patchcore", "Memory bank"): r"(?:memory bank|Memory bank)",
     ("patchcore", "Coreset"): r"(?:coreset|Coreset)",
     ("patchcore", "Nearest neighbor"): r"(?:nearest neighbor|최근접)",
@@ -565,18 +559,17 @@ SECTION_VISUALS = {
     ("tasks", "pipeline"): ["tasks-output-types.svg", "tasks-label-box-mask.svg"],
 
     ("training", "loop"): ["train-overfit.svg"],
-    ("training", "split"): ["train-split.svg", "train-leakage.svg"],
+    ("training", "split"): ["train-leakage.svg"],
     ("training", "metrics"): ["train-confusion.svg", "train-prf.svg", "train-threshold.svg", "train-curves.svg"],
 
-    ("resnet", "problem"): ["resnet-plain-vs.svg"],
-    ("resnet", "block"): ["resnet-function.svg"],
-    ("resnet", "projection"): ["resnet-shortcuts.svg"],
-    ("resnet", "bottleneck"): ["resnet-gradient.svg"],
+    ("cnn", "resnet_problem"): ["resnet-plain-vs.svg"],
+    ("cnn", "residual_block"): ["resnet-function.svg"],
+    ("cnn", "residual_shape"): ["resnet-shortcuts.svg"],
+    ("cnn", "resnet_bottleneck"): ["resnet-gradient.svg"],
 
-    ("unet", "problem"): ["unet-mask-triplet.svg"],
-    ("unet", "architecture"): ["unet-pyramid.svg"],
-    ("unet", "concat"): ["unet-skip-why.svg"],
-    ("unet", "loss"): ["unet-pixel-class.svg"],
+    ("tasks", "segmentation_context"): ["unet-mask-triplet.svg"],
+    ("tasks", "unet_architecture"): ["unet-pyramid.svg", "unet-skip-why.svg"],
+    ("tasks", "unet_original"): ["unet-pixel-class.svg"],
 
     ("patchcore", "problem"): [],
     ("patchcore", "pipeline"): [],
@@ -664,7 +657,7 @@ def section_paper_figures(slug, anchor):
             f'<img src="../assets/diagrams/paper/{escape(name)}" '
             f'alt="{escape(title)}" loading="lazy" decoding="async">'
             f'<figcaption><strong>Figure {index}.</strong> '
-            f'{escape(title)} — {escape(subtitle)}</figcaption></figure>'
+            f'{escape(title)} — {escape(subtitle)} ''<span class="figure-note">설명용 재구성 도식이며 실제 실험 측정값이 아닙니다.</span>''</figcaption></figure>'
         )
     return '<div class="paper-visuals">' + ''.join(figures) + '</div>'
 
@@ -681,7 +674,7 @@ def section_reference_figures(slug, anchor):
             f'<img src="../assets/diagrams/reference/{escape(name)}" '
             f'alt="{escape(title)}" loading="lazy" decoding="async">'
             f'<figcaption><strong>{escape(title)}</strong> — '
-            f'{escape(subtitle)}</figcaption></figure>'
+            f'{escape(subtitle)} ''<span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span>''</figcaption></figure>'
         )
     return '<div class="paper-visuals reference-visuals">' + ''.join(figures) + '</div>'
 
@@ -714,7 +707,7 @@ def note(slug, title, subtitle, group, label, minutes, sections, sources):
                       label=label, minutes=minutes, sections=sections, sources=sources))
 
 
-note('pixels', '이미지는 어떻게 숫자가 될까?', '픽셀, RGB, 텐서, 정규화. 모델에 들어가는 입력을 숫자의 관점에서 이해합니다.', '기초 개념', '01 · IMAGE & TENSOR', 15, [
+note('pixels', '이미지는 어떻게 숫자가 될까?', '픽셀, RGB, 텐서, 정규화. 모델에 들어가는 입력을 숫자의 관점에서 이해합니다.', '이미지·CNN', '01 · IMAGE & TENSOR', 15, [
 section('overview', '사람의 장면을 모델의 배열로 바꾸기', '''<p>컴퓨터 비전 모델이 받는 것은 “사진”이라는 개념보다 <strong>정해진 순서로 배치된 숫자 배열</strong>에 가깝습니다. 사진을 읽으면 높이·너비·색상 채널의 배열이 되고, 여러 장을 묶으면 배치 차원이 추가됩니다. 모델은 이 수치에서 학습한 패턴을 이용해 클래스, 좌표, 마스크 등을 예측합니다.</p>''' + asset_figure('image-to-tensor.svg', '원본 이미지가 RGB 채널을 거쳐 NCHW 텐서로 변환되는 과정', '원본 이미지 → RGB 채널 값 → 배치 텐서의 관계를 한눈에 보는 개념도입니다.') + flow([('디코딩', '[H, W, 3]'), ('전처리', 'resize · normalize'), ('배치 구성', '[B, 3, H, W]'), ('모델', '특징 · 예측')], '이미지 파일에서 모델 입력까지. RGB와 NCHW를 사용하는 경우의 예시입니다.') + '''<p>예를 들어 RGB 이미지 224 × 224 한 장은 <strong>150,528개</strong>의 채널 값을 가집니다. 32장을 묶으면 입력은 <code>[32, 3, 224, 224]</code>입니다. 배열의 숫자 개수와 모델이 학습하는 파라미터 개수는 서로 다른 개념입니다.</p>'''),
 section('pixels', '한 픽셀에는 무엇이 들어 있을까?', table(['표현', '자료 구조 예시', '의미'], [('Grayscale', '<code>[H, W]</code> · 8-bit 값 0~255', '0은 검정, 255는 흰색. 밝기 하나로 표현합니다.'), ('RGB', '<code>[H, W, 3]</code> · [220, 60, 30]', 'R, G, B 채널의 세기. 이 예시는 붉은색 계열입니다.'), ('배치 텐서', '<code>[32, 3, 224, 224]</code>', 'PyTorch CNN에서 흔한 NCHW 순서: 배치, 채널, 높이, 너비.')]) + '''<p>OpenCV로 읽은 컬러 이미지의 기본 순서는 BGR입니다. RGB로 학습한 모델에 BGR을 그대로 넣으면 빨강과 파랑의 의미가 바뀝니다. 또한 <code>reshape</code>로 채널 순서를 바꾸면 안 됩니다. 차원의 위치를 바꾸는 <code>transpose</code>나 <code>permute</code>가 필요합니다.</p>''' + callout('형태와 의미를 함께 확인', '1920 × 1080 이미지를 보통 너비 × 높이로 말하지만 배열은 흔히 [1080, 1920, 3]입니다. “shape가 맞다”는 것만으로 RGB 순서와 값 범위가 맞는지는 알 수 없습니다.')),
 section('illumination', '직접 확인하기: 모양은 같아도 숫자는 달라진다', '''<p>아래 8 × 8 밝기 패턴은 학습용 합성 입력입니다. 왼쪽 그림과 오른쪽 행렬은 <strong>동일한 64개 픽셀</strong>을 보여 줍니다. 밝기 배율을 바꾸면 경계와 내부의 서로 다른 값들이 함께 변합니다.</p><div class="lab"><div class="lab-heading"><h3>밝기와 픽셀 값</h3><span class="lab-badge">INTERACTIVE</span></div><div class="controls"><label for="brightness">밝기 배율 <output id="brightness-value">1.00</output></label><input id="brightness" type="range" min="30" max="180" value="100" step="5"></div><div class="lab-display"><canvas id="pixel-canvas" width="256" height="256" aria-label="밝기 변화에 따른 8 × 8 패턴"></canvas><div id="pixel-matrix" class="matrix" style="grid-template-columns:repeat(8,1fr)" aria-label="동일한 패턴의 픽셀 값"></div></div><p class="lab-note">표시값 = clip(round(원래 값 × 배율), 0, 255). 실제 카메라의 노출·감마·노이즈를 모두 재현하는 물리 모델은 아닙니다.</p></div><p>밝은 값이 255를 넘으면 잘려서 포화됩니다. 예를 들어 170 × 1.8 = 306은 255가 됩니다. 서로 다른 원래 값들이 같은 255가 되므로 정보가 사라질 수 있습니다. 조명 변화에 강한 모델을 만들려면 이런 입력 분포 변화와 촬영 조건을 함께 생각해야 합니다.</p>'''),
@@ -722,15 +715,22 @@ section('normalization', '스케일 변환과 정규화는 구분하기', '''<p>
 section('check', '스스로 설명해 보기', '''<details><summary>224 × 224 RGB 이미지의 채널 값은 왜 50,176개가 아닐까?</summary><p>224 × 224 = 50,176은 공간 위치의 수입니다. 각 위치에 3개 채널이 있으므로 150,528개 값입니다.</p></details><details><summary>배치 크기를 16에서 32로 바꾸면 모델 파라미터도 두 배가 될까?</summary><p>파라미터 수는 그대로입니다. 한 번에 처리하는 입력과 중간 활성값의 양이 늘기 때문에 보통 메모리 사용량이 증가합니다.</p></details>''')
 ], [('PyTorch · Tensor basics', 'https://docs.pytorch.org/tutorials/beginner/basics/tensorqs_tutorial.html', '텐서의 형태와 차원 조작을 확인할 수 있습니다.'), ('Torchvision · Models and pre-trained weights', 'https://docs.pytorch.org/vision/stable/models.html', '가중치별 입력 전처리가 다를 수 있습니다.'), ('OpenCV · Color conversions', 'https://docs.opencv.org/4.x/d8/d01/group__imgproc__color__conversions.html', 'BGR/RGB 변환의 공식 API입니다.')])
 
-note('cnn', 'CNN: 작은 계산이 특징이 되는 과정', '합성곱을 한 칸씩 계산하고, 채널·수용영역·다운샘플링이 어떤 역할을 하는지 연결합니다.', '기초 개념', '02 · CONVOLUTION', 22, [
+note('cnn', 'CNN: 합성곱에서 ResNet까지', '합성곱·채널·수용영역을 이해한 뒤, 대표 CNN 아키텍처인 ResNet의 residual learning까지 연결합니다.', '이미지·CNN', '02 · CNN & RESNET', 22, [
 section('overview', '왜 작은 커널을 반복해서 사용할까?', '''<p>CNN은 가까운 픽셀 사이의 패턴을 작은 커널로 계산합니다. 같은 커널을 여러 위치에 적용하는 <strong>가중치 공유</strong> 덕분에 이미지의 모든 위치마다 별도 가중치를 둘 필요가 없습니다. 학습은 어떤 커널 값이 목적에 유용한지를 데이터로 조정하는 과정입니다.</p>''' + flow([('입력', '3 × 224 × 224'), ('Conv + ReLU', '32 × 224 × 224'), ('Downsample', '32 × 112 × 112'), ('분류 Head', 'K개 logits')], '구조를 설명하기 위한 간단한 CNN 예시. 특정 논문의 전체 모델은 아닙니다.') + '''<p>Feature map은 “물체를 그린 지도”로 항상 해석할 수 있는 결과가 아닙니다. 특정 커널과 비선형 연산에 반응한 활성값의 공간 배열입니다. 초기 층에서 경계·방향 같은 반응을 볼 수 있지만, 모든 채널을 한 단어의 의미에 대응시킬 수는 없습니다.</p>'''),
 section('convolution', '3 × 3 합성곱을 손으로 계산하기', '''<p>입력의 3 × 3 영역과 커널의 같은 위치를 각각 곱한 뒤, 9개 값을 더하고 bias를 더합니다. 딥러닝 라이브러리에서 흔히 합성곱이라고 부르는 연산은 커널을 뒤집지 않는 <em>cross-correlation</em>입니다.</p>''' + asset_figure('convolution-step.svg', '5×5 입력의 3×3 영역과 3×3 커널을 곱하고 더해 출력 한 값을 계산하는 과정', '3×3 합성곱 한 위치의 multiply-and-sum 계산을 외부 SVG로 정리했습니다.') + equation('출력[y, x] = Σ 입력[y+i, x+j] × 커널[i, j] + bias\n예시 커널 = [[−1, 0, 1], [−1, 0, 1], [−1, 0, 1]]') + '''<div class="lab"><div class="lab-heading"><h3>커널이 이동하는 위치</h3><span class="lab-badge">INTERACTIVE</span></div><div class="controls"><label for="conv-position">출력 위치 선택</label><input id="conv-position" type="range" min="0" max="8" value="0" step="1"></div><div class="lab-display"><div><p class="small">입력 5 × 5 · 파란 영역이 현재 계산 범위</p><div id="conv-input" class="matrix" style="grid-template-columns:repeat(5,1fr)"></div></div><div><p class="small">출력 3 × 3 · stride 1, padding 0, bias 0</p><div id="conv-output" class="matrix" style="grid-template-columns:repeat(3,1fr)"></div></div></div><div id="conv-value" class="lab-output" aria-live="polite"></div><p class="lab-note">수직 경계에 반응하는 고정 커널입니다. 실제 CNN에서는 대부분의 커널 값을 학습합니다.</p></div><p>첫 위치에서 각 행은 <code>[0, 0, 1] · [−1, 0, 1] = 1</code>이고, 세 행을 더하면 3입니다. 오른쪽 끝의 일정한 <code>[1, 1, 1]</code>은 −1 + 0 + 1 = 0이므로 경계가 없는 영역은 0이 됩니다.</p>'''),
 section('channels', '채널은 어떻게 섞일까?', '''<p>RGB 입력에 출력 채널 32개를 만드는 3 × 3 Conv를 사용하면 커널의 전체 shape는 <code>[32, 3, 3, 3]</code>입니다. 출력 채널 하나는 R·G·B 각각에 대한 계산을 합한 결과입니다. 일반적인 Conv에서 입력 채널마다 완전히 독립적인 최종 결과를 만드는 것은 아닙니다.</p>''' + table(['항목', '수치 예시', '설명'], [('입력', '[B, 3, 224, 224]', '배치 차원은 공간 연산과 별도'), ('가중치', '[32, 3, 3, 3]', '출력 채널 × 입력 채널 × 커널 높이 × 너비'), ('파라미터', '32 × 3 × 3 × 3 + 32 = 896', 'groups=1, bias=True일 때'), ('출력', '[B, 32, 224, 224]', 'stride=1, padding=1, dilation=1')]) + callout('1 × 1 Conv도 학습할 내용이 있다', '1 × 1 커널은 인접 공간을 직접 섞지는 않지만 채널을 섞습니다. 입력 64채널을 출력 128채널로 바꾸면 위치마다 64차원 벡터를 128차원으로 변환합니다.')),
 section('shape', 'Stride · Padding · Receptive field', equation('H_out = floor((H + 2P − D(K−1) − 1) / S + 1)\nW_out도 같은 방식으로 계산\nH=224, K=3, P=1, D=1, S=2 → H_out=112') + table(['용어', '하는 일', '수치 예시'], [('Stride', '커널이 이동하는 간격', '2이면 출력 공간 크기가 보통 약 절반'), ('Padding', '입력 주변을 확장', '3 × 3, stride 1에서 padding 1이면 크기 유지'), ('Dilation', '커널 샘플 간격 확장', '3 × 3, dilation 2의 유효 범위는 5 × 5'), ('Receptive field', '한 출력이 영향을 받는 입력의 범위', 'stride 1인 3 × 3 두 층은 이론상 5 × 5')]) + '''<p>수용영역은 층이 깊어지며 커집니다. 하지만 이론적으로 연결된 모든 픽셀이 동일한 영향력을 갖는 것은 아닙니다. 그리고 다운샘플링은 계산량을 줄이는 대신 작은 결함의 위치 정보가 약해질 수 있는 선택입니다.</p>'''),
-section('nonlinear', '왜 비선형 함수와 학습이 필요할까?', '''<p>ReLU는 <code>max(0, x)</code>를 계산합니다. 예를 들어 [−2, 0.5, 3]은 [0, 0.5, 3]이 됩니다. 비선형성이 전혀 없다면 여러 선형 변환을 쌓아도 하나의 선형 변환으로 합칠 수 있어 표현력에 제약이 생깁니다.</p><p>분류 학습에서는 특징을 이용해 클래스별 logit을 만들고, 정답과 비교한 loss를 역전파합니다. 기울기는 각 가중치를 바꿨을 때 loss가 어떻게 변할지를 나타내며, optimizer가 이 정보를 사용해 파라미터를 갱신합니다. “경계를 찾는 필터”를 사람이 모두 지정하는 것이 아닙니다.</p>''' + callout('한 문장으로 정리', 'CNN은 공유 커널로 지역 패턴을 계산하고, 채널 변환과 비선형 함수를 반복하면서 목적에 맞는 특징을 학습합니다.'))
-], [('PyTorch · Conv2d', 'https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html', '연산 정의, 가중치 shape, 출력 크기 공식의 기준입니다.'), ('PyTorch · ReLU', 'https://docs.pytorch.org/docs/stable/generated/torch.nn.ReLU.html', 'ReLU의 정의를 확인할 수 있습니다.'), ('ResNet 논문', 'https://arxiv.org/abs/1512.03385', '깊은 CNN을 학습하는 문제는 ResNet 해설에서 이어집니다.')])
+section('nonlinear', '왜 비선형 함수와 학습이 필요할까?', '''<p>ReLU는 <code>max(0, x)</code>를 계산합니다. 예를 들어 [−2, 0.5, 3]은 [0, 0.5, 3]이 됩니다. 비선형성이 전혀 없다면 여러 선형 변환을 쌓아도 하나의 선형 변환으로 합칠 수 있어 표현력에 제약이 생깁니다.</p><p>분류 학습에서는 특징을 이용해 클래스별 logit을 만들고, 정답과 비교한 loss를 역전파합니다. 기울기는 각 가중치를 바꿨을 때 loss가 어떻게 변할지를 나타내며, optimizer가 이 정보를 사용해 파라미터를 갱신합니다. “경계를 찾는 필터”를 사람이 모두 지정하는 것이 아닙니다.</p>''' + callout('한 문장으로 정리', 'CNN은 공유 커널로 지역 패턴을 계산하고, 채널 변환과 비선형 함수를 반복하면서 목적에 맞는 특징을 학습합니다.')),
+section('architectures', 'CNN 아키텍처는 무엇이 바뀌어 왔을까?', '''<p>LeNet, AlexNet, VGG, ResNet은 모두 CNN 계열이지만 깊이만 늘어난 것이 아닙니다. 특히 VGG는 작은 3 × 3 convolution을 반복해서 쌓는 설계를 체계적으로 사용했고, ResNet은 더 깊은 CNN을 최적화하기 위해 <strong>residual connection</strong>을 도입했습니다.</p>''' + table(['모델/아이디어', '핵심 설계', '이 주제에서 볼 포인트'], [('VGG', '3 × 3 Conv 반복', '작은 local kernel을 깊게 쌓아 receptive field와 비선형성을 늘림'), ('ResNet', 'F(x)+x', '깊은 CNN의 optimization degradation을 완화'), ('Bottleneck ResNet', '1×1 → 3×3 → 1×1', '비싼 3×3 연산 전후의 채널 수를 조절')]) + callout('논문을 별도 섬으로 보지 않기', 'ResNet은 CNN과 다른 종류의 모델이 아니라, convolutional feature extractor를 더 깊게 학습하기 위한 CNN architecture입니다.')),
+section('resnet_problem', 'ResNet 논문: 깊게 쌓았는데 training error가 커지는 문제', '''<p>He et al.의 ResNet 논문은 단순히 “gradient vanishing을 해결했다”는 한 문장으로 요약하면 부정확합니다. 논문이 강조한 현상은 충분히 깊은 plain network에서 <strong>training error 자체가 더 나빠지는 degradation problem</strong>입니다. 이는 training error는 낮지만 validation/test 성능만 나빠지는 overfitting과 구분해야 합니다.</p><p>Residual block은 원하는 mapping H(x)를 직접 근사하는 대신 <code>F(x)=H(x)-x</code>를 학습하도록 재표현하고, 출력에서 입력을 더해 <code>H(x)=F(x)+x</code>를 만듭니다.</p>'''),
+section('residual_block', 'Residual block: F(x)와 identity shortcut', asset_figure('resnet-skip.svg', 'CNN residual block에서 입력 x가 convolution branch를 우회해 합산되는 구조', 'ResNet을 CNN의 architecture 확장으로 이해하기 위한 residual block 도식입니다.') + equation('합산 전 목표: H(x) = x + F(x)\n단순한 합산 경로의 미분: ∂H/∂x = I + ∂F/∂x') + '''<p>예를 들어 x=[2, −1], F(x)=[0.3, 0.2]라면 합산 전 activation은 [2.3, −0.8]입니다. 원 ResNet의 post-activation basic block처럼 합산 뒤 ReLU를 적용하는 경우 [2.3, 0]이 됩니다. Shortcut이 있다고 해서 출력이 항상 입력과 같다는 뜻은 아닙니다.</p><p>또한 <code>∂H/∂x</code>에 identity term이 생긴다는 사실은 gradient가 지나갈 직접 경로를 설명하지만, 이것만으로 모든 깊은 모델의 optimization이 자동으로 해결된다고 해석해서는 안 됩니다.</p>'''),
+section('residual_shape', 'Shape가 다르면 projection shortcut이 필요하다', '''<p>원소별 덧셈을 하려면 두 branch의 shape가 같아야 합니다. 예를 들어 main branch가 <code>[B,64,56,56] → [B,128,28,28]</code>로 바뀌면 identity를 그대로 더할 수 없습니다. 이런 경우 projection shortcut에서 1 × 1 convolution과 stride를 사용해 shape를 맞출 수 있습니다.</p>''' + table(['경로', '입력', '변환', '출력'], [('Main branch', '[B,64,56,56]', 'stride-2 residual block', '[B,128,28,28]'), ('Shortcut', '[B,64,56,56]', '1×1 Conv, stride 2', '[B,128,28,28]'), ('Add', '동일 shape 두 텐서', 'element-wise sum', '[B,128,28,28]')]) + callout('U-Net skip과 구분', 'ResNet의 대표 shortcut은 element-wise add이고, 원 U-Net의 encoder–decoder skip은 channel-wise concatenate입니다. 둘 다 “skip connection”이지만 자료 구조가 다릅니다.')),
+section('resnet_bottleneck', 'Bottleneck block: 1×1 Conv의 또 다른 역할', '''<p>ResNet-18/34는 basic block을, ResNet-50/101/152는 bottleneck block을 사용합니다. Bottleneck에서는 1 × 1 convolution으로 채널을 줄인 뒤 3 × 3 공간 연산을 하고 다시 1 × 1로 채널을 확장합니다.</p>''' + flow([('1×1 Conv', '256 → 64'), ('3×3 Conv', '64 → 64'), ('1×1 Conv', '64 → 256')], '공간 크기가 유지되는 bottleneck의 채널 흐름 예시입니다.') + '''<p>bias와 normalization parameter를 제외하면 이 예시의 convolution weight는 256×64 + 64×64×9 + 64×256 = 69,632개입니다. 같은 256 input/output channel의 3×3 convolution 하나는 589,824개입니다. 이 수치는 block 내부 연산량 감각을 위한 예시이며 전체 모델 성능을 직접 비교하는 숫자는 아닙니다.</p>'''),
+section('resnet_scope', 'ResNet 논문에서 실제로 확인한 범위', '''<p>원 논문은 ImageNet에서 residual network를 최대 152 layers까지 실험하고 plain counterpart와 비교하며, residual formulation이 매우 깊은 network의 optimization을 쉽게 만든다는 실험 근거를 제시합니다. 따라서 “ResNet은 무조건 깊을수록 좋다”가 아니라, <strong>깊이를 늘릴 때 생기던 optimization degradation을 residual learning으로 다룬다</strong>가 핵심입니다.</p><p>새로운 제조 데이터에 적용할 때는 입력 해상도, defect 크기, 사전학습, 데이터 수, latency를 별도로 평가해야 합니다. 논문의 ImageNet 결과를 다른 데이터셋의 성능 보장으로 옮겨 적으면 안 됩니다.</p>''')
 
-note('vit', 'ViT: 이미지를 패치의 관계로 이해하기', 'An Image is Worth 16×16 Words를 바탕으로, 패치부터 Q·K·V와 Transformer encoder까지 설명합니다.', '논문 해설', '03 · VISION TRANSFORMER', 30, [
+], [('PyTorch · Conv2d', 'https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html', '연산 정의, 가중치 shape, 출력 크기 공식의 기준입니다.'), ('PyTorch · ReLU', 'https://docs.pytorch.org/docs/stable/generated/torch.nn.ReLU.html', 'ReLU의 정의를 확인할 수 있습니다.'), ('He et al. · Deep Residual Learning for Image Recognition', 'https://arxiv.org/abs/1512.03385', 'CVPR 2016. degradation problem, residual block, bottleneck과 ImageNet 실험의 원문입니다.'), ('저자 공식 구현 · KaimingHe/deep-residual-networks', 'https://github.com/KaimingHe/deep-residual-networks', '원 연구의 모델 구현 자료입니다.'), ('Torchvision · ResNet', 'https://docs.pytorch.org/vision/stable/models/resnet.html', '현대 PyTorch 구현과 사전학습 가중치의 공식 문서입니다.')])
+
+note('vit', 'Transformer Vision: Attention에서 ViT까지', '패치·토큰·Q/K/V·self-attention을 먼저 이해하고, Vision Transformer 논문을 대표 사례로 연결합니다.', 'Transformer·Attention', '03 · TRANSFORMER & VIT', 30, [
 section('problem', '논문이 던진 질문', '''<p>Transformer를 이미지 분류의 주된 구조로 사용할 수 있을까요? ViT는 이미지를 일정한 크기의 패치로 나누고, 각 패치를 토큰 벡터로 바꿔 Transformer encoder에 넣습니다. 논문의 핵심은 <strong>이미지의 2차원 격자를 토큰 시퀀스로 변환하는 방법</strong>과 대규모 사전학습의 효과입니다.</p><p>원 논문은 대규모 데이터로 사전학습했을 때의 강력한 결과를 보였습니다. 이것을 “작은 데이터에서도 ViT가 항상 CNN보다 좋다”로 일반화하면 안 됩니다. 사전학습 데이터, 입력 해상도, 증강, 학습 설정과 계산 예산을 함께 비교해야 합니다.</p>''' + flow([('이미지', '224 × 224 × 3'), ('패치 임베딩', '196 × 768'), ('Encoder', '197 tokens'), ('분류 Head', 'K개 logits')], 'ViT-B/16의 224 × 224 입력 예시. Encoder 입력의 197은 패치 196개와 CLS 토큰 1개입니다.')),
 section('patches', 'Patch → Flatten → Linear projection', '''<p>패치 크기를 16 × 16으로 정하면 224/16 = 14이므로 총 14 × 14 = <strong>196개 패치</strong>가 생깁니다. 각 RGB 패치를 펼치면 16 × 16 × 3 = 768개의 숫자입니다. 이 벡터에 학습 가능한 선형 변환을 적용해 임베딩 차원 D로 바꿉니다.</p>''' + asset_figure('vit-patch-attention.svg', '이미지를 패치로 나누고 토큰 시퀀스로 만든 뒤 self-attention을 적용하는 Vision Transformer 흐름', '224×224 이미지를 patch sequence로 바꾸고 attention에 전달하는 흐름입니다.') + equation('N = (H/P) × (W/P)\npatch_flat: [B, N, P²C]\nembedding = patch_flat × E + bias\nE: [P²C, D] → output: [B, N, D]') + '''<p>ViT-B/16에서는 패치 벡터 길이와 D가 우연히 모두 768입니다. 따라서 변환이 불필요한 것이 아닙니다. 학습 가능한 768 × 768 행렬은 픽셀 공간을 모델이 쓸 특징 공간으로 바꿉니다. 패치 크기와 D는 서로 독립적으로 설계할 수 있습니다.</p><div class="lab"><div class="lab-heading"><h3>패치 크기와 토큰 수</h3><span class="lab-badge">INTERACTIVE</span></div><div class="controls"><label for="patch-size">패치 한 변</label><select id="patch-size"><option value="8">8 px</option><option value="16" selected>16 px</option><option value="32">32 px</option></select></div><div class="lab-display"><canvas id="patch-canvas" width="224" height="224" aria-label="224 × 224 입력에 적용한 패치 격자"></canvas><div id="patch-result" class="lab-output" aria-live="polite"></div></div><p class="lab-note">D=768로 고정한 크기 계산입니다. 선택값마다 사전학습 모델을 실행하는 데모는 아닙니다.</p></div>'''),
 section('tokens', 'CLS와 위치 임베딩은 왜 더할까?', '''<p><strong>CLS 토큰</strong>은 이미지 전체를 분류하는 데 사용할 학습 가능한 추가 토큰입니다. 입력 단계에서는 이미지의 내용을 이미 알고 있는 벡터가 아닙니다. 여러 encoder 층에서 패치들과 정보를 주고받은 뒤 최종 표현을 분류 head에 전달합니다.</p><p><strong>Position embedding</strong>은 패치 위치에 대한 학습 가능한 정보를 더합니다. 기본 self-attention만으로는 토큰의 원래 격자 위치를 직접 구분하지 못하기 때문입니다. 원 ViT는 1차원 학습 가능한 위치 임베딩을 사용합니다.</p>''' + equation('z₀ = [CLS; patch₁E; …; patch₁₉₆E] + E_position\nshape: [B, 197, 768]') + callout('패치 번호와 픽셀 좌표는 다르다', '2차원 패치를 일정한 순서로 펼쳐도 원래 행·열 배치는 정해져 있습니다. 위치 임베딩은 그 순서에 대응하는 정보를 제공합니다. 입력 해상도를 바꿔 토큰 수가 달라지면 사전학습 위치 임베딩을 보간하는 등의 처리가 필요할 수 있습니다.')),
@@ -739,14 +739,19 @@ section('encoder', 'Encoder 블록 내부의 두 번의 업데이트', '''<p>원
 section('limits', 'CNN과 비교할 때 살펴볼 점', table(['관점', 'CNN', '기본 ViT'], [('공간 처리', '지역 커널을 반복 적용', '패치 토큰 사이 전역 attention'), ('구조적 가정', '지역성·가중치 공유가 강하게 내장', '상대적으로 적은 이미지 특화 가정'), ('입력 해상도', '활성값·연산량 증가', '토큰 수 증가와 attention 비용 고려'), ('작은 물체', 'stride와 feature 해상도에 민감', '패치 크기와 입력 해상도에 민감')]) + '''<p>224에서 448로 가로·세로를 두 배로 늘리고 P=16을 유지하면 패치는 196에서 784로 4배가 됩니다. CLS 포함 score 행렬의 원소 수는 197²=38,809에서 785²=616,225로 약 15.88배입니다. 이것은 attention score의 크기 비교이며 전체 실행시간이나 총 GPU 메모리가 반드시 같은 비율로 늘어난다는 뜻은 아닙니다.</p>''' + callout('이 논문의 핵심', '이미지를 패치 임베딩 시퀀스로 만들면 Transformer로 분류할 수 있습니다. 좋은 성능을 만드는 조건에는 구조뿐 아니라 데이터 규모와 사전학습이 포함됩니다.'))
 ], [('Dosovitskiy et al. · An Image is Worth 16×16 Words', 'https://arxiv.org/abs/2010.11929', 'ICLR 2021. 패치 임베딩·CLS·encoder 구조와 모델 크기 표의 원문입니다.'), ('Google Research · vision_transformer', 'https://github.com/google-research/vision_transformer', '저자 측 공식 구현과 모델 설정입니다.'), ('Vaswani et al. · Attention Is All You Need', 'https://arxiv.org/abs/1706.03762', 'Scaled dot-product attention과 multi-head attention의 기반 논문입니다.')])
 
-note('tasks', '분류·탐지·분할은 무엇을 출력할까?', '같은 입력도 질문이 달라지면 정답 형식, 출력 구조, 평가 방법이 달라집니다.', '기초 개념', '04 · VISION TASKS', 15, [
+note('tasks', 'Vision Tasks와 Segmentation: U-Net까지', '분류·탐지·분할의 출력 형식을 구분하고, segmentation의 대표 구조인 U-Net을 같은 주제 안에서 연결합니다.', 'Vision Tasks·Segmentation', '04 · VISION TASKS & U-NET', 15, [
 section('overview', '모델을 고르기 전에 출력부터 정하기', '''<p>“이 이미지에 불량이 있는가”, “불량이 어디 있는가”, “불량의 경계가 어디인가”는 서로 다른 질문입니다. 먼저 필요한 출력의 형태를 정하면 라벨링 범위와 평가 지표, 후처리를 더 명확히 설계할 수 있습니다.</p>''' + table(['문제', '출력 예시', '필요한 정답'], [('분류 Classification', '[정상 .10, 결함 .90]', '이미지 전체의 클래스'), ('탐지 Object detection', '[x₁, y₁, x₂, y₂, score, class]', '물체별 박스와 클래스'), ('의미 분할 Semantic segmentation', '픽셀별 클래스 [H, W]', '모든 픽셀의 클래스'), ('개체 분할 Instance segmentation', '물체별 마스크 [N, H, W]', '각 물체의 클래스·경계·개체 구분')]) + '''<p>예를 들어 3개의 동일 종류 물체가 있을 때 semantic segmentation은 모두 같은 클래스 값으로 표시할 수 있습니다. Instance segmentation은 세 물체를 서로 다른 개체로 구분합니다. 물체 개수를 세거나 개별 경계를 추적하려는 경우 이 차이가 중요합니다.</p>'''),
 section('visual', '같은 장면에서 결과를 비교하기', svg('''<rect x="20" y="48" width="216" height="174" rx="10" fill="#f1f5fb"/><rect x="272" y="48" width="216" height="174" rx="10" fill="#f1f5fb"/><rect x="524" y="48" width="216" height="174" rx="10" fill="#f1f5fb"/><text x="128" y="25" class="label" text-anchor="middle">분류</text><text x="380" y="25" class="label" text-anchor="middle">탐지</text><text x="632" y="25" class="label" text-anchor="middle">개체 분할</text>''' + ''.join(f'<circle cx="{x+70}" cy="114" r="29" fill="#a5b6d0"/><rect x="{x+115}" y="144" width="60" height="36" rx="8" fill="#a5b6d0"/>' for x in [20,272,524]) + '''<text x="128" y="207" class="sub" text-anchor="middle">부품 있음 · score 0.96</text><rect x="308" y="77" width="68" height="74" rx="3" fill="none" stroke="#2454d8" stroke-width="3"/><rect x="382" y="138" width="72" height="48" rx="3" fill="none" stroke="#2454d8" stroke-width="3"/><circle cx="594" cy="114" r="29" fill="#2454d8" fill-opacity=".6" stroke="#2454d8" stroke-width="2"/><rect x="639" y="144" width="60" height="36" rx="8" fill="#0a9e89" fill-opacity=".65" stroke="#08796f" stroke-width="2"/>''',245,'동일한 두 도형을 대상으로 출력 표현만 비교한 개념도입니다. 실제 모델 예측이나 실물 사진은 아닙니다.') + '''<p>분류에는 위치가 직접 나오지 않습니다. 탐지 박스는 물체를 둘러싸지만 경계 모양을 그대로 표현하지는 않습니다. 마스크는 픽셀 단위 영역을 제공하지만 촬영 해상도·라벨 오차·모델 출력 해상도의 제약을 받습니다.</p>'''),
 section('pipeline', 'Backbone · Neck · Head', '''<p><strong>Backbone</strong>은 특징을 추출하는 부분입니다. <strong>Neck</strong>은 여러 해상도의 특징을 결합하는 부분으로, 항상 별도 모듈로 존재하는 것은 아닙니다. <strong>Head</strong>는 목적에 맞는 최종 출력을 만듭니다. 같은 backbone도 head와 학습 목표에 따라 다른 문제에 사용할 수 있습니다.</p>''' + flow([('입력', '640 × 640'), ('Backbone', '다단계 특징'), ('Neck', '다중 해상도 결합'), ('Head', '박스 · 클래스 · 마스크')], '일반적인 탐지·분할 구성의 개념도. 모든 모델이 이 분해를 정확히 따르는 것은 아닙니다.') + '''<p>학습 중 출력은 바로 최종 박스 목록이 아닐 수 있습니다. 모델별 출력 해석, 좌표 변환, confidence 필터, 필요시 NMS 등의 후처리를 거쳐 사용 가능한 결과가 됩니다. NMS가 필요한지와 score의 정의는 모델 버전과 구현마다 확인해야 합니다.</p>'''),
-section('iou', '겹친 정도를 수치로 표현하기', equation('IoU = |예측 ∩ 정답| / |예측 ∪ 정답|\nDice = 2|예측 ∩ 정답| / (|예측| + |정답|)') + '''<p>예측 영역 120픽셀, 정답 영역 100픽셀, 교집합 80픽셀이라면 합집합은 140픽셀입니다. IoU는 80/140≈0.571, Dice는 160/220≈0.727입니다. 같은 두 이진 마스크를 비교할 때 <code>Dice = 2IoU/(1+IoU)</code>의 관계가 있습니다.</p>''' + svg('''<rect x="118" y="30" width="230" height="140" rx="4" fill="#a5bef8" fill-opacity=".65" stroke="#2454d8" stroke-width="2"/><rect x="248" y="73" width="230" height="140" rx="4" fill="#6dcebb" fill-opacity=".6" stroke="#08796f" stroke-width="2"/><text x="158" y="63" class="label">예측</text><text x="386" y="191" class="label">정답</text><text x="298" y="117" class="label" text-anchor="middle">교집합</text><text x="535" y="100" class="label">겹친 영역</text><path d="M 520 115 H 700" stroke="#7891b7" stroke-width="2"/><text x="535" y="142" class="label">전체 합집합</text>''',240,'IoU의 기하학적 의미. 위 설명의 픽셀 수를 면적 비율로 재현한 그림은 아닙니다.') + callout('목적에 맞는 평가 영역', '경계 위치가 중요하면 전체 IoU 하나만으로 충분하지 않을 수 있습니다. 작은 관심영역과 경계 오차를 함께 확인하되, 평가 ROI와 기준은 결과를 보기 전에 정해야 합니다.'))
-], [('Ultralytics · Tasks', 'https://docs.ultralytics.com/tasks/', '분류·탐지·분할의 지원 태스크와 입출력 사용법입니다.'), ('COCO · Detection evaluation', 'https://cocodataset.org/#detection-eval', 'IoU 임계값과 평균 정밀도 평가 정의를 확인할 수 있습니다.'), ('U-Net 논문', 'https://arxiv.org/abs/1505.04597', '픽셀 단위 분할 구조는 U-Net 해설에서 자세히 다룹니다.')])
+section('iou', '겹친 정도를 수치로 표현하기', equation('IoU = |예측 ∩ 정답| / |예측 ∪ 정답|\nDice = 2|예측 ∩ 정답| / (|예측| + |정답|)') + '''<p>예측 영역 120픽셀, 정답 영역 100픽셀, 교집합 80픽셀이라면 합집합은 140픽셀입니다. IoU는 80/140≈0.571, Dice는 160/220≈0.727입니다. 같은 두 이진 마스크를 비교할 때 <code>Dice = 2IoU/(1+IoU)</code>의 관계가 있습니다.</p>''' + svg('''<rect x="118" y="30" width="230" height="140" rx="4" fill="#a5bef8" fill-opacity=".65" stroke="#2454d8" stroke-width="2"/><rect x="248" y="73" width="230" height="140" rx="4" fill="#6dcebb" fill-opacity=".6" stroke="#08796f" stroke-width="2"/><text x="158" y="63" class="label">예측</text><text x="386" y="191" class="label">정답</text><text x="298" y="117" class="label" text-anchor="middle">교집합</text><text x="535" y="100" class="label">겹친 영역</text><path d="M 520 115 H 700" stroke="#7891b7" stroke-width="2"/><text x="535" y="142" class="label">전체 합집합</text>''',240,'IoU의 기하학적 의미. 위 설명의 픽셀 수를 면적 비율로 재현한 그림은 아닙니다.') + callout('목적에 맞는 평가 영역', '경계 위치가 중요하면 전체 IoU 하나만으로 충분하지 않을 수 있습니다. 작은 관심영역과 경계 오차를 함께 확인하되, 평가 ROI와 기준은 결과를 보기 전에 정해야 합니다.')),
+section('segmentation_context', 'Segmentation에서는 왜 encoder–decoder가 필요한가?', '''<p>분류는 이미지 전체를 하나의 vector로 요약해도 되지만 segmentation은 픽셀 위치를 보존하며 class를 예측해야 합니다. Downsampling은 넓은 context를 얻는 데 유리하지만 세밀한 위치 정보가 줄어들 수 있습니다. 따라서 dense prediction에서는 낮은 해상도의 semantic feature와 높은 해상도의 spatial feature를 어떻게 결합하는지가 중요한 설계 문제가 됩니다.</p>'''),
+section('unet_architecture', 'U-Net 논문: context와 localization을 함께 연결하기', asset_figure('unet-flow.svg', 'U-Net encoder에서 해상도를 줄이고 decoder에서 복원하며 encoder feature를 concatenate하는 구조', 'Segmentation 주제 안에서 U-Net의 contracting path, expanding path와 skip concatenate를 보여 줍니다.') + '''<p>Ronneberger et al.의 U-Net은 contracting path에서 context를 추출하고 symmetric expanding path에서 해상도를 복원합니다. Encoder의 고해상도 feature를 decoder로 전달하는 skip connection은 세밀한 위치 정보를 다시 활용하게 합니다.</p>''' + table(['단계', '예시 shape', '역할'], [('Decoder upsample', '[B,128,128,128]', '깊은 feature의 공간 해상도를 복원'), ('Encoder skip', '[B,128,128,128]', '같은 scale의 고해상도 feature'), ('Concat, dim=1', '[B,256,128,128]', '공간 위치를 맞춘 뒤 channel 방향 결합'), ('Conv block', '[B,128,128,128]', '결합한 feature를 학습해 다음 representation 생성')]) + callout('ResNet과 같은 “skip”이 아니다', '원 U-Net은 encoder feature를 decoder feature와 concatenate합니다. 대표 ResNet block은 identity/projection branch를 main branch와 add합니다.')),
+section('unet_original', '원 U-Net과 현대 same-padding 구현을 구분하기', '''<p>2015년 원 U-Net은 unpadded 3 × 3 convolution을 사용하므로 convolution을 지날 때 공간 크기가 줄어듭니다. 논문 Figure 1의 대표 흐름은 572 × 572 input에서 388 × 388 output을 만들며, encoder feature를 decoder에 연결할 때 crop이 필요합니다.</p>''' + table(['항목', '2015 원 논문', '많이 쓰이는 현대 구현'], [('3×3 Conv', 'valid / unpadded', 'same padding을 쓰는 경우가 많음'), ('입출력 크기', '572 → 388 예시', '입출력 공간 크기를 같게 유지하기도 함'), ('Skip', 'crop 후 concatenate', '동일 spatial size에서 concatenate'), ('손실', 'weighted pixel-wise softmax loss', 'CE, Dice 계열 등 다양한 선택')]) + '''<p>따라서 “U-Net은 항상 same padding”이나 “U-Net의 원래 loss가 Dice loss”라고 설명하면 부정확합니다. Dice 계열 loss는 이후 segmentation 실무에서 널리 사용되지만 원 논문의 핵심 손실과 구분해야 합니다.</p>'''),
+section('unet_scope', 'U-Net 논문의 문제 설정과 한계', '''<p>원 논문은 생의학 영상 segmentation에서 제한된 수의 annotated image를 효율적으로 사용하기 위해 강한 data augmentation과 encoder–decoder 구조를 제안했습니다. 이 결과를 모든 자연영상·산업영상 segmentation에서 동일하게 보장되는 성능으로 해석해서는 안 됩니다.</p><p>산업 영상에서는 작은 defect의 pixel 크기, downsampling 비율, boundary label 품질, class imbalance, inference resolution을 별도로 검토해야 합니다. U-Net은 segmentation architecture를 이해하는 대표 사례이지 모든 segmentation 문제의 기본 정답은 아닙니다.</p>''')
 
-note('training', '학습·검증·평가를 구분하는 기준', '데이터 누수, 클래스별 분포, 교차검증과 임계값. 성능 숫자가 무엇을 의미하는지 확인합니다.', '기초 개념', '05 · TRAINING & EVALUATION', 22, [
+], [('Ultralytics · Tasks', 'https://docs.ultralytics.com/tasks/', '분류·탐지·분할의 지원 태스크와 입출력 사용법입니다.'), ('COCO · Detection evaluation', 'https://cocodataset.org/#detection-eval', 'IoU 임계값과 평균 정밀도 평가 정의를 확인할 수 있습니다.'), ('Ronneberger et al. · U-Net: Convolutional Networks for Biomedical Image Segmentation', 'https://arxiv.org/abs/1505.04597', '2015 U-Net의 contracting/expanding path, crop-and-concat, augmentation과 원 손실의 근거입니다.'), ('U-Net 저자 프로젝트 페이지', 'https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/', '원 논문의 코드·자료가 연결된 저자 측 페이지입니다.')])
+
+note('training', '학습·검증·평가를 구분하는 기준', '데이터 누수, 클래스별 분포, 교차검증과 임계값. 성능 숫자가 무엇을 의미하는지 확인합니다.', '학습·평가', '05 · TRAINING & EVALUATION', 22, [
 section('loop', '학습에서 실제로 바뀌는 것은 무엇일까?', '''<p>지도학습은 입력과 정답 쌍을 사용해 예측 오차를 줄입니다. 모델이 예측을 만들면 loss가 정답과의 차이를 수치화하고, 역전파가 파라미터별 기울기를 계산합니다. Optimizer가 파라미터를 갱신하며 이 과정을 반복합니다.</p>''' + flow([('Forward', '입력 → logits'), ('Loss', '예측과 정답 비교'), ('Backward', '기울기 계산'), ('Optimizer', '파라미터 갱신')], '학습의 한 iteration. 다음 batch에서도 갱신된 파라미터를 사용합니다.') + '''<p>Epoch는 학습 데이터를 한 바퀴 사용하는 단위입니다. 3,200장, batch size 32, 남는 샘플이 없는 경우 한 epoch는 100 iteration입니다. Validation은 갱신 없이 일반화 성능을 살피는 과정이고, test는 설정을 정한 뒤 최종 평가에 사용합니다.</p>''' + table(['학습 방식', '정답을 사용하는 방식', '비전 예시'], [('지도학습', '클래스·박스·마스크 라벨', '불량 종류 분류, 부품 분할'), ('자기지도학습', '데이터 자체에서 학습 목표 구성', '가려진 패치 복원, 서로 다른 view의 표현 학습'), ('정상 데이터 기반 이상탐지', '정상 샘플을 학습에 사용', '정상 특징과의 거리를 이용한 결함 위치 탐지')]) + '''<p>비지도학습은 명시적 과업 정답 없이 구조를 찾는 넓은 범주입니다. 다만 정상만으로 적합한 이상탐지 모델이라도 threshold 선정에는 라벨이 있는 validation을 사용할 수 있으므로, 파이프라인 전체의 라벨 사용 범위를 구체적으로 밝혀야 합니다.</p>'''),
 section('split', '비율보다 먼저 독립성을 지키기', '''<p>연속 영상의 이웃 프레임은 매우 비슷합니다. 프레임 단위로 무작위 분할하면 같은 장면이 train과 test 양쪽에 들어갈 수 있습니다. 평가 목적에 맞게 원본 영상·촬영 시간·장비 등의 그룹을 정하고, 그룹 전체를 한 split에 배정해야 합니다.</p>''' + svg(box(20,87,164,'원본 영상 그룹','그룹 단위 배정') + box(293,10,195,'Train','70% 목표') + box(293,111,195,'Validation','15% 목표') + box(293,212,195,'Test','15% 목표','dark') + edge('M 184 120 H 235 V 43 H 291') + edge('M 235 120 V 144 H 291') + edge('M 235 144 V 245 H 291') + '<text x="530" y="47" class="label">파라미터 학습</text><text x="530" y="148" class="label">모델·threshold 선택</text><text x="530" y="249" class="label">고정 후 최종 평가</text>',300,'예시 분할 정책. 세 갈래 중 하나에 그룹을 통째로 배정하며 동일 그룹을 복제해서 넣지 않습니다.') + '''<p>전체 비율만 70/15/15가 되어도 희소 클래스가 test에 0개라면 그 클래스의 recall을 평가할 수 없습니다. <strong>클래스별 개수와 독립 그룹 수</strong>를 확인해야 합니다. 클래스가 특정 그룹 한 개에만 있으면 그룹 독립성을 지키면서 세 split 모두에 넣는 것은 불가능합니다. 이때는 데이터를 추가하거나 평가 설계를 바꾸고 한계를 명시해야 합니다.</p>''' + table(['예시 클래스', '전체', 'Train 목표', 'Val 목표', 'Test 목표'], [('정상', '1,000', '700', '150', '150'), ('결함 A', '200', '140', '30', '30'), ('결함 B', '40', '28', '6', '6')]) + '<p class="small">설명을 위한 개수입니다. 실제 그룹 제약에서는 정확한 비율이 불가능할 수 있으므로, 누수 방지와 평가 가능한 클래스 구성을 우선합니다.</p>'),
 section('cv', '3-fold CV는 전체 데이터를 세 번 나눠 평가하기', '''<p>세 개 fold로 나눈 뒤 두 개로 학습하고 하나로 검증합니다. 검증 fold를 바꿔 3번 반복하며, 각 반복은 모델을 새로 초기화합니다. 세 모델을 앞 모델의 가중치로 이어 학습하는 방식이 아닙니다.</p>''' + table(['반복', 'Fold A', 'Fold B', 'Fold C'], [('1', '검증', '학습', '학습'), ('2', '학습', '검증', '학습'), ('3', '학습', '학습', '검증')]) + '''<p>모든 샘플은 한 번 검증에, 두 번 학습에 사용됩니다. 평균과 표준편차를 보고하면 분할에 따른 변동을 이해하는 데 도움이 됩니다. 예를 들어 F1이 [0.80, 0.86, 0.83]이면 평균 0.83입니다. 표준편차는 사용한 모집단/표본 계산 방식을 함께 명시합니다.</p>''' + callout('튜닝과 최종 성능 추정', 'CV 검증 결과로 모델·threshold를 선택했다면 그 결과만으로 독립적인 최종 성능이 보장되지는 않습니다. 별도 test를 유지하거나 nested CV를 고려합니다. 설비 일반화가 목적이면 설비 그룹을 fold 경계로 사용합니다.')),
@@ -754,29 +759,14 @@ section('metrics', 'Threshold를 바꾸면 어떤 오류가 달라질까?', '''<
 section('report', '실험 기록에 남길 최소 정보', table(['항목', '예시', '필요한 이유'], [('데이터', '그룹 목록·클래스별 개수·split 버전', '같은 조건의 재평가'), ('학습', '입력 640, batch 32, seed, 증강', '결과 차이를 해석'), ('모델', '가중치 hash·라이브러리 버전', '실제 사용한 모델 식별'), ('평가', '클래스별 precision/recall·혼동행렬', '희소 클래스 실패 확인'), ('판정', 'threshold·영상 집계 규칙', '프레임 점수와 최종 판정 구분')]) + callout('기억할 핵심', '평가 숫자는 “어떤 데이터에 어떤 규칙으로 평가했는가”와 함께 해석합니다. 데이터 분할, threshold, 후처리를 바꾸면 서로 다른 실험입니다.'))
 ], [('scikit-learn · Cross-validation', 'https://scikit-learn.org/stable/modules/cross_validation.html', 'GroupKFold와 교차검증의 기본 원칙입니다.'), ('scikit-learn · Model evaluation', 'https://scikit-learn.org/stable/modules/model_evaluation.html', 'Precision·recall·F1과 평균 방식의 정의입니다.'), ('PyTorch · Optimization', 'https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html', '학습·검증 반복과 optimizer의 동작을 설명합니다.')])
 
-note('resnet', 'ResNet: 입력을 더하면 무엇이 달라질까?', 'Deep Residual Learning for Image Recognition의 문제의식과 잔차 블록을 수식·구조·예시로 설명합니다.', '논문 해설', '06 · RESIDUAL LEARNING', 20, [
-section('problem', '깊게 쌓았는데 학습 오차가 커지는 문제', '''<p>깊은 모델은 더 복잡한 함수를 표현할 수 있어 보입니다. 그런데 층을 단순히 더 쌓으면 <strong>훈련 오차 자체가 더 나빠지는 degradation 문제</strong>가 나타날 수 있습니다. 이것은 “훈련 성능은 좋은데 test만 나빠지는 과적합”과 구분해야 합니다.</p><p>ResNet은 여러 층이 원하는 출력 전체 H(x)를 직접 만드는 대신, 입력에서 바꿔야 할 부분 F(x)를 학습하고 입력 x를 더하도록 구성합니다. 즉 <code>H(x) = F(x) + x</code>입니다. 잔차는 정답과 예측의 loss를 뜻하는 것이 아니라 블록이 학습하는 변환의 표현입니다.</p>'''),
-section('block', 'Residual block과 shortcut', asset_figure('resnet-skip.svg', '입력 x가 가중치 경로 F(x)를 우회해 출력에서 다시 더해지는 ResNet residual block', 'Residual branch와 identity shortcut의 관계를 단순화한 외부 SVG입니다.') + svg(box(32,115,116,'입력 x','같은 shape') + box(211,115,142,'가중치 층','Conv · BN · ReLU') + box(407,115,142,'가중치 층','Conv · BN') + box(616,115,119,'출력','Add → ReLU','dark') + edge('M 148 148 H 209') + edge('M 353 148 H 405') + edge('M 549 148 H 614') + edge('M 173 148 V 42 H 583 V 135') + '<text x="349" y="30" class="label">shortcut: x 그대로 전달</text><circle cx="583" cy="148" r="13" fill="white" stroke="#7891b7"/><text x="583" y="154" text-anchor="middle" class="label">+</text>',225,'원 ResNet의 basic block을 단순화한 그림. 마지막 합산 뒤 ReLU가 있는 post-activation 구조입니다.') + '''<p>블록이 입력을 그대로 보존하는 것이 유리하다면 F(x)를 0에 가깝게 만들면 됩니다. 예를 들어 x=[2, −1], F(x)=[0.3, 0.2]이면 합산값은 [2.3, −0.8]입니다. 원 basic block의 마지막 ReLU까지 적용하면 [2.3, 0]이 됩니다. “입력을 더한다”와 “출력이 입력과 항상 같다”는 다른 이야기입니다.</p>''' + equation('합산 전 목표: H(x) = x + F(x)\n단순한 합산 경로의 미분: ∂H/∂x = I + ∂F/∂x') + '''<p>미분 식에는 입력에서 출력으로 직접 이어지는 항 I가 있습니다. 이 경로는 깊은 구조를 최적화하는 데 도움이 됩니다. 다만 활성함수·정규화·손실·학습률까지 포함한 전체 최적화가 언제나 안정적이라는 보장은 아닙니다.</p>'''),
-section('projection', '크기가 다르면 그냥 더할 수 없다', '''<p>텐서를 원소별로 더하려면 shape가 맞아야 합니다. <code>[B, 64, 56, 56]</code>과 <code>[B, 128, 28, 28]</code>은 그대로 더할 수 없습니다. 원 논문은 차원이 바뀌는 경우의 shortcut 전략을 논의하며, projection shortcut에서는 1 × 1 Conv 등을 사용해 차원을 맞춥니다.</p>''' + table(['경로', '입력', '변환', '출력'], [('주 경로', '[B,64,56,56]', 'stride 2 블록', '[B,128,28,28]'), ('Shortcut', '[B,64,56,56]', '1 × 1 Conv, stride 2', '[B,128,28,28]'), ('합산', '동일 shape 두 텐서', '원소별 덧셈', '[B,128,28,28]')]) + callout('Concat과 add는 다르다', 'ResNet shortcut은 보통 덧셈입니다. 64채널 두 텐서를 더하면 64채널이고, 채널 방향으로 concatenate하면 128채널입니다. U-Net의 skip connection과 비교할 때 중요한 차이입니다.')),
-section('bottleneck', 'Bottleneck은 채널 수를 줄였다가 넓힌다', '''<p>ResNet-18/34는 basic block을, 더 깊은 ResNet-50/101/152는 bottleneck block을 사용합니다. 대표적인 bottleneck에서는 1 × 1로 채널을 줄이고, 3 × 3 공간 계산을 수행한 뒤, 다시 1 × 1로 채널을 확장합니다.</p>''' + flow([('1 × 1 Conv', '256 → 64'), ('3 × 3 Conv', '64 → 64'), ('1 × 1 Conv', '64 → 256')], '공간 크기가 유지되는 bottleneck 예시. Shortcut과 BN/ReLU는 이 그림에서 생략했습니다.') + '''<p>Bias와 BN을 제외하면 가중치는 256×64 + 64×64×9 + 64×256 = <strong>69,632개</strong>입니다. 256→256의 3 × 3 Conv 하나는 589,824개입니다. 이는 특정 블록 내부의 수치 비교이며 서로 다른 전체 모델의 성능·연산량이 그대로 비교된다는 뜻은 아닙니다.</p>'''),
-section('meaning', '논문이 보여 준 것과 적용할 때의 한계', '''<p>논문은 ImageNet에서 152층까지 깊은 residual network를 학습하고, 여러 깊이의 plain network와 residual network를 비교합니다. 핵심 기여는 단지 층 수를 늘린 것보다 <strong>깊은 구조를 실제로 최적화할 수 있도록 학습 문제를 재표현했다는 점</strong>에 있습니다.</p><p>제조 이미지 같은 새로운 데이터에서는 깊은 모델이 항상 유리하지 않습니다. 작은 입력에서의 해상도 감소, 데이터 수, 사전학습, 추론 비용을 함께 봐야 합니다. Residual connection은 CNN뿐 아니라 Transformer에서도 나타나지만, 정규화·활성함수의 배치와 블록 역할은 다를 수 있습니다.</p>''' + callout('이해 점검', 'ResNet의 핵심 연산을 “더한다”로 기억하고, 더하는 두 텐서의 shape를 직접 적어 보세요. 모델 구조도를 볼 때 shortcut의 출발점과 합산점을 찾을 수 있으면 기본 개념을 이해한 것입니다.'))
-], [('He et al. · Deep Residual Learning for Image Recognition', 'https://arxiv.org/abs/1512.03385', 'CVPR 2016. Degradation 문제, residual block, bottleneck, 실험 비교의 원문입니다.'), ('저자 공식 구현 · KaimingHe/deep-residual-networks', 'https://github.com/KaimingHe/deep-residual-networks', '원 연구의 모델과 구현 자료입니다.'), ('Torchvision · ResNet', 'https://docs.pytorch.org/vision/stable/models/resnet.html', '현대 구현과 사전학습 가중치를 확인하는 공식 문서입니다.')])
-
-note('unet', 'U-Net: 의미와 위치 정보를 다시 연결하기', 'U-Net 논문의 수축·확장 경로, skip connection, 원본 구조의 크롭을 구분해 설명합니다.', '논문 해설', '07 · DENSE PREDICTION', 20, [
-section('problem', '이미지 전체가 아니라 모든 픽셀의 답이 필요하다', '''<p>분류는 이미지 전체를 요약한 특징으로 답할 수 있지만, segmentation은 “어느 픽셀이 어느 대상에 속하는가”를 알아야 합니다. 다운샘플링은 넓은 문맥을 파악하는 데 유용하지만 세밀한 위치 정보를 잃을 수 있습니다.</p><p>U-Net은 수축 경로에서 문맥을 추출하고 확장 경로에서 해상도를 높이며, 같은 수준의 고해상도 특징을 skip connection으로 전달합니다. 원 논문은 적은 라벨 데이터에서의 생의학 영상 분할과 강한 데이터 증강을 함께 다룹니다.</p>'''),
-section('architecture', 'U자 구조를 따라가는 특징의 이동', asset_figure('unet-flow.svg', 'Encoder에서 해상도를 줄이고 Decoder에서 복원하며 같은 해상도의 특징을 skip concat하는 U-Net 구조', 'Encoder–bottleneck–decoder와 skip concat의 방향을 한 화면에 정리했습니다.') + svg(box(20,25,175,'Encoder 1','256² · 64 channels') + box(20,147,175,'Encoder 2','128² · 128 channels') + box(282,269,195,'Bottleneck','64² · 256 channels','dark') + box(560,147,180,'Decoder 2','128² · 128 channels') + box(560,25,180,'Decoder 1','256² · 64 channels') + edge('M 108 91 V 145') + edge('M 108 213 V 302 H 280') + edge('M 477 302 H 650 V 215') + edge('M 650 147 V 93') + edge('M 195 58 H 558') + edge('M 195 180 H 558') + '<text x="326" y="45" class="sub">skip · 채널 방향 concat</text><text x="326" y="167" class="sub">skip · 채널 방향 concat</text><text x="30" y="123" class="sub">downsample</text><text x="640" y="123" class="sub">upsample</text>',365,'크기 흐름을 이해하기 위한 same-padding U-Net 예시입니다. 2015년 원 논문의 정확한 레이어 수·공간 크기를 복제한 그림은 아닙니다.') + '''<p>인코더의 얕은 특징에는 높은 공간 해상도가 있고, 깊은 특징에는 더 넓은 문맥이 있습니다. 디코더는 업샘플링한 깊은 특징과 인코더의 같은 해상도 특징을 이어 붙인 뒤 Conv로 결합합니다. 저해상도 결과를 단순히 크게 늘리는 것과 다릅니다.</p>'''),
-section('concat', 'Skip connection의 자료 구조', table(['단계', '텐서 shape', '해석'], [('Decoder 업샘플링', '[B,128,128,128]', '채널 128, 공간 128 × 128'), ('Encoder skip', '[B,128,128,128]', '같은 공간 크기의 세밀한 특징'), ('Concat, dim=1', '[B,256,128,128]', '공간은 유지하고 채널을 합침'), ('Conv 결합', '[B,128,128,128]', '합친 특징을 학습 가능한 방식으로 섞음')]) + '''<p>마지막 1 × 1 Conv는 픽셀마다 클래스 점수를 만듭니다. 배경을 포함해 총 3클래스라면 logits는 <code>[B,3,H,W]</code>, argmax 결과는 <code>[B,H,W]</code>입니다. 이진 분할은 한 logit+sigmoid 또는 두 logits+softmax 등으로 설계할 수 있어 loss와 target 형태를 맞춰야 합니다.</p>'''),
-section('original', '원 논문과 흔한 구현을 혼동하지 않기', '''<p>원 U-Net은 padding 없는 3 × 3 Conv를 사용하므로 Conv를 거칠 때 공간 크기가 줄어듭니다. 논문의 구조도는 572 × 572 입력에서 388 × 388 출력이 나옵니다. 이에 따라 skip으로 연결하는 인코더 특징을 crop해 디코더 크기에 맞춥니다.</p>''' + table(['항목', '2015 원 논문', '위 교육용 도식'], [('Convolution', 'Unpadded/valid', 'Same padding'), ('입출력 공간 크기', '572 → 388', '256 → 256'), ('Skip 연결', 'Crop 후 concatenate', '동일 크기에서 concatenate'), ('깊이', '원 논문 Figure 1 기준', '설명을 위해 단계 수 축소')]) + '''<p>원 논문은 overlap-tile 방식으로 큰 이미지의 영역을 처리하고, 경계 주변에는 미러링을 사용합니다. 또한 탄성 변형 등 증강과 인접한 세포의 경계 분리를 위한 가중 손실을 사용합니다. “U자 형태”만이 논문의 모든 내용은 아닙니다.</p>'''),
-section('loss', '픽셀 loss와 경계 품질', '''<p>분할 학습에서는 각 픽셀의 클래스 예측과 정답 마스크를 비교할 수 있습니다. Cross-entropy는 해당 픽셀의 정답 클래스 확률을 높이는 방향으로 작동합니다. Dice loss는 이후 많은 분할 구현에서 사용되지만, 이를 원 U-Net 논문의 핵심 손실로 소개하면 부정확합니다.</p>''' + equation('한 픽셀의 cross-entropy = −log p(정답 클래스)\np=0.8 → loss≈0.223 / p=0.2 → loss≈1.609') + '''<p>작은 결함이 1,000픽셀이고 배경이 1,000,000픽셀이면 픽셀 수만으로 배경이 압도적입니다. 클래스 불균형, 경계 라벨의 일관성, 작은 구조의 해상도를 함께 점검해야 합니다. 학습 loss가 낮아도 실제 경계 측정 오차가 작다고 바로 결론낼 수는 없습니다.</p>''' + callout('이 논문의 핵심', '깊은 층의 문맥과 얕은 층의 위치 정보를 연결해 픽셀 단위 예측을 만듭니다. Skip의 concat과 ResNet의 add, 원본의 valid convolution과 현대 구현의 same padding을 구분하세요.'))
-], [('Ronneberger et al. · U-Net', 'https://arxiv.org/abs/1505.04597', 'MICCAI 2015. 원본 구조, crop, overlap-tile과 학습 전략의 원문입니다.'), ('Freiburg · U-Net project', 'https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/', '저자 측 구조도와 구현 자료입니다.')])
-
-note('patchcore', 'PatchCore: 정상과 얼마나 다른가?', 'Towards Total Recall in Industrial Anomaly Detection의 특징 저장소, coreset, 최근접 거리와 이상 지도를 설명합니다.', '논문 해설', '08 · ANOMALY DETECTION', 22, [
+note('patchcore', 'Anomaly Detection: 정상 특징에서 PatchCore까지', '정상 데이터 기반 이상 탐지의 문제를 먼저 정의하고, PatchCore의 memory bank·coreset·최근접 거리 방식을 대표 사례로 설명합니다.', 'Anomaly Detection', '06 · ANOMALY DETECTION', 22, [
 section('problem', '불량 종류를 모두 모으기 어려울 때', '''<p>제조 환경에서는 정상 이미지는 많지만 불량은 드물고, 앞으로 나타날 불량의 모양을 모두 라벨링하기 어렵습니다. PatchCore는 정상 이미지에서 얻은 지역 특징을 저장한 뒤, 테스트 패치가 정상 특징과 얼마나 다른지를 이용합니다.</p><p>이 논문에서의 “학습”은 보통 대상 정상 이미지로 새로운 분류기를 역전파 학습하는 과정이 아니라, 사전학습된 특징 추출기로 <strong>정상 특징 memory bank를 구성하는 과정</strong>입니다. 사전학습 backbone 자체가 이미 다른 데이터로 학습되었다는 사실은 별개입니다.</p>'''),
 section('pipeline', '정상 데이터 준비와 검사 과정을 분리하기', asset_figure('patchcore-memory.svg', '정상 이미지에서 CNN 지역 특징을 추출해 memory bank를 구성하고 검사 patch의 최근접 거리를 계산하는 PatchCore 흐름', '정상 feature memory bank와 검사 시 nearest-neighbor anomaly score의 관계입니다.') + svg(box(20,30,172,'정상 학습 이미지','여러 정상 조건') + box(275,30,191,'지역 특징 추출','사전학습 CNN') + box(545,30,190,'Memory bank','Coreset 선택','dark') + edge('M 192 63 H 273') + edge('M 466 63 H 543') + box(20,191,172,'검사 이미지','정상 또는 이상') + box(275,191,191,'지역 특징 추출','같은 backbone') + box(545,191,190,'최근접 거리','점수 · 이상 지도') + edge('M 192 224 H 273') + edge('M 466 224 H 543') + edge('M 640 96 V 189') + '<text x="534" y="148" class="sub">정상 특징과 비교</text>',300,'정상 특징 저장과 검사 과정. Backbone의 동일한 층·전처리·특징 결합을 양쪽에서 사용합니다.') + '''<p>PatchCore는 중간 CNN 특징을 활용하고 주변 지역을 집계해 patch-level descriptor를 만듭니다. 여러 단계의 특징은 해상도를 맞춘 뒤 결합합니다. 여기서 patch는 원본 RGB를 단순히 16 × 16으로 잘라 만든 ViT token과 동일한 의미가 아닙니다. CNN feature map의 위치와 수용영역을 바탕으로 한 지역 표현입니다.</p>'''),
 section('memory', '모든 정상 특징을 저장하면 얼마나 커질까?', '''<p>예를 들어 정상 이미지 1,000장, 이미지마다 28 × 28개의 특징, 특징 차원 1,024, float32라면 784,000개 벡터가 생깁니다. 저장량은 784,000 × 1,024 × 4 = 3,211,264,000 bytes로 약 <strong>3.21 GB</strong>입니다. 이 수치는 논문의 고정 설정이 아니라 저장량을 이해하기 위한 가정입니다.</p>''' + equation('Memory ≈ 이미지 수 × 특징 위치 수 × 특징 차원 × 원소 bytes\n1,000 × 784 × 1,024 × 4 ≈ 3.21 GB') + '''<p>Coreset은 전체 정상 특징을 대표할 작은 부분집합입니다. 가까운 점만 많이 보관하는 중복을 줄이면서 특징 공간의 다양한 정상 패턴을 커버하려는 목적입니다. 원 논문은 greedy 방식의 근사 coreset 선택을 사용합니다. 무작위로 일부를 고르는 것과 선택 목적이 다릅니다.</p>''' + svg('''<text x="27" y="27" class="label">전체 정상 특징</text><text x="465" y="27" class="label">대표점 · coreset</text>''' + ''.join(f'<circle cx="{45+(i*47)%265}" cy="{64+(i*31)%115}" r="5" fill="#9bb0d6"/>' for i in range(42)) + edge('M 345 119 H 417') + ''.join(f'<circle cx="{x}" cy="{y}" r="10" fill="#2454d8"/>' for x,y in [(462,70),(575,70),(686,92),(480,170),(604,169),(559,119)]) + '<text x="369" y="155" class="sub" text-anchor="middle">선택</text>',215,'특징 공간의 대표점 선택을 설명하는 개념도. 실제 coreset 알고리즘 실행 결과가 아닙니다.') + '''<p>10%를 선택한다는 가정이면 벡터 저장량은 약 321 MB로 줄어듭니다. 검색용 인덱스와 실행 중 텐서 메모리는 별도로 필요합니다. 선택 비율을 줄이면 메모리·검색 비용은 줄 수 있지만 정상의 다양성을 놓칠 수도 있어 검증이 필요합니다.</p>'''),
 section('score', '최근접 거리가 이상 점수가 되는 이유', equation('패치 점수 sᵢ = min_{m ∈ M} ||fᵢ − m||₂\nM: 정상 특징 저장소 / fᵢ: 검사 이미지 i번째 지역 특징') + '''<p>검사 특징과 정상 특징이 가까우면 저장된 정상 패턴과 비슷하다고 봅니다. 멀면 정상에서 보기 어려운 패턴일 수 있습니다. 2차원 장난감 예시에서 정상 벡터 [1,1], 검사 벡터 [1.1,1.2]의 거리는 약 0.224입니다. 검사 벡터 [4,5]라면 거리는 5입니다. 실제 특징은 훨씬 고차원이고 거리의 범위도 모델·전처리에 따라 달라집니다.</p><p>패치별 점수를 공간 위치에 돌려 놓고 입력 해상도로 업샘플링하면 이상 지도를 만들 수 있습니다. 큰 점수의 위치가 이상 후보가 됩니다. 원 논문은 이미지 수준 점수에 최대 패치 거리와 주변 정상 특징을 활용한 <strong>재가중</strong>도 사용합니다. 따라서 “원 논문 점수는 무조건 max 거리 하나”라고 설명하면 세부가 빠집니다.</p>''' + flow([('패치별 거리', '28 × 28 예시'), ('공간 복원', '거리 지도'), ('업샘플링', '입력 해상도'), ('결과', '이상 위치 · 점수')], '이상 지도의 개념적 데이터 흐름. 정확한 해상도·평활화·이미지 점수 계산은 구현 설정에 따라 확인합니다.')),
 section('limits', '정상과 다르다고 반드시 불량은 아니다', '''<p>조명 변경, 카메라 위치 변화, 정상 부품의 새로운 재질도 특징 공간에서 멀어질 수 있습니다. 반대로 미세 결함이 다운샘플링 과정에서 사라지거나 정상 특징과 비슷하면 검출이 어려울 수 있습니다. 모델은 공정의 불량 정의를 자동으로 알고 있는 것이 아닙니다.</p>''' + table(['상황', '가능한 결과', '확인할 항목'], [('정상 조명 조건 누락', '정상인데 높은 이상 점수', '정상 학습 데이터의 다양성'), ('작은 결함', '낮은 점수 또는 흐린 이상 지도', '입력·특징 해상도와 수용영역'), ('정상 데이터 오염', '결함 특징이 정상 bank에 포함', '정상 데이터 품질'), ('새 카메라·새 공정', '점수 분포 변화', '도메인별 validation과 threshold')]) + '''<p>Threshold는 특정 데이터의 validation으로 정하고 test 전에 고정해야 합니다. Image AUROC는 이미지 수준 이상/정상 구분을, pixel AUROC 등은 위치 단위 결과를 평가합니다. 서로 다른 평가 단위를 섞어서 하나의 성능처럼 보고하면 안 됩니다.</p>''' + callout('이 논문의 핵심', '정상 지역 특징을 잘 대표하는 저장소를 만들고 검사 특징의 최근접 거리를 사용합니다. Coreset은 저장 비용을 줄이는 핵심 장치이며, 좋은 정상 데이터와 검증된 판정 기준이 함께 필요합니다.'))
 ], [('Roth et al. · Towards Total Recall in Industrial Anomaly Detection', 'https://arxiv.org/abs/2106.08265', 'CVPR 2022. PatchCore의 지역 특징, coreset, 점수 재가중을 설명하는 원문입니다.'), ('공식 구현 · amazon-science/patchcore-inspection', 'https://github.com/amazon-science/patchcore-inspection', '특징 계층·coreset·검색과 점수 계산을 확인할 수 있습니다.')])
+
 
 
 register_reference_notes(
@@ -789,15 +779,39 @@ register_reference_notes(
 )
 
 
+# Make the representative-paper role explicit in the section headings.
+vit = next(item for item in NOTES if item["slug"] == "vit")
+vit["sections"][0] = (
+    vit["sections"][0][0],
+    "대표 논문 ViT · Transformer를 이미지 분류에 적용한 문제 설정",
+    vit["sections"][0][2],
+)
+patchcore = next(item for item in NOTES if item["slug"] == "patchcore")
+patchcore["sections"][0] = (
+    patchcore["sections"][0][0],
+    "정상 데이터 기반 이상 탐지와 대표 방법 PatchCore",
+    patchcore["sections"][0][2],
+)
+
+
 def nav(current, prefix):
-    groups = ['기초 개념', '논문 해설', '강의·교과서 정리']
+    groups = ['이미지·CNN', 'Transformer·Attention', 'Vision Tasks·Segmentation', '학습·평가', 'Anomaly Detection', '종합 이론']
+    names = {
+        'pixels': '이미지와 텐서',
+        'cnn': 'CNN · ResNet',
+        'vit': 'Transformer · ViT',
+        'tasks': 'Vision Tasks · U-Net',
+        'training': '학습과 평가',
+        'patchcore': 'Anomaly Detection',
+        'cs231n': 'CS231n 전체 정리',
+        'prml': 'PRML 전체 정리',
+    }
     content = f'<a href="{prefix}index.html" {"aria-current=page" if current == "home" else ""}><span>00</span>학습 노트 전체</a>'
     for group in groups:
         content += f'<p class="nav-label">{group}</p>'
         for item in NOTES:
             if item['group'] == group:
-                name = {'pixels':'이미지와 텐서','cnn':'CNN의 원리','vit':'Vision Transformer','tasks':'분류 · 탐지 · 분할','training':'학습과 평가','resnet':'ResNet','unet':'U-Net','patchcore':'PatchCore','cs231n':'CS231n 전체 정리','prml':'PRML 전체 정리'}[item['slug']]
-                content += f'<a href="{prefix}notes/{item["slug"]}.html" {"aria-current=page" if current == item["slug"] else ""}><span>{item["label"][:2]}</span>{name}</a>'
+                content += f'<a href="{prefix}notes/{item["slug"]}.html" {"aria-current=page" if current == item["slug"] else ""}><span>{item["label"][:2]}</span>{names[item["slug"]]}</a>'
     return content
 
 
@@ -812,10 +826,6 @@ def miniature(slug):
         return '<svg viewBox="0 0 390 100" aria-hidden="true">' + ''.join(f'<rect x="{x*19+35}" y="{y*19+7}" width="16" height="16" rx="2" fill="rgb({50+x*23},{70+y*26},{135+x*16})"/>' for y in range(5) for x in range(5)) + '<text x="161" y="47" fill="#2454d8" font-size="21" font-family="monospace">[B, C, H, W]</text><text x="161" y="73" fill="#617596" font-size="13" font-family="monospace">32 × 3 × 224 × 224</text></svg>'
     if slug == 'vit':
         return '<svg viewBox="0 0 390 100" aria-hidden="true">' + ''.join(f'<rect x="{x*16+28}" y="{y*16+18}" width="13" height="13" rx="2" fill="#769aeb"/>' for y in range(4) for x in range(4)) + ''.join(f'<path d="M 106 50 L {160+i*28} 32" stroke="#a4b8df"/>' for i in range(7)) + ''.join(f'<rect x="{150+i*28}" y="35" width="19" height="33" rx="3" fill="{ "#0b9286" if i==0 else "#2454d8"}"/>' for i in range(7)) + '</svg>'
-    if slug == 'resnet':
-        return '<svg viewBox="0 0 390 100" aria-hidden="true"><path d="M 25 66 H 350 M 62 66 V 17 H 307 V 66" fill="none" stroke="#91a9cf" stroke-width="2"/><rect x="93" y="43" width="80" height="45" rx="6" fill="#2454d8"/><rect x="205" y="43" width="80" height="45" rx="6" fill="#2454d8"/><circle cx="308" cy="66" r="15" fill="white" stroke="#2454d8"/><text x="308" y="73" text-anchor="middle" fill="#2454d8" font-size="22">+</text></svg>'
-    if slug == 'unet':
-        return '<svg viewBox="0 0 390 100" aria-hidden="true"><path d="M 65 24 V 58 H 125 V 84 H 267 V 58 H 325 V 24 M 65 24 H 325 M 125 58 H 267" fill="none" stroke="#93abd2" stroke-width="2"/>' + ''.join(f'<rect x="{x-22}" y="{y-11}" width="44" height="22" rx="4" fill="{color}"/>' for x,y,color in [(65,24,'#2454d8'),(125,58,'#2454d8'),(196,84,'#14213b'),(267,58,'#079688'),(325,24,'#079688')]) + '</svg>'
     if slug == 'patchcore':
         return '<svg viewBox="0 0 390 100" aria-hidden="true">' + ''.join(f'<circle cx="{30+(i*39)%150}" cy="{17+(i*29)%70}" r="4" fill="#91acd8"/>' for i in range(25)) + '<path d="M 193 50 H 240" stroke="#2454d8" stroke-width="2"/><rect x="260" y="15" width="90" height="70" rx="8" fill="#e2ecef"/>' + ''.join(f'<circle cx="{x}" cy="{y}" r="7" fill="#08796f"/>' for x,y in [(278,33),(328,33),(301,53),(277,72),(330,72)]) + '</svg>'
     if slug == 'training':
@@ -855,20 +865,56 @@ def render():
             counter += 1
             pieces[j] = pieces[j].replace('id="arrow"', f'id="arrow-{counter}"').replace('url(#arrow)', f'url(#arrow-{counter})')
         (ROOT / 'notes' / f'{item["slug"]}.html').write_text('<figure>'.join(pieces), encoding='utf-8')
-    home = f'''<div class="home-intro"><p class="eyebrow">VISION AI · STUDY NOTEBOOK</p><h1>이미지에서 시작해,<br>모델의 동작까지.</h1><p class="lead">숫자가 특징이 되고, 특징이 판단이 되는 과정.<br>개념과 논문·강의·교과서를 도식과 계산으로 이해하는 학습 노트입니다.</p><a class="start-link" href="notes/pixels.html">이미지와 텐서부터 시작하기 <span aria-hidden="true">→</span></a><div class="meta"><span class="tag">{len(NOTES)}개 학습 자료</span><span class="tag">4개 인터랙티브 예시</span><span class="tag">논문 · 공식 자료 기반</span></div></div>'''
-    group_subtitles = {
-        '기초 개념': '입력 · 특징 · 출력 · 평가',
-        '논문 해설': '문제 · 구조 · 계산 · 한계',
-        '강의·교과서 정리': '전체 흐름 · 핵심 수식 · Vision 연결',
+    legacy_redirects = {
+        'resnet.html': (
+            'cnn.html#resnet_problem',
+            'ResNet 내용은 CNN 주제로 이동했습니다.',
+        ),
+        'unet.html': (
+            'tasks.html#unet_architecture',
+            'U-Net 내용은 Vision Tasks 주제로 이동했습니다.',
+        ),
     }
-    for group in ['기초 개념', '논문 해설', '강의·교과서 정리']:
+    for filename, (target, message) in legacy_redirects.items():
+        body = (
+            '<header data-legacy-redirect="true"><p class="eyebrow">MOVED</p>'
+            f'<h1>{message}</h1>'
+            f'<p class="lead"><a href="{target}">새 위치에서 계속 읽기 →</a></p>'
+            '</header>'
+        )
+        redirect_html = page(
+            '자료 위치 변경',
+            message,
+            'legacy',
+            body,
+            '../',
+        )
+        redirect_html = redirect_html.replace(
+            '</head>',
+            f'<meta http-equiv="refresh" content="0; url={target}"></head>',
+        )
+        (ROOT / 'notes' / filename).write_text(
+            redirect_html,
+            encoding='utf-8',
+        )
+
+    home = f'''<div class="home-intro"><p class="eyebrow">VISION AI · STUDY NOTEBOOK</p><h1>이미지에서 시작해,<br>모델의 동작까지.</h1><p class="lead">숫자가 특징이 되고, 특징이 판단이 되는 과정.<br>큰 주제를 먼저 이해하고, 관련 논문·강의·교과서를 근거와 사례로 연결하는 학습 노트입니다.</p><a class="start-link" href="notes/pixels.html">이미지와 텐서부터 시작하기 <span aria-hidden="true">→</span></a><div class="meta"><span class="tag">{len(NOTES)}개 학습 자료</span><span class="tag">4개 인터랙티브 예시</span><span class="tag">논문 · 공식 자료 기반</span></div></div>'''
+    group_subtitles = {
+        '이미지·CNN': '픽셀 · 텐서 · 합성곱 · ResNet',
+        'Transformer·Attention': 'token · Q/K/V · ViT',
+        'Vision Tasks·Segmentation': '분류 · 탐지 · mask · U-Net',
+        '학습·평가': 'split · optimization · metric · threshold',
+        'Anomaly Detection': 'normal feature · memory bank · PatchCore',
+        '종합 이론': 'CS231n · PRML을 큰 흐름으로 다시 연결',
+    }
+    for group in ['이미지·CNN', 'Transformer·Attention', 'Vision Tasks·Segmentation', '학습·평가', 'Anomaly Detection', '종합 이론']:
         home += f'<div class="section-label"><h2>{group}</h2><span>{group_subtitles[group]}</span></div><div class="note-grid">'
         for item in NOTES:
             if item['group'] != group:
                 continue
             home += f'<a class="note-card" href="notes/{item["slug"]}.html"><div class="mini-viz">{miniature(item["slug"])}</div><div class="card-body"><div class="card-meta"><span>{item["label"]}</span><span>약 {item["minutes"]}분</span></div><h3>{item["title"]}</h3><p>{item["subtitle"]}</p></div></a>'
         home += '</div>'
-    home += '''<section class="article-section"><h2>개념을 서로 연결해서 이해하기</h2><div class="two-col"><div class="mini-card"><h3>CNN에서 ResNet으로</h3><p>지역 특징을 계산하는 원리를 익힌 뒤, 깊은 모델에서 잔차 연결이 필요한 이유를 살펴봅니다.</p></div><div class="mini-card"><h3>패치에서 ViT·PatchCore로</h3><p>ViT의 입력 패치와 PatchCore의 지역 특징은 다른 개념입니다. 각 모델이 만드는 벡터와 사용하는 연산을 비교해 보세요.</p></div></div></section><footer class="footer">Vision AI Notes · 최초 작성 2026.09.22 · 설명용 예시는 실제 실험 결과와 구분해 표시합니다.</footer>'''
+    home += '''<section class="article-section"><h2>개념을 서로 연결해서 이해하기</h2><div class="two-col"><div class="mini-card"><h3>CNN 안에서 ResNet 이해하기</h3><p>합성곱의 지역 계산을 익힌 뒤, 같은 CNN 주제 안에서 깊은 네트워크의 residual learning으로 확장합니다.</p></div><div class="mini-card"><h3>패치에서 ViT·PatchCore로</h3><p>ViT의 입력 패치와 PatchCore의 지역 특징은 다른 개념입니다. 각 모델이 만드는 벡터와 사용하는 연산을 비교해 보세요.</p></div></div></section><footer class="footer">Vision AI Notes · 최초 작성 2026.09.22 · 설명용 예시는 실제 실험 결과와 구분해 표시합니다.</footer>'''
     (ROOT / 'index.html').write_text(page('학습 노트', 'Vision AI 개념과 논문 내용을 도식, 수치 예시, 인터랙티브 실험으로 설명하는 한국어 학습 노트.', 'home', home), encoding='utf-8')
     print(f'Built {len(NOTES) + 1} HTML pages.')
 

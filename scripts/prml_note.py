@@ -18,8 +18,8 @@ def register_prml(
             "Christopher M. Bishop의 Pattern Recognition and Machine Learning "
             "14개 장을 확률·추론·예측·잠재변수의 연결 구조로 정리합니다."
         ),
-        "강의·교과서 정리",
-        "10 · PRML",
+        "종합 이론",
+        "08 · PRML",
         110,
         [
             section(

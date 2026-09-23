@@ -41,10 +41,57 @@ for path in [ROOT / 'index.html', *sorted((ROOT / 'notes').glob('*.html'))]:
     html = path.read_text(encoding='utf-8')
     if 'class="term-guide"' in html:
         errors.append(f'Legacy top term guide remains: {path.name}')
-    if path.name != 'index.html' and 'class="term-inline"' not in html:
+    is_legacy_redirect = 'data-legacy-redirect="true"' in html
+    if (
+        path.name != 'index.html'
+        and not is_legacy_redirect
+        and 'class="term-inline"' not in html
+    ):
         errors.append(f'Missing inline first-use term explanation: {path.name}')
     if 'equation-fallback' in html:
         errors.append(f'Unmapped plain-text equation: {path.name}')
+
+index_html = (ROOT / 'index.html').read_text(encoding='utf-8')
+if '논문 해설' in index_html:
+    errors.append('Legacy paper-review top-level category remains in index.html')
+for required_group in [
+    '이미지·CNN',
+    'Transformer·Attention',
+    'Vision Tasks·Segmentation',
+    '학습·평가',
+    'Anomaly Detection',
+    '종합 이론',
+]:
+    if f'>{required_group}<' not in index_html:
+        errors.append(f'Missing topic-first category in index.html: {required_group}')
+for forbidden_link in ['notes/resnet.html', 'notes/unet.html']:
+    if forbidden_link in index_html:
+        errors.append(f'Legacy standalone topic card remains: {forbidden_link}')
+
+required_topic_anchors = {
+    ROOT / 'notes' / 'cnn.html': [
+        'architectures',
+        'resnet_problem',
+        'residual_block',
+        'residual_shape',
+        'resnet_bottleneck',
+        'resnet_scope',
+    ],
+    ROOT / 'notes' / 'tasks.html': [
+        'segmentation_context',
+        'unet_architecture',
+        'unet_original',
+        'unet_scope',
+    ],
+}
+for topic_path, anchors in required_topic_anchors.items():
+    parser = pages.get(topic_path.resolve())
+    if parser is None:
+        errors.append(f'Missing topic page: {topic_path.name}')
+        continue
+    for anchor in anchors:
+        if anchor not in parser.ids:
+            errors.append(f'Missing merged topic anchor: {topic_path.name}#{anchor}')
 
 for path, parser in pages.items():
     for link in parser.links:
@@ -71,6 +118,44 @@ reference_source = (ROOT / 'scripts' / 'reference_figures.py').read_text(
     encoding='utf-8'
 )
 
+paper_source = (ROOT / 'scripts' / 'paper_figures.py').read_text(encoding='utf-8')
+build_source = (ROOT / 'scripts' / 'build.py').read_text(encoding='utf-8')
+
+for forbidden_note in ["note('resnet'", "note('unet'"]:
+    if forbidden_note in build_source:
+        errors.append(
+            f'Legacy standalone paper page remains in build source: {forbidden_note}'
+        )
+
+for forbidden_group in ["'논문 해설'", "'핵심 주제'"]:
+    if forbidden_group in build_source:
+        errors.append(
+            f'Legacy source-type/top-level grouping remains: {forbidden_group}'
+        )
+
+
+for forbidden in [
+    'v=3 if c==1 else 0',
+    'Layer 1: local edge',
+    'Head 1","nearby shape',
+]:
+    if forbidden in paper_source:
+        errors.append(f'Paper figure semantic regression remains: {forbidden}')
+
+for required in [
+    'output = [[3,3,0],[3,3,0],[3,3,0]]',
+    '실제 모델에서 측정한 attention이 아닙니다',
+]:
+    if required not in paper_source:
+        errors.append(f'Missing audited paper-figure safeguard: {required}')
+
+for forbidden in [
+    'maximizing ELBO closes the KL gap',
+    'MCMC reaches a target distribution',
+]:
+    if forbidden in reference_source:
+        errors.append(f'Reference wording regression remains: {forbidden}')
+
 for forbidden in [
     'values=[0.02,0.2,0.65,1.0]',
     'steps=["model A","model B","model C","average"]',
@@ -96,7 +181,7 @@ if 'kind="text"' in reference_source:
         'text cards.'
     )
 
-for svg_path in reference_diagrams:
+for svg_path in [*paper_diagrams, *reference_diagrams]:
     svg_text = svg_path.read_text(encoding='utf-8')
     try:
         root = ET.fromstring(svg_text)
@@ -149,4 +234,7 @@ for svg_path in [
 
 if errors:
     raise SystemExit('\n'.join(errors))
-print(f'Validated {len(pages)} pages: local links, IDs, anchors, and headings.')
+print(
+    f'Validated {len(pages)} pages plus '
+    f'{len(paper_diagrams)} paper and {len(reference_diagrams)} reference SVGs.'
+)
