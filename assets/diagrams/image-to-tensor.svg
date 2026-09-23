@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520">
   <style>
-    text{font-family:Arial,'Noto Sans KR',sans-serif}
+    text{font-family:'NanumGothic','Noto Sans CJK KR','Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif}
     .title{font-size:30px;font-weight:700}.sub{font-size:18px;fill:#5b6880}.label{font-size:20px;font-weight:700}
     .box{fill:#fff;stroke:#c7d5ee;stroke-width:2}.soft{fill:#edf3ff}.edge{stroke:#7891b7;stroke-width:4;fill:none}
   </style>
