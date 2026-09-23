@@ -11,13 +11,13 @@ def _e(value):
 def _svg(title, subtitle, body, height=760):
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 {height}" role="img" aria-label="{_e(title)}">
 <style>
-.title{{font:700 27px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#18243b}}
-.subtitle{{font:18px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#5b6880}}
-.panel-label{{font:700 19px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#18243b}}
-.label{{font:700 18px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#203455}}
-.body{{font:16px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#526178}}
-.small{{font:14px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#68768c}}
-.white{{font:700 16px Arial,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif;fill:#fff}}
+.title{{font:700 27px 'NanumSquare','Malgun Gothic','Apple SD Gothic Neo','Noto Sans CJK KR','Noto Sans KR','Noto Serif CJK KR',Arial,sans-serif;fill:#18243b}}
+.subtitle{{font:18px 'NanumSquare','Malgun Gothic','Apple SD Gothic Neo','Noto Sans CJK KR','Noto Sans KR','Noto Serif CJK KR',Arial,sans-serif;fill:#5b6880}}
+.panel-label{{font:700 19px 'NanumSquare','Malgun Gothic','Apple SD Gothic Neo','Noto Sans CJK KR','Noto Sans KR','Noto Serif CJK KR',Arial,sans-serif;fill:#18243b}}
+.label{{font:700 18px 'NanumSquare','Malgun Gothic','Apple SD Gothic Neo','Noto Sans CJK KR','Noto Sans KR','Noto Serif CJK KR',Arial,sans-serif;fill:#203455}}
+.body{{font:16px 'NanumSquare','Malgun Gothic','Apple SD Gothic Neo','Noto Sans CJK KR','Noto Sans KR','Noto Serif CJK KR',Arial,sans-serif;fill:#526178}}
+.small{{font:14px 'NanumSquare','Malgun Gothic','Apple SD Gothic Neo','Noto Sans CJK KR','Noto Sans KR','Noto Serif CJK KR',Arial,sans-serif;fill:#68768c}}
+.white{{font:700 16px 'NanumSquare','Malgun Gothic','Apple SD Gothic Neo','Noto Sans CJK KR','Noto Sans KR','Noto Serif CJK KR',Arial,sans-serif;fill:#fff}}
 .panel{{fill:#fff;stroke:#d2dceb;stroke-width:2}}
 .soft{{fill:#f3f7fe;stroke:#c9d6ea;stroke-width:2}}
 .blue{{fill:#edf3ff;stroke:#8faee8;stroke-width:2}}

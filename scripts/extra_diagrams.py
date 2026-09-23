@@ -170,10 +170,10 @@ def _threshold_curve(title, subtitle):
     """For fixed scores, recall and FPR are non-increasing as threshold rises."""
     body = [
         '<path d="M150 410 H1080 M150 410 V145" class="edge"/>',
-        '<text x="1090" y="438" text-anchor="end" class="m">threshold →</text>',
+        '<text x="1050" y="472" text-anchor="end" class="m">threshold →</text>',
         '<text x="125" y="155" text-anchor="end" class="m">rate</text>',
-        '<text x="155" y="445" class="m">low</text>',
-        '<text x="1045" y="445" text-anchor="end" class="m">high</text>',
+        '<text x="155" y="442" class="m">low threshold</text>',
+        '<text x="1040" y="442" text-anchor="end" class="m">high threshold</text>',
         '<path d="M175 175 C300 185 430 210 560 250 C710 300 865 350 1045 385" '
         'stroke="#2454d8" stroke-width="6" fill="none"/>',
         '<path d="M175 235 C300 255 430 290 560 325 C710 362 865 390 1045 402" '
@@ -186,6 +186,76 @@ def _threshold_curve(title, subtitle):
         '<text x="235" y="205" class="m">more samples predicted positive</text>',
         '<text x="760" y="245" class="m">fewer samples predicted positive</text>',
     ]
+    return _frame(title, subtitle, "".join(body))
+
+
+def _roc_pr_curves(title, subtitle):
+    """Schematic ROC and precision-recall curves with explicit axes."""
+    body = [
+        '<rect x="85" y="140" width="470" height="300" rx="18" fill="#fff" stroke="#c7d5ee" stroke-width="2"/>',
+        '<rect x="645" y="140" width="470" height="300" rx="18" fill="#fff" stroke="#c7d5ee" stroke-width="2"/>',
+        '<text x="320" y="178" text-anchor="middle" class="l">ROC curve</text>',
+        '<text x="880" y="178" text-anchor="middle" class="l">Precision–Recall curve</text>',
+        '<path d="M145 390 H505 M145 390 V205" class="thin"/>',
+        '<path d="M705 390 H1065 M705 390 V205" class="thin"/>',
+        '<path d="M145 390 L505 205" stroke="#b9c5d8" stroke-width="3" stroke-dasharray="8 7" fill="none"/>',
+        '<path d="M145 390 C190 300 245 245 315 220 C390 195 455 198 505 205" stroke="#2454d8" stroke-width="6" fill="none"/>',
+        '<text x="325" y="418" text-anchor="middle" class="m">False Positive Rate</text>',
+        '<text x="120" y="300" text-anchor="middle" class="m" transform="rotate(-90 120 300)">True Positive Rate</text>',
+        '<text x="365" y="242" class="m" fill="#2454d8">illustrative ROC</text>',
+        '<text x="340" y="350" class="m" fill="#8494aa">random baseline</text>',
+        '<path d="M705 232 C760 235 805 250 850 275 C905 305 955 340 1065 375" stroke="#08796f" stroke-width="6" fill="none"/>',
+        '<line x1="705" y1="350" x2="1065" y2="350" stroke="#b9c5d8" stroke-width="3" stroke-dasharray="8 7"/>',
+        '<text x="885" y="418" text-anchor="middle" class="m">Recall</text>',
+        '<text x="680" y="300" text-anchor="middle" class="m" transform="rotate(-90 680 300)">Precision</text>',
+        '<text x="850" y="258" class="m" fill="#08796f">illustrative PR</text>',
+        '<text x="855" y="340" class="m" fill="#8494aa">prevalence baseline</text>',
+        '<text x="610" y="482" text-anchor="middle" class="m">schematic curves — not measured model performance</text>',
+    ]
+    return _frame(title, subtitle, "".join(body))
+
+
+def _leakage_split(title, subtitle):
+    """Contrast frame-random splitting with source-grouped splitting."""
+    body = [
+        '<rect x="70" y="140" width="1060" height="145" rx="18" fill="#fff" stroke="#e0ae82" stroke-width="2"/>',
+        '<rect x="70" y="315" width="1060" height="145" rx="18" fill="#fff" stroke="#8ccdbb" stroke-width="2"/>',
+        '<text x="100" y="175" class="l">Random frame split</text>',
+        '<text x="100" y="350" class="l">Grouped split</text>',
+    ]
+    colors = ["#2454d8", "#08796f", "#a24d18"]
+    names = ["train", "val", "test"]
+    for idx,(color,name) in enumerate(zip(colors,names)):
+        x=790+idx*105
+        body.append(f'<rect x="{x}" y="55" width="18" height="18" rx="3" fill="{color}"/>')
+        body.append(f'<text x="{x+25}" y="70" class="m">{name}</text>')
+
+    start_x=265
+    group_gap=205
+    # Random split: neighboring frames from each source are mixed across sets.
+    for g in range(4):
+        gx=start_x+g*group_gap
+        body.append(f'<text x="{gx}" y="197" text-anchor="middle" class="m">video {g+1}</text>')
+        for j in range(6):
+            color=colors[(j+g)%3]
+            x=gx-66+j*24
+            body.append(f'<rect x="{x}" y="216" width="18" height="40" rx="3" fill="{color}"/>')
+        body.append(f'<path d="M{gx-72} 262 H{gx+72}" stroke="#d9a06d" stroke-width="2"/>')
+
+    body.append('<text x="995" y="275" text-anchor="end" class="m" fill="#a24d18">near-duplicate frames can cross split boundaries</text>')
+
+    # Grouped split: every frame from a source stays in one set.
+    assignments=[0,0,1,2]
+    for g,set_idx in enumerate(assignments):
+        gx=start_x+g*group_gap
+        color=colors[set_idx]
+        body.append(f'<text x="{gx}" y="372" text-anchor="middle" class="m">video {g+1}</text>')
+        body.append(f'<rect x="{gx-78}" y="390" width="156" height="44" rx="8" fill="{color}" opacity=".18" stroke="{color}" stroke-width="2"/>')
+        for j in range(6):
+            x=gx-66+j*24
+            body.append(f'<rect x="{x}" y="397" width="18" height="30" rx="3" fill="{color}"/>')
+        body.append(f'<text x="{gx}" y="450" text-anchor="middle" class="m" fill="{color}">{names[set_idx]}</text>')
+    body.append('<text x="995" y="482" text-anchor="end" class="m" fill="#08796f">one source group stays inside one split</text>')
     return _frame(title, subtitle, "".join(body))
 
 def _confusion():
@@ -314,11 +384,11 @@ SPECS = {
 
     # training
     "train-split.svg": ("flow", "Train / Validation / Test", "세 집합은 역할이 다르며 test는 최종 평가까지 격리해야 합니다.", [["Train","가중치 학습"],["Validation","모델 선택"],["Threshold","운영 기준"],["Test","최종 일반화"]]),
-    "train-leakage.svg": ("compare", "좋은 분할 vs Data leakage", "같은 원본 영상의 유사 frame이 섞이면 성능이 부풀 수 있습니다.", "좋은 split", ["원본 그룹 단위 분리","시간대/설비 누수 방지","실제 일반화 평가"], "나쁜 split", ["frame random split","near-duplicate 섞임","평가 과대추정"]),
+    "train-leakage.svg": ("leakage_split", "Random frame split vs grouped split", "연속 영상처럼 서로 유사한 sample은 source group 단위로 분리해야 평가 누수를 줄일 수 있습니다."),
     "train-confusion.svg": ("confusion",),
     "train-prf.svg": ("compare", "Precision과 Recall의 관점", "같은 confusion matrix에서 서로 다른 질문을 합니다.", "Precision", ["이상이라고 한 것 중","얼마나 진짜 이상인가?","FP에 민감"], "Recall", ["실제 이상 중","얼마나 놓치지 않았나?","FN에 민감"]),
     "train-threshold.svg": ("threshold_curve", "Threshold를 바꾸면 무엇이 변할까?", "고정된 score에서 threshold를 높이면 positive 판정 수가 줄어 Recall과 false-positive rate가 감소하거나 유지됩니다."),
-    "train-curves.svg": ("compare", "ROC curve와 PR curve", "불균형 데이터에서는 PR curve도 함께 보는 것이 중요합니다.", "ROC", ["TPR vs FPR","threshold 전 범위","음성 샘플 영향 큼"], "PR", ["Precision vs Recall","positive 성능 집중","희소 이상 탐지에 유용"]),
+    "train-curves.svg": ("roc_pr_curves", "ROC curve와 Precision–Recall curve", "두 곡선은 threshold 전 범위에서 서로 다른 오류 trade-off를 보여 줍니다. 아래 선은 개념 설명용 합성 예시입니다."),
     "train-overfit.svg": ("overfit_curve", "Overfitting의 전형적 신호", "train loss는 계속 낮아져도 validation loss가 최저점을 지난 뒤 다시 높아질 수 있습니다."),
 
     # ResNet
@@ -384,6 +454,10 @@ def _render(spec):
         return _overfit_curve(spec[1], spec[2])
     if kind == "threshold_curve":
         return _threshold_curve(spec[1], spec[2])
+    if kind == "roc_pr_curves":
+        return _roc_pr_curves(spec[1], spec[2])
+    if kind == "leakage_split":
+        return _leakage_split(spec[1], spec[2])
     if kind == "confusion":
         return _confusion()
     if kind == "gaussian":
