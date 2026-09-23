@@ -34,10 +34,12 @@ def _svg(title, subtitle, body, height=620):
 
 
 def _panel_frame(x, y, w, h, letter, title):
+    title_size = 17 if len(title) <= 24 else 15 if len(title) <= 34 else 13
     return (
         f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="18" class="panel"/>'
         f'<text x="{x+16}" y="{y+29}" class="panel-label">({letter})</text>'
-        f'<text x="{x+52}" y="{y+29}" class="label">{_e(title)}</text>'
+        f'<text x="{x+52}" y="{y+29}" font-size="{title_size}" '
+        f'font-weight="700" fill="#203455">{_e(title)}</text>'
     )
 
 
@@ -138,6 +140,7 @@ def _curves(x, y, w, h, kind):
         ],
         "activations": [
             ("#2454d8", f'M{x+45} {y+h-55} L{x+w*.48} {y+h-55} L{x+w-40} {y+50}', "ReLU"),
+            ("#6d7f9b", f'M{x+45} {y+h-70} L{x+w*.48} {y+h-55} L{x+w-40} {y+65}', "Leaky ReLU"),
             ("#08796f", f'M{x+45} {y+h-70} C{x+w*.35} {y+h-70} {x+w*.48} {y+70} {x+w-40} {y+65}', "sigmoid"),
             ("#a24d18", f'M{x+45} {y+h-85} C{x+w*.35} {y+h-120} {x+w*.60} {y+85} {x+w-40} {y+55}', "tanh"),
         ],
@@ -156,6 +159,7 @@ def _curves(x, y, w, h, kind):
         "gaussian": [
             ("#2454d8", f'M{x+45} {y+h-50} C{x+w*.25} {y+h-50} {x+w*.35} {y+55} {x+w*.50} {y+55} C{x+w*.65} {y+55} {x+w*.75} {y+h-50} {x+w-35} {y+h-50}', "small σ"),
             ("#a24d18", f'M{x+45} {y+h-50} C{x+w*.18} {y+h-55} {x+w*.30} {y+115} {x+w*.50} {y+115} C{x+w*.70} {y+115} {x+w*.82} {y+h-55} {x+w-35} {y+h-50}', "large σ"),
+            ("#08796f", f'M{x+45} {y+h-50} C{x+w*.38} {y+h-50} {x+w*.48} {y+85} {x+w*.64} {y+85} C{x+w*.78} {y+85} {x+w*.85} {y+h-50} {x+w-35} {y+h-50}', "shifted μ"),
         ],
         "regression": [
             ("#2454d8", f'M{x+45} {y+h-60} L{x+w-40} {y+60}', "fit"),
@@ -266,9 +270,700 @@ def _hmm(x, y, w, h):
     return "".join(parts)
 
 
+
+def _value_grid(x, y, values, cell=32, fill="#f4f7fb"):
+    parts = []
+    for row_idx, row in enumerate(values):
+        for col_idx, value in enumerate(row):
+            xx = x + col_idx * cell
+            yy = y + row_idx * cell
+            parts.append(
+                f'<rect x="{xx}" y="{yy}" width="{cell-3}" height="{cell-3}" '
+                f'rx="4" fill="{fill}" stroke="#cbd6e6"/>'
+            )
+            parts.append(
+                f'<text x="{xx+(cell-3)/2}" y="{yy+(cell-3)/2+5}" '
+                f'text-anchor="middle" class="small">{_e(value)}</text>'
+            )
+    return "".join(parts)
+
+
+def _knn_semantics(x, y, w, h):
+    parts = [
+        f'<text x="{x+20}" y="{y+45}" class="label">same class</text>',
+        f'<text x="{x+20}" y="{y+205}" class="label">different class</text>',
+    ]
+    patterns = [
+        ([6, 7, 11, 12, 16, 17], [7, 8, 12, 13, 17, 18]),
+        ([6, 8, 12, 16, 18], [6, 7, 12, 17, 18]),
+    ]
+    row_y = [y + 65, y + 225]
+    for idx, (left_hot, right_hot) in enumerate(patterns):
+        yy = row_y[idx]
+        parts.append(_grid(x + 35, yy, 5, 5, 22, "gray", left_hot))
+        parts.append(_arrow(x + 160, yy + 52, x + 210, yy + 52))
+        parts.append(_grid(x + 225, yy, 5, 5, 22, "gray", right_hot))
+        label = "pixel distance: large" if idx == 0 else "pixel distance: small"
+        color = "#a24d18" if idx == 0 else "#08796f"
+        parts.append(
+            f'<text x="{x+365}" y="{yy+58}" class="body" fill="{color}">'
+            f'{_e(label)}</text>'
+        )
+    parts.append(
+        f'<text x="{x+20}" y="{y+h-18}" class="small">'
+        "raw pixels measure appearance, not semantic identity</text>"
+    )
+    return "".join(parts)
+
+
+def _grouped_split(x, y, w, h):
+    parts = [
+        f'<text x="{x+18}" y="{y+45}" class="label">random frame split</text>',
+        f'<text x="{x+18}" y="{y+205}" class="label">grouped split</text>',
+    ]
+    colors = ["#8faee8", "#8ccdbb", "#e0ae82"]
+    labels = ["train", "val", "test"]
+    for idx, (color, label) in enumerate(zip(colors, labels)):
+        lx = x + 260 + idx * 75
+        parts.append(f'<rect x="{lx}" y="{y+25}" width="16" height="16" rx="3" fill="{color}"/>')
+        parts.append(f'<text x="{lx+22}" y="{y+38}" class="small">{label}</text>')
+    group_w = (w - 70) / 4
+    for group_idx in range(4):
+        gx = x + 20 + group_idx * group_w
+        parts.append(
+            f'<rect x="{gx}" y="{y+62}" width="{group_w-12}" height="92" '
+            'rx="10" fill="#f8fafc" stroke="#d4deeb"/>'
+        )
+        parts.append(
+            f'<text x="{gx+8}" y="{y+82}" class="small">video {group_idx+1}</text>'
+        )
+        for frame_idx in range(6):
+            color = colors[(frame_idx + group_idx) % 3]
+            parts.append(
+                f'<rect x="{gx+8+frame_idx*15}" y="{y+98}" width="11" height="34" '
+                f'rx="2" fill="{color}"/>'
+            )
+    parts.append(
+        f'<text x="{x+w-165}" y="{y+170}" class="small" fill="#a24d18">'
+        "near-duplicate leak</text>"
+    )
+    for group_idx in range(4):
+        gx = x + 20 + group_idx * group_w
+        color = colors[min(group_idx, 2)]
+        parts.append(
+            f'<rect x="{gx}" y="{y+222}" width="{group_w-12}" height="92" '
+            f'rx="10" fill="{color}" opacity=".18" stroke="{color}"/>'
+        )
+        parts.append(
+            f'<text x="{gx+8}" y="{y+242}" class="small">video {group_idx+1}</text>'
+        )
+        for frame_idx in range(6):
+            parts.append(
+                f'<rect x="{gx+8+frame_idx*15}" y="{y+258}" width="11" height="34" '
+                f'rx="2" fill="{color}"/>'
+            )
+    parts.append(
+        f'<text x="{x+w-165}" y="{y+332}" class="small" fill="#08796f">'
+        "source stays isolated</text>"
+    )
+    return "".join(parts)
+
+
+def _score_softmax_ce(x, y, w, h):
+    parts = []
+    columns = [
+        (x + 18, "scores", [2.0, 1.0, 0.1]),
+        (x + w * 0.38, "softmax", [0.659, 0.242, 0.099]),
+    ]
+    names = ["cat", "dog", "car"]
+    for column_x, heading, values in columns:
+        parts.append(f'<text x="{column_x}" y="{y+48}" class="label">{heading}</text>')
+        max_value = max(values)
+        for idx, (name, value) in enumerate(zip(names, values)):
+            yy = y + 72 + idx * 55
+            parts.append(f'<text x="{column_x}" y="{yy+16}" class="small">{name}</text>')
+            bar_w = 95 * value / max_value
+            parts.append(
+                f'<rect x="{column_x+38}" y="{yy}" width="{bar_w}" height="22" '
+                f'rx="5" fill="{"#2454d8" if idx == 0 else "#a9bce5"}"/>'
+            )
+            parts.append(
+                f'<text x="{column_x+142}" y="{yy+16}" class="small">'
+                f'{value:.3g}</text>'
+            )
+    parts.append(_arrow(x + w * 0.31, y + 148, x + w * 0.36, y + 148))
+    parts.append(_arrow(x + w * 0.69, y + 148, x + w * 0.74, y + 148))
+    loss_x = x + w * 0.77
+    parts.append(f'<text x="{loss_x}" y="{y+48}" class="label">cross-entropy</text>')
+    parts.append(
+        f'<rect x="{loss_x}" y="{y+92}" width="{w*0.20}" height="86" rx="12" '
+        'fill="#fff1e7" stroke="#e0ae82"/>'
+    )
+    parts.append(f'<text x="{loss_x+14}" y="{y+122}" class="body">−log(0.659)</text>')
+    parts.append(f'<text x="{loss_x+14}" y="{y+154}" class="label">≈ 0.417</text>')
+    parts.append(
+        f'<text x="{x+18}" y="{y+h-25}" class="small">'
+        "logits → normalized probability → penalty for the correct class</text>"
+    )
+    return "".join(parts)
+
+
+def _loss_compare(x, y, w, h):
+    left = x + 45
+    right = x + w - 25
+    top = y + 45
+    bottom = y + h - 45
+    mid_x = x + w * 0.55
+    parts = [
+        f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>',
+        f'<path d="M{left} {top+20} L{mid_x} {bottom-12} L{right} {bottom-12}" '
+        'stroke="#a24d18" stroke-width="4" fill="none"/>',
+        f'<path d="M{left} {top+10} C{x+w*.35} {y+h*.28} '
+        f'{x+w*.58} {y+h*.70} {right} {bottom-8}" '
+        'stroke="#2454d8" stroke-width="4" fill="none"/>',
+        f'<path d="M{mid_x} {top} V{bottom}" stroke="#9aa9be" stroke-width="2" '
+        'stroke-dasharray="6 6"/>',
+        f'<text x="{left+6}" y="{top+8}" class="small" fill="#2454d8">CE</text>',
+        f'<text x="{left+6}" y="{top+30}" class="small" fill="#a24d18">hinge</text>',
+        f'<text x="{mid_x+6}" y="{bottom-10}" class="small">margin = 1</text>',
+        f'<text x="{right-95}" y="{bottom+26}" class="small">confidence / margin →</text>',
+    ]
+    return "".join(parts)
+
+
+def _activation_gradients(x, y, w, h):
+    half = w / 2
+    parts = []
+    for panel_idx, title in enumerate(["saturating units", "ReLU family"]):
+        px = x + panel_idx * half
+        left = px + 30
+        right = px + half - 18
+        top = y + 58
+        bottom = y + h - 42
+        parts.append(f'<text x="{px+18}" y="{y+40}" class="label">{title}</text>')
+        parts.append(
+            f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>'
+        )
+        if panel_idx == 0:
+            parts.append(
+                f'<path d="M{left+5} {bottom-8} C{px+half*.34} {bottom-8} '
+                f'{px+half*.46} {top+25} {px+half*.56} {top+25} '
+                f'C{px+half*.69} {top+25} {right-8} {top+18} {right-5} {top+18}" '
+                'stroke="#2454d8" stroke-width="4" fill="none"/>'
+            )
+            parts.append(
+                f'<rect x="{left}" y="{top}" width="{half*.22}" height="{bottom-top}" '
+                'fill="#fff1e7" opacity=".55"/>'
+            )
+            parts.append(
+                f'<rect x="{right-half*.22}" y="{top}" width="{half*.22}" '
+                f'height="{bottom-top}" fill="#fff1e7" opacity=".55"/>'
+            )
+            parts.append(f'<text x="{left+5}" y="{bottom-12}" class="small">|grad|≈0</text>')
+        else:
+            zero_y = bottom - (bottom - top) * 0.48
+            mid = px + half * 0.52
+            parts.append(
+                f'<path d="M{left+5} {zero_y} L{mid} {zero_y} L{right-5} {top+25}" '
+                'stroke="#08796f" stroke-width="4" fill="none"/>'
+            )
+            parts.append(
+                f'<path d="M{left+5} {zero_y+25} L{mid} {zero_y} " '
+                'stroke="#a24d18" stroke-width="3" fill="none"/>'
+            )
+            parts.append(f'<text x="{right-76}" y="{top+20}" class="small">grad≈1</text>')
+    return "".join(parts)
+
+
+def _batchnorm_modes(x, y, w, h):
+    parts = []
+    rows = [
+        (y + 78, "train", "batch μB, σB²", "#2454d8"),
+        (y + 228, "eval", "running μ, σ²", "#08796f"),
+    ]
+    for yy, mode, stats, color in rows:
+        parts.append(f'<text x="{x+18}" y="{yy-22}" class="label">{mode}</text>')
+        for idx in range(4):
+            parts.append(
+                f'<circle cx="{x+62+idx*24}" cy="{yy+28}" r="9" '
+                f'fill="{color}" opacity="{0.45+idx*0.12}"/>'
+            )
+        parts.append(_arrow(x + 150, yy + 28, x + 195, yy + 28))
+        parts.append(
+            f'<rect x="{x+205}" y="{yy-3}" width="128" height="62" rx="10" '
+            'fill="#f3f7fe" stroke="#c9d6ea"/>'
+        )
+        parts.append(
+            f'<text x="{x+269}" y="{yy+33}" text-anchor="middle" class="small">'
+            f'{stats}</text>'
+        )
+        parts.append(_arrow(x + 338, yy + 28, x + 378, yy + 28))
+        parts.append(
+            f'<rect x="{x+386}" y="{yy-3}" width="112" height="62" rx="10" '
+            'fill="#e9f7f2" stroke="#8ccdbb"/>'
+        )
+        parts.append(
+            f'<text x="{x+442}" y="{yy+22}" text-anchor="middle" class="small">'
+            "normalize</text>"
+        )
+        parts.append(
+            f'<text x="{x+442}" y="{yy+43}" text-anchor="middle" class="small">'
+            "γ, β</text>"
+        )
+    return "".join(parts)
+
+
+def _augmentation_cards(x, y, w, h):
+    parts = []
+    labels = ["crop", "flip", "color", "rotate"]
+    positions = [
+        (x + 20, y + 58),
+        (x + w/2 + 4, y + 58),
+        (x + 20, y + 205),
+        (x + w/2 + 4, y + 205),
+    ]
+    card_w = w / 2 - 28
+    card_h = 112
+    for idx, ((px, py), label) in enumerate(zip(positions, labels)):
+        parts.append(
+            f'<rect x="{px}" y="{py}" width="{card_w}" height="{card_h}" rx="12" '
+            'fill="#eef2f6" stroke="#cbd5e2"/>'
+        )
+        parts.append(f'<text x="{px+12}" y="{py+22}" class="small">{label}</text>')
+        opacity = 0.58 if label == "color" else 0.92
+        cx = px + card_w * (0.43 if label == "crop" else 0.52)
+        if label == "flip":
+            cx = px + card_w * 0.66
+        transform = (
+            f' transform="rotate(18 {cx} {py+68})"' if label == "rotate" else ""
+        )
+        parts.append(
+            f'<rect x="{cx-35}" y="{py+43}" width="70" height="46" rx="10" '
+            f'fill="#2454d8" opacity="{opacity}"{transform}/>'
+        )
+        parts.append(
+            f'<circle cx="{cx+18}" cy="{py+58}" r="7" fill="#fff" opacity=".9"/>'
+        )
+        if label == "crop":
+            parts.append(
+                f'<path d="M{px+18} {py+40} V{py+90} M{px+18} {py+40} H{px+70}" '
+                'stroke="#a24d18" stroke-width="3"/>'
+            )
+    return "".join(parts)
+
+
+def _invariance_checks(x, y, w, h):
+    parts = []
+    checks = [
+        ("crop", True),
+        ("horizontal flip", True),
+        ("extreme color shift", False),
+        ("shape-destroying warp", False),
+    ]
+    for idx, (label, valid) in enumerate(checks):
+        yy = y + 70 + idx * 70
+        parts.append(
+            f'<rect x="{x+35}" y="{yy-27}" width="{w-70}" height="50" rx="10" '
+            f'fill="{"#e9f7f2" if valid else "#fff1e7"}" '
+            f'stroke="{"#8ccdbb" if valid else "#e0ae82"}"/>'
+        )
+        symbol = "✓" if valid else "×"
+        parts.append(
+            f'<text x="{x+62}" y="{yy+7}" font-size="24" font-weight="700" '
+            f'fill="{"#08796f" if valid else "#a24d18"}">{symbol}</text>'
+        )
+        parts.append(f'<text x="{x+98}" y="{yy+5}" class="body">{label}</text>')
+        parts.append(
+            f'<text x="{x+w-115}" y="{yy+5}" class="small">'
+            f'{"label kept" if valid else "review"}</text>'
+        )
+    return "".join(parts)
+
+
+def _numeric_conv(x, y, w, h):
+    input_values = [
+        [1, 2, 0, 1],
+        [0, 1, 3, 1],
+        [2, 1, 0, 2],
+        [1, 0, 2, 1],
+    ]
+    kernel_values = [
+        [1, 0, -1],
+        [1, 0, -1],
+        [1, 0, -1],
+    ]
+    parts = [
+        f'<text x="{x+22}" y="{y+47}" class="small">input patch</text>',
+        f'<text x="{x+218}" y="{y+47}" class="small">3×3 kernel</text>',
+    ]
+    parts.append(_value_grid(x + 20, y + 65, input_values, 38))
+    parts.append(
+        f'<rect x="{x+18}" y="{y+63}" width="{38*3}" height="{38*3}" '
+        'fill="none" stroke="#2454d8" stroke-width="3"/>'
+    )
+    parts.append(_value_grid(x + 215, y + 75, kernel_values, 38, "#e9f7f2"))
+    parts.append(_arrow(x + 345, y + 132, x + 388, y + 132))
+    parts.append(
+        f'<rect x="{x+398}" y="{y+91}" width="104" height="82" rx="12" '
+        'fill="#edf3ff" stroke="#8faee8"/>'
+    )
+    parts.append(f'<text x="{x+450}" y="{y+121}" text-anchor="middle" class="small">dot sum</text>')
+    parts.append(f'<text x="{x+450}" y="{y+151}" text-anchor="middle" class="label">0</text>')
+    parts.append(
+        f'<text x="{x+20}" y="{y+h-36}" class="small">'
+        "(1+0+0) + (0+0−3) + (2+0+0) = 0</text>"
+    )
+    return "".join(parts)
+
+
+def _conv_controls(x, y, w, h):
+    parts = []
+    cards = [
+        ("stride 1", "blue", [6, 7, 8, 11, 12, 13]),
+        ("stride 2", "green", [6, 8, 16, 18]),
+        ("padding=same", "gray", [0, 4, 20, 24]),
+        ("dilation 2", "heat", [0, 2, 4, 10, 12, 14, 20, 22, 24]),
+    ]
+    positions = [
+        (x + 18, y + 58),
+        (x + w/2 + 3, y + 58),
+        (x + 18, y + 210),
+        (x + w/2 + 3, y + 210),
+    ]
+    card_w = w / 2 - 24
+    for (title, mode, hot), (px, py) in zip(cards, positions):
+        parts.append(
+            f'<rect x="{px}" y="{py}" width="{card_w}" height="125" rx="11" '
+            'fill="#fbfcfe" stroke="#d6deea"/>'
+        )
+        parts.append(f'<text x="{px+10}" y="{py+22}" class="small">{title}</text>')
+        parts.append(_grid(px + 56, py + 32, 5, 5, 16, mode, hot))
+    return "".join(parts)
+
+
+def _modern_visual(x, y, w, h):
+    parts = []
+    cards = [
+        (x + 18, y + 58, "attention"),
+        (x + w/2 + 4, y + 58, "CLIP"),
+        (x + 18, y + 210, "DINO"),
+        (x + w/2 + 4, y + 210, "diffusion"),
+    ]
+    card_w = w / 2 - 26
+    for px, py, title in cards:
+        parts.append(
+            f'<rect x="{px}" y="{py}" width="{card_w}" height="126" rx="11" '
+            'fill="#fbfcfe" stroke="#d6deea"/>'
+        )
+        parts.append(f'<text x="{px+10}" y="{py+22}" class="small">{title}</text>')
+        if title == "attention":
+            parts.append(_grid(px + 50, py + 36, 4, 4, 18, "heat", [5, 6, 9, 10]))
+        elif title == "CLIP":
+            parts.append(f'<circle cx="{px+55}" cy="{py+64}" r="13" fill="#2454d8"/>')
+            parts.append(f'<rect x="{px+132}" y="{py+51}" width="52" height="25" rx="6" fill="#e9f7f2" stroke="#8ccdbb"/>')
+            parts.append(_arrow(px + 72, py + 64, px + 126, py + 64))
+            parts.append(f'<text x="{px+47}" y="{py+103}" class="small">image ↔ text</text>')
+        elif title == "DINO":
+            parts.append(f'<circle cx="{px+65}" cy="{py+68}" r="22" fill="#edf3ff" stroke="#8faee8"/>')
+            parts.append(f'<circle cx="{px+172}" cy="{py+68}" r="22" fill="#e9f7f2" stroke="#8ccdbb"/>')
+            parts.append(_arrow(px + 89, py + 68, px + 146, py + 68))
+            parts.append(f'<text x="{px+46}" y="{py+108}" class="small">student → teacher</text>')
+        else:
+            parts.append(_grid(px + 28, py + 43, 3, 3, 15, "gray", [0, 2, 4, 6, 8]))
+            parts.append(_arrow(px + 82, py + 65, px + 112, py + 65))
+            parts.append(_grid(px + 120, py + 43, 3, 3, 15, "blue", [1, 4, 7]))
+            parts.append(f'<text x="{px+44}" y="{py+108}" class="small">noise → structure</text>')
+    return "".join(parts)
+
+
+def _bayes_update_density(x, y, w, h):
+    left = x + 40
+    right = x + w - 20
+    bottom = y + h - 42
+    top = y + 45
+    parts = [
+        f'<path d="M{left} {bottom} H{right}" class="thin"/>',
+        f'<path d="M{left+10} {bottom} C{x+w*.22} {bottom} {x+w*.30} {top+60} '
+        f'{x+w*.40} {top+60} C{x+w*.50} {top+60} {x+w*.58} {bottom} '
+        f'{right-10} {bottom}" stroke="#2454d8" stroke-width="4" fill="none"/>',
+        f'<path d="M{left+10} {bottom} C{x+w*.43} {bottom} {x+w*.50} {top+90} '
+        f'{x+w*.62} {top+90} C{x+w*.73} {top+90} {x+w*.80} {bottom} '
+        f'{right-10} {bottom}" stroke="#a24d18" stroke-width="4" fill="none"/>',
+        f'<path d="M{left+10} {bottom} C{x+w*.42} {bottom} {x+w*.49} {top+28} '
+        f'{x+w*.55} {top+28} C{x+w*.64} {top+28} {x+w*.70} {bottom} '
+        f'{right-10} {bottom}" stroke="#08796f" stroke-width="5" fill="none"/>',
+        f'<text x="{left+4}" y="{top+18}" class="small" fill="#2454d8">prior</text>',
+        f'<text x="{left+72}" y="{top+18}" class="small" fill="#a24d18">likelihood</text>',
+        f'<text x="{left+170}" y="{top+18}" class="small" fill="#08796f">posterior</text>',
+    ]
+    return "".join(parts)
+
+
+def _bayes_risk(x, y, w, h):
+    parts = [
+        f'<text x="{x+25}" y="{y+55}" class="body">at one observation x*</text>',
+        f'<text x="{x+25}" y="{y+95}" class="small">expected risk</text>',
+    ]
+    items = [("action A", 0.18, "#08796f"), ("action B", 0.62, "#a24d18")]
+    for idx, (label, value, color) in enumerate(items):
+        yy = y + 125 + idx * 92
+        parts.append(f'<text x="{x+28}" y="{yy+20}" class="small">{label}</text>')
+        parts.append(
+            f'<rect x="{x+108}" y="{yy}" width="{(w-160)*value}" height="28" '
+            f'rx="6" fill="{color}" opacity=".78"/>'
+        )
+        parts.append(f'<text x="{x+w-55}" y="{yy+20}" class="small">{value:.2f}</text>')
+    parts.append(
+        f'<rect x="{x+20}" y="{y+h-78}" width="{w-40}" height="42" rx="10" '
+        'fill="#e9f7f2" stroke="#8ccdbb"/>'
+    )
+    parts.append(
+        f'<text x="{x+w/2}" y="{y+h-51}" text-anchor="middle" class="body">'
+        "choose the action with minimum risk</text>"
+    )
+    return "".join(parts)
+
+
+def _covariance_ellipse(x, y, w, h):
+    cx = x + w * 0.52
+    cy = y + h * 0.57
+    parts = [
+        f'<path d="M{x+35} {cy} H{x+w-25} M{cx} {y+45} V{y+h-35}" class="thin"/>',
+        f'<ellipse cx="{cx}" cy="{cy}" rx="{w*.28}" ry="{h*.11}" '
+        f'transform="rotate(-28 {cx} {cy})" fill="#edf3ff" stroke="#2454d8" stroke-width="3"/>',
+        f'<ellipse cx="{cx}" cy="{cy}" rx="{w*.18}" ry="{h*.07}" '
+        f'transform="rotate(-28 {cx} {cy})" fill="none" stroke="#08796f" stroke-width="3"/>',
+        f'<path d="M{cx-w*.20} {cy+h*.11} L{cx+w*.20} {cy-h*.11}" '
+        'stroke="#a24d18" stroke-width="3"/>',
+        f'<text x="{x+24}" y="{y+45}" class="small">correlated dimensions</text>',
+    ]
+    return "".join(parts)
+
+
+def _basis_functions(x, y, w, h):
+    left = x + 38
+    right = x + w - 22
+    top = y + 48
+    bottom = y + h - 42
+    parts = [f'<path d="M{left} {bottom} H{right} M{left} {bottom} V{top}" class="thin"/>']
+    parts.extend([
+        f'<path d="M{left+5} {bottom-55} L{right-5} {top+45}" stroke="#2454d8" stroke-width="3" fill="none"/>',
+        f'<path d="M{left+5} {bottom-25} C{x+w*.35} {top+35} {x+w*.62} {bottom-20} {right-5} {top+65}" stroke="#a24d18" stroke-width="3" fill="none"/>',
+        f'<path d="M{left+5} {bottom-8} C{x+w*.34} {bottom-8} {x+w*.43} {top+55} {x+w*.52} {top+55} C{x+w*.62} {top+55} {x+w*.70} {bottom-8} {right-5} {bottom-8}" stroke="#08796f" stroke-width="3" fill="none"/>',
+        f'<path d="M{left+5} {bottom-18} C{x+w*.34} {bottom-18} {x+w*.45} {top+95} {x+w*.58} {top+95} C{x+w*.70} {top+95} {x+w*.78} {top+35} {right-5} {top+35}" stroke="#7f5fbf" stroke-width="3" fill="none"/>',
+        f'<text x="{left+8}" y="{top+15}" class="small" fill="#2454d8">linear</text>',
+        f'<text x="{left+70}" y="{top+15}" class="small" fill="#a24d18">polynomial</text>',
+        f'<text x="{left+8}" y="{top+37}" class="small" fill="#08796f">Gaussian</text>',
+        f'<text x="{left+92}" y="{top+37}" class="small" fill="#7f5fbf">sigmoid</text>',
+    ])
+    return "".join(parts)
+
+
+def _factor_graph(x, y, w, h):
+    var_x = [x + 80, x + w * 0.50, x + w - 80]
+    fy = y + h * 0.50
+    parts = []
+    for idx, vx in enumerate(var_x):
+        parts.append(f'<circle cx="{vx}" cy="{y+105}" r="24" fill="#edf3ff" stroke="#8faee8" stroke-width="2"/>')
+        parts.append(f'<text x="{vx}" y="{y+111}" text-anchor="middle" class="label">x{idx+1}</text>')
+    factor_x = [x + w * 0.34, x + w * 0.66]
+    for idx, fx in enumerate(factor_x):
+        parts.append(f'<rect x="{fx-18}" y="{fy-18}" width="36" height="36" rx="5" fill="#fff1e7" stroke="#e0ae82" stroke-width="2"/>')
+        parts.append(f'<text x="{fx}" y="{fy+6}" text-anchor="middle" class="small">f{idx+1}</text>')
+    edges = [
+        (var_x[0], y + 129, factor_x[0], fy - 18),
+        (var_x[1], y + 129, factor_x[0], fy - 18),
+        (var_x[1], y + 129, factor_x[1], fy - 18),
+        (var_x[2], y + 129, factor_x[1], fy - 18),
+    ]
+    for x1, y1, x2, y2 in edges:
+        parts.append(f'<path d="M{x1} {y1} L{x2} {y2}" class="line"/>')
+    parts.append(f'<text x="{x+24}" y="{y+h-35}" class="small">variables ↔ factors</text>')
+    return "".join(parts)
+
+
+def _posterior_approx(x, y, w, h):
+    left = x + 38
+    right = x + w - 20
+    bottom = y + h - 40
+    top = y + 48
+    parts = [
+        f'<path d="M{left} {bottom} H{right}" class="thin"/>',
+        f'<path d="M{left+5} {bottom} C{x+w*.18} {bottom} {x+w*.23} {top+70} '
+        f'{x+w*.33} {top+70} C{x+w*.43} {top+70} {x+w*.45} {bottom-25} '
+        f'{x+w*.53} {bottom-25} C{x+w*.61} {bottom-25} {x+w*.64} {top+45} '
+        f'{x+w*.73} {top+45} C{x+w*.84} {top+45} {x+w*.86} {bottom} '
+        f'{right-5} {bottom}" stroke="#a24d18" stroke-width="4" fill="none"/>',
+        f'<path d="M{left+5} {bottom} C{x+w*.33} {bottom} {x+w*.40} {top+85} '
+        f'{x+w*.54} {top+85} C{x+w*.68} {top+85} {x+w*.76} {bottom} '
+        f'{right-5} {bottom}" stroke="#2454d8" stroke-width="4" fill="none"/>',
+        f'<text x="{left+8}" y="{top+15}" class="small" fill="#a24d18">true posterior</text>',
+        f'<text x="{left+125}" y="{top+15}" class="small" fill="#2454d8">q(z)</text>',
+    ]
+    return "".join(parts)
+
+
+def _elbo_decomposition(x, y, w, h):
+    bar_x = x + 45
+    bar_y = y + 130
+    bar_w = w - 90
+    parts = [
+        f'<text x="{bar_x}" y="{y+62}" class="label">log p(x)</text>',
+        f'<rect x="{bar_x}" y="{bar_y}" width="{bar_w}" height="58" rx="10" fill="#eef2f7" stroke="#c8d3e2"/>',
+        f'<rect x="{bar_x}" y="{bar_y}" width="{bar_w*.72}" height="58" rx="10" fill="#2454d8" opacity=".82"/>',
+        f'<rect x="{bar_x+bar_w*.72}" y="{bar_y}" width="{bar_w*.28}" height="58" rx="10" fill="#e0ae82" opacity=".88"/>',
+        f'<text x="{bar_x+bar_w*.36}" y="{bar_y+35}" text-anchor="middle" class="white">ELBO</text>',
+        f'<text x="{bar_x+bar_w*.86}" y="{bar_y+35}" text-anchor="middle" class="body">KL gap</text>',
+        f'<text x="{bar_x}" y="{bar_y+105}" class="small">maximize ELBO → shrink KL gap</text>',
+    ]
+    return "".join(parts)
+
+
+def _mc_samples(x, y, w, h):
+    left = x + 38
+    right = x + w - 22
+    bottom = y + h - 48
+    top = y + 52
+    parts = [
+        f'<path d="M{left} {bottom} H{right}" class="thin"/>',
+        f'<path d="M{left+5} {bottom} C{x+w*.28} {bottom} {x+w*.36} {top+45} '
+        f'{x+w*.50} {top+45} C{x+w*.64} {top+45} {x+w*.72} {bottom} '
+        f'{right-5} {bottom}" stroke="#2454d8" stroke-width="4" fill="none"/>',
+    ]
+    samples = [0.18, 0.27, 0.41, 0.46, 0.53, 0.61, 0.68, 0.74, 0.83]
+    heights = [36, 55, 92, 125, 142, 118, 86, 60, 31]
+    for sx, sh in zip(samples, heights):
+        xx = x + sx * w
+        parts.append(f'<path d="M{xx} {bottom} V{bottom-sh}" stroke="#08796f" stroke-width="3"/>')
+        parts.append(f'<circle cx="{xx}" cy="{bottom-sh}" r="5" fill="#08796f"/>')
+    parts.append(f'<text x="{left+6}" y="{top+15}" class="small">target density + samples</text>')
+    return "".join(parts)
+
+
+def _mcmc_path(x, y, w, h):
+    parts = [
+        f'<ellipse cx="{x+w*.55}" cy="{y+h*.52}" rx="{w*.34}" ry="{h*.28}" fill="none" stroke="#c7d2e4" stroke-width="2"/>',
+        f'<ellipse cx="{x+w*.55}" cy="{y+h*.52}" rx="{w*.22}" ry="{h*.16}" fill="none" stroke="#9fb2d3" stroke-width="2"/>',
+        f'<ellipse cx="{x+w*.55}" cy="{y+h*.52}" rx="{w*.10}" ry="{h*.07}" fill="none" stroke="#7f9fd6" stroke-width="2"/>',
+        f'<path d="M{x+w*.12} {y+h*.82} C{x+w*.20} {y+h*.70} {x+w*.27} {y+h*.75} {x+w*.32} {y+h*.60}" stroke="#a24d18" stroke-width="4" stroke-dasharray="8 6" fill="none"/>',
+        f'<path d="M{x+w*.32} {y+h*.60} C{x+w*.39} {y+h*.35} {x+w*.46} {y+h*.62} {x+w*.55} {y+h*.48} C{x+w*.63} {y+h*.36} {x+w*.70} {y+h*.55} {x+w*.77} {y+h*.43}" stroke="#2454d8" stroke-width="4" fill="none"/>',
+        f'<text x="{x+20}" y="{y+45}" class="small" fill="#a24d18">burn-in</text>',
+        f'<text x="{x+90}" y="{y+45}" class="small" fill="#2454d8">retained chain</text>',
+    ]
+    return "".join(parts)
+
+
+def _hmm_tasks(x, y, w, h):
+    parts = []
+    rows = [
+        ("filter", 2, [0, 1, 2]),
+        ("predict", 3, [0, 1, 2]),
+        ("smooth", 1, [0, 1, 2, 3, 4]),
+        ("Viterbi", 4, [0, 1, 2, 3, 4]),
+    ]
+    for row_idx, (label, target, observed) in enumerate(rows):
+        yy = y + 72 + row_idx * 72
+        parts.append(f'<text x="{x+18}" y="{yy+5}" class="small">{label}</text>')
+        for t in range(5):
+            xx = x + 105 + t * 72
+            fill = "#dce7fa" if t in observed else "#f8fafc"
+            stroke = "#2454d8" if t == target else "#b9c6d8"
+            parts.append(
+                f'<rect x="{xx}" y="{yy-20}" width="42" height="42" rx="8" '
+                f'fill="{fill}" stroke="{stroke}" stroke-width="{"3" if t == target else "2"}"/>'
+            )
+            parts.append(
+                f'<text x="{xx+21}" y="{yy+6}" text-anchor="middle" class="small">'
+                f't{t}</text>'
+            )
+            if t < 4:
+                parts.append(
+                    f'<path d="M{xx+44} {yy+1} H{xx+68}" stroke="#a8b5c8" stroke-width="2"/>'
+                )
+    return "".join(parts)
+
+
+def _vision_bridge(x, y, w, h):
+    parts = []
+    cards = [
+        (x + 18, y + 58, "calibration"),
+        (x + w/2 + 4, y + 58, "uncertainty"),
+        (x + 18, y + 210, "latent space"),
+        (x + w/2 + 4, y + 210, "sequence"),
+    ]
+    card_w = w / 2 - 26
+    for px, py, title in cards:
+        parts.append(
+            f'<rect x="{px}" y="{py}" width="{card_w}" height="126" rx="11" '
+            'fill="#fbfcfe" stroke="#d6deea"/>'
+        )
+        parts.append(f'<text x="{px+10}" y="{py+22}" class="small">{title}</text>')
+        if title == "calibration":
+            parts.append(f'<path d="M{px+35} {py+98} L{px+155} {py+38}" stroke="#a8b5c8" stroke-width="2" stroke-dasharray="5 4"/>')
+            parts.append(f'<path d="M{px+35} {py+95} C{px+75} {py+88} {px+112} {py+48} {px+155} {py+44}" stroke="#2454d8" stroke-width="3" fill="none"/>')
+        elif title == "uncertainty":
+            for idx, bh in enumerate([28, 54, 78, 44]):
+                parts.append(f'<rect x="{px+35+idx*32}" y="{py+104-bh}" width="20" height="{bh}" rx="4" fill="#e0ae82"/>')
+        elif title == "latent space":
+            for cx, cy in [(px+55,py+75),(px+82,py+58),(px+112,py+86),(px+145,py+52)]:
+                parts.append(f'<circle cx="{cx}" cy="{cy}" r="8" fill="#08796f"/>')
+        else:
+            for idx in range(4):
+                cx = px + 38 + idx * 42
+                parts.append(f'<circle cx="{cx}" cy="{py+70}" r="12" fill="#edf3ff" stroke="#8faee8"/>')
+                if idx < 3:
+                    parts.append(_arrow(cx + 14, py + 70, cx + 28, py + 70))
+    return "".join(parts)
+
+
+
 def _panel_content(kind, x, y, w, h, data):
     if kind=="knn":
         return _scatter(x,y,w,h,"curve",True)
+    if kind=="knn_semantics":
+        return _knn_semantics(x,y,w,h)
+    if kind=="grouped_split":
+        return _grouped_split(x,y,w,h)
+    if kind=="score_softmax_ce":
+        return _score_softmax_ce(x,y,w,h)
+    if kind=="loss_compare":
+        return _loss_compare(x,y,w,h)
+    if kind=="activation_gradients":
+        return _activation_gradients(x,y,w,h)
+    if kind=="batchnorm_modes":
+        return _batchnorm_modes(x,y,w,h)
+    if kind=="augmentation_cards":
+        return _augmentation_cards(x,y,w,h)
+    if kind=="invariance_checks":
+        return _invariance_checks(x,y,w,h)
+    if kind=="numeric_conv":
+        return _numeric_conv(x,y,w,h)
+    if kind=="conv_controls":
+        return _conv_controls(x,y,w,h)
+    if kind=="modern_visual":
+        return _modern_visual(x,y,w,h)
+    if kind=="bayes_update":
+        return _bayes_update_density(x,y,w,h)
+    if kind=="bayes_risk":
+        return _bayes_risk(x,y,w,h)
+    if kind=="covariance_ellipse":
+        return _covariance_ellipse(x,y,w,h)
+    if kind=="basis_functions":
+        return _basis_functions(x,y,w,h)
+    if kind=="factor_graph":
+        return _factor_graph(x,y,w,h)
+    if kind=="posterior_approx":
+        return _posterior_approx(x,y,w,h)
+    if kind=="elbo_decomp":
+        return _elbo_decomposition(x,y,w,h)
+    if kind=="mc_samples":
+        return _mc_samples(x,y,w,h)
+    if kind=="mcmc_path":
+        return _mcmc_path(x,y,w,h)
+    if kind=="hmm_tasks":
+        return _hmm_tasks(x,y,w,h)
+    if kind=="vision_bridge":
+        return _vision_bridge(x,y,w,h)
     if kind=="scatter_linear":
         return _scatter(x,y,w,h,"linear",False,data.get("margin",False))
     if kind=="scatter_curve":
@@ -355,21 +1050,21 @@ def _render(spec):
 
 FIGURES = {
     # CS231n — classification / linear
-    "cs-knn-distance.svg": dict(title="kNN and pixel-space distance",subtitle="Nearest-neighbor classification is simple, but raw-pixel distance is fragile.",panels=[
+    "cs-knn-distance.svg": dict(title="kNN and pixel-space distance",subtitle="Raw-pixel distance can disagree with semantic similarity.",panels=[
         dict(title="k nearest neighbors",kind="knn"),
-        dict(title="distance is not semantics",kind="text",lines=["L1 / L2 compare numeric arrays","translation changes many pixels","illumination changes many values","feature learning becomes necessary"]),
+        dict(title="pixel distance failure cases",kind="knn_semantics"),
     ]),
-    "cs-split.svg": dict(title="Train / validation / test",subtitle="Hyperparameters belong to validation; test stays isolated until the end.",panels=[
+    "cs-split.svg": dict(title="Train / validation / test",subtitle="Validation guides choices; grouped splitting keeps near-duplicates from leaking across sets.",panels=[
         dict(title="data roles",kind="pipeline",steps=["Train","Validation","Model select","Test"]),
-        dict(title="video leakage warning",kind="text",lines=["random frames can leak near-duplicates","group by source video / subject","fit preprocessing only on train","lock test before final evaluation"]),
+        dict(title="random frames vs grouped sources",kind="grouped_split"),
     ]),
     "cs-linear-score.svg": dict(title="Linear classifier",subtitle="A single affine transformation maps an input vector to K class scores.",panels=[
         dict(title="score function",kind="pipeline",steps=["x","W·x+b","scores"]),
         dict(title="class-score bars",kind="bars",labels=["cat","dog","fox"],values=[0.82,0.31,0.12]),
     ]),
-    "cs-softmax-loss.svg": dict(title="Softmax and classification losses",subtitle="Scores become probabilities with softmax; losses decide how mistakes are penalized.",panels=[
-        dict(title="softmax / CE",kind="curve",curve="softmax_loss"),
-        dict(title="hinge vs CE",kind="text",lines=["cross-entropy: −log p(correct)","hinge: margin violations only","same scores, different penalties","regularization is a separate term"]),
+    "cs-softmax-loss.svg": dict(title="Softmax and classification losses",subtitle="Scores become probabilities, then the loss converts confidence or margin into a penalty.",panels=[
+        dict(title="scores → softmax → CE",kind="score_softmax_ce"),
+        dict(title="cross-entropy vs hinge",kind="loss_compare"),
     ]),
     "cs-decision-boundary.svg": dict(title="Decision boundaries",subtitle="Linear models split feature space with hyperplanes; nonlinear models bend that boundary.",panels=[
         dict(title="linear boundary",kind="scatter_linear"),
@@ -389,13 +1084,13 @@ FIGURES = {
         dict(title="loss landscape",kind="landscape"),
     ]),
     # NN/training tricks
-    "cs-activations.svg": dict(title="Activation functions",subtitle="Nonlinear activations prevent deep stacks from collapsing into one linear map.",panels=[
+    "cs-activations.svg": dict(title="Activation functions",subtitle="Activation shape and derivative shape jointly control information and gradient flow.",panels=[
         dict(title="ReLU / sigmoid / tanh",kind="curve",curve="activations"),
-        dict(title="practical effects",kind="text",lines=["ReLU: simple, sparse negative side","sigmoid/tanh can saturate","activation changes gradient flow","output activation depends on task"]),
+        dict(title="gradient behavior",kind="activation_gradients"),
     ]),
-    "cs-init-bn.svg": dict(title="Initialization and Batch Normalization",subtitle="Signal scale at initialization and hidden-statistic normalization both affect trainability.",panels=[
+    "cs-init-bn.svg": dict(title="Initialization and Batch Normalization",subtitle="Initialization controls signal scale; BatchNorm uses different statistics in training and evaluation.",panels=[
         dict(title="initial activation spread",kind="bars",labels=["too small","balanced","too large"],values=[0.2,0.65,1.0]),
-        dict(title="BatchNorm train/eval",kind="text",lines=["train: batch mean/variance","eval: running statistics","gamma/beta remain learned","mode mismatch can shift outputs"]),
+        dict(title="BatchNorm: train vs eval",kind="batchnorm_modes"),
     ]),
     "cs-reg-dropout.svg": dict(title="Regularization and dropout",subtitle="Regularization constrains the solution; dropout injects stochastic masking during training.",panels=[
         dict(title="weight regularization",kind="curve",curve="regularization"),
@@ -405,14 +1100,14 @@ FIGURES = {
         dict(title="train / validation loss",kind="curve",curve="train_val"),
         dict(title="confusion pattern",kind="matrix",rows=2,cols=2,cell=70,mode="heat",hot=[0,3]),
     ]),
-    "cs-augmentation.svg": dict(title="Data augmentation",subtitle="Augmentations should expand nuisance variation without changing the label semantics.",panels=[
-        dict(title="original vs transforms",kind="matrix",rows=2,cols=4,cell=48,mode="blue",hot=[1,2,5,6]),
-        dict(title="check label invariance",kind="text",lines=["crop: object still present?","flip: task semantics preserved?","color: realistic illumination range?","geometry: does shape remain valid?"]),
+    "cs-augmentation.svg": dict(title="Data augmentation",subtitle="Useful augmentation changes nuisance factors while preserving the task label.",panels=[
+        dict(title="image-like transforms",kind="augmentation_cards"),
+        dict(title="label-invariance check",kind="invariance_checks"),
     ]),
     # CNN
-    "cs-conv-shape.svg": dict(title="Convolution, stride and padding",subtitle="Convolution combines local weighted sums with a spatial sampling rule.",panels=[
-        dict(title="numeric convolution",kind="conv"),
-        dict(title="shape controls",kind="text",lines=["kernel size controls local window","stride controls sampling interval","padding controls border handling","dilation expands spacing inside kernel"]),
+    "cs-conv-shape.svg": dict(title="Convolution, stride and padding",subtitle="A convolution is a local dot product; stride, padding and dilation change how that dot product is sampled.",panels=[
+        dict(title="3×3 numeric convolution",kind="numeric_conv"),
+        dict(title="stride / padding / dilation",kind="conv_controls"),
     ]),
     "cs-pooling-hierarchy.svg": dict(title="Pooling and feature hierarchy",subtitle="Spatial summarization and depth transform low-level responses into more task-specific features.",panels=[
         dict(title="pooling response",kind="matrix",rows=4,cols=4,cell=45,mode="blue",hot=[1,6,10,15]),
@@ -445,23 +1140,24 @@ FIGURES = {
         dict(title="saliency / heatmap",kind="heatmap"),
         dict(title="feature maps",kind="matrix",rows=4,cols=5,cell=38,mode="gray",hot=[2,8,13,17]),
     ]),
-    "cs-modern.svg": dict(title="Modern CS231n topics",subtitle="Transformers, self-supervised learning, vision-language models and diffusion expand the representation-learning toolbox.",panels=[
+    "cs-modern.svg": dict(title="Modern CS231n topics",subtitle="Attention, self-distillation, vision-language alignment and denoising are distinct representation-learning patterns.",panels=[
         dict(title="representation learning",kind="pipeline",steps=["unlabeled images","augment/views","encoder","representation"]),
-        dict(title="CLIP / DINO / diffusion",kind="text",lines=["CLIP: align image and text embeddings","DINO: teacher-student self-distillation","Diffusion: learn denoising transitions","Transformer: global token interactions"]),
+        dict(title="attention / CLIP / DINO / diffusion",kind="modern_visual"),
     ]),
 
     # PRML
-    "prml-bayes-density.svg": dict(title="Probability density and Bayes theorem",subtitle="PRML starts by representing uncertainty explicitly and updating it with data.",panels=[
-        dict(title="probability density",kind="distribution",mode="gaussian"),
-        dict(title="Bayes update",kind="pipeline",steps=["prior","likelihood","posterior","decision"]),
+    "prml-bayes-density.svg": dict(title="Bayes update and decision risk",subtitle="Data reshapes uncertainty from prior to posterior; decisions then minimize expected risk.",panels=[
+        dict(title="prior × likelihood → posterior",kind="bayes_update"),
+        dict(title="Bayesian decision",kind="bayes_risk"),
     ]),
-    "prml-gaussian-beta.svg": dict(title="Gaussian parameters and Beta-Binomial update",subtitle="Parameters control distribution shape, while conjugacy makes some posterior updates analytic.",panels=[
+    "prml-gaussian-beta.svg": dict(title="Gaussian geometry and Beta-Binomial update",subtitle="Mean, variance and covariance shape Gaussian uncertainty; conjugate priors allow analytic updates.",panels=[
         dict(title="mean / variance",kind="curve",curve="gaussian"),
+        dict(title="covariance ellipse",kind="covariance_ellipse"),
         dict(title="Beta prior → posterior",kind="distribution",mode="beta"),
     ]),
-    "prml-regression-basis.svg": dict(title="Linear regression and basis expansion",subtitle="A model can remain linear in parameters while using nonlinear basis functions of x.",panels=[
+    "prml-regression-basis.svg": dict(title="Linear regression and basis expansion",subtitle="The model can stay linear in its weights while nonlinear basis functions reshape the input.",panels=[
         dict(title="regression fit",kind="curve",curve="regression"),
-        dict(title="basis functions",kind="bars",labels=["1","x","x²","sin x"],values=[0.45,0.7,0.95,0.62],horizontal=False),
+        dict(title="nonlinear basis functions",kind="basis_functions"),
     ]),
     "prml-bias-reg.svg": dict(title="Bias–variance and regularization",subtitle="Model complexity trades approximation error against sensitivity to finite data.",panels=[
         dict(title="bias / variance trade-off",kind="curve",curve="bias_variance"),
@@ -491,21 +1187,22 @@ FIGURES = {
         dict(title="maximum margin",kind="scatter_linear",margin=True),
         dict(title="hinge-loss view",kind="bars",labels=["far correct","on margin","inside margin","wrong"],values=[0.02,0.2,0.65,1.0]),
     ]),
-    "prml-graph-mrf.svg": dict(title="Bayesian networks and Markov random fields",subtitle="Directed and undirected graphs encode different factorization and conditional-independence structures.",panels=[
+    "prml-graph-mrf.svg": dict(title="Graphical model families",subtitle="Directed graphs, undirected graphs and factor graphs encode dependencies with different primitives.",panels=[
         dict(title="Bayesian network",kind="graphical",undirected=False),
         dict(title="Markov random field",kind="graphical",undirected=True),
+        dict(title="factor graph",kind="factor_graph"),
     ]),
     "prml-gmm-em.svg": dict(title="Gaussian mixtures and EM",subtitle="Latent component assignments turn a complex density into a mixture of simpler distributions.",panels=[
         dict(title="mixture density",kind="distribution",mode="mixture"),
         dict(title="EM loop",kind="pipeline",steps=["initialize","E: responsibilities","M: parameters","repeat"]),
     ]),
-    "prml-vi-elbo.svg": dict(title="Variational inference and ELBO",subtitle="Choose a tractable q(z) and optimize it toward the intractable posterior.",panels=[
-        dict(title="posterior approximation",kind="curve",curve="regularization"),
-        dict(title="ELBO decomposition",kind="pipeline",steps=["q(z)","ELBO","KL gap","log p(x)"]),
+    "prml-vi-elbo.svg": dict(title="Variational inference and ELBO",subtitle="A tractable q(z) approximates the true posterior; maximizing ELBO closes the KL gap.",panels=[
+        dict(title="true posterior vs q(z)",kind="posterior_approx"),
+        dict(title="ELBO + KL = log evidence",kind="elbo_decomp"),
     ]),
-    "prml-monte-mcmc.svg": dict(title="Monte Carlo and MCMC",subtitle="Expectations can be approximated by samples; MCMC constructs dependent samples from a target distribution.",panels=[
-        dict(title="Monte Carlo samples",kind="bars",labels=["s1","s2","s3","s4","s5"],values=[0.45,0.72,0.58,0.91,0.67],horizontal=False),
-        dict(title="MCMC trajectory",kind="landscape"),
+    "prml-monte-mcmc.svg": dict(title="Monte Carlo and MCMC",subtitle="Monte Carlo uses samples to estimate expectations; MCMC reaches a target distribution through a dependent chain.",panels=[
+        dict(title="samples from a target density",kind="mc_samples"),
+        dict(title="burn-in and retained chain",kind="mcmc_path"),
     ]),
     "prml-pca-dim.svg": dict(title="PCA and dimensionality reduction",subtitle="Principal components align the coordinate system with directions of largest data variance.",panels=[
         dict(title="principal axes",kind="pca"),
@@ -515,17 +1212,17 @@ FIGURES = {
         dict(title="latent generative model",kind="pipeline",steps=["z ~ N(0,I)","Wz + μ","add ε","x"]),
         dict(title="uncertainty around subspace",kind="distribution",mode="gaussian"),
     ]),
-    "prml-hmm-filter.svg": dict(title="Hidden Markov models, filtering and decoding",subtitle="Sequential models separate hidden state dynamics from the observation process.",panels=[
+    "prml-hmm-filter.svg": dict(title="Hidden Markov models, filtering and decoding",subtitle="The same state-space model supports filtering, prediction, smoothing and sequence decoding.",panels=[
         dict(title="state transitions",kind="hmm"),
-        dict(title="inference tasks",kind="text",lines=["filtering: current state from past observations","prediction: future state distribution","smoothing: past state using future observations","decoding: most likely state sequence"]),
+        dict(title="filter / predict / smooth / Viterbi",kind="hmm_tasks"),
     ]),
     "prml-ensemble-moe.svg": dict(title="Ensembles and mixture of experts",subtitle="Predictions can be averaged globally or combined by an input-dependent gating function.",panels=[
         dict(title="committee averaging",kind="pipeline",steps=["model A","model B","model C","average"]),
         dict(title="mixture of experts",kind="pipeline",steps=["input","gating","experts","weighted output"]),
     ]),
-    "prml-vision-bridge.svg": dict(title="PRML concepts inside modern Vision AI",subtitle="Probability, latent variables and decision theory remain useful even when the function approximator is a deep network.",panels=[
+    "prml-vision-bridge.svg": dict(title="PRML concepts inside modern Vision AI",subtitle="Probabilistic tools remain useful around deep networks for calibration, uncertainty, latent structure and temporal reasoning.",panels=[
         dict(title="model output",kind="pipeline",steps=["image","network","score/probability","decision"]),
-        dict(title="engineering bridge",kind="text",lines=["calibration and threshold selection","uncertainty and distribution shift","PCA/GMM/HMM for monitoring and analysis","Bayesian language clarifies assumptions"]),
+        dict(title="probabilistic engineering tools",kind="vision_bridge"),
     ]),
 }
 

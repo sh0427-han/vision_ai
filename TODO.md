@@ -22,6 +22,8 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] 기존 simple diagram 일부는 종합 페이지에서 중복되지 않도록 비활성화
 - [x] build / validate / GitHub Pages deploy 성공
 - [x] figure를 1열 전체 폭으로 표시하여 크기 문제 완화
+- [x] 문장형 bullet panel 10개를 plot/matrix/graph/trajectory 중심 시각 패널로 교체
+- [x] panel title 자동 축소, 모바일 reference figure 가로 스크롤, SVG 정적 QA guard 추가
 
 ---
 
@@ -52,18 +54,18 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 1-1. Image Classification
 
-- [ ] kNN failure example 추가/보강
+- [x] kNN failure example 추가/보강
   - 같은 의미의 이미지가 shift/lighting 때문에 pixel distance가 커지는 예시
   - 다른 의미인데 background 때문에 raw pixel distance가 작아지는 예시
-- [ ] train / validation / test split figure 개선
-- [ ] video / burst / near-duplicate 데이터의 leakage figure 추가
+- [x] train / validation / test split figure 개선
+- [x] video / burst / near-duplicate 데이터의 leakage figure 추가
   - random frame split vs grouped split 비교
-- [ ] score → softmax probability → cross-entropy loss를 한 흐름으로 명확히 분리한 figure 추가
+- [x] score → softmax probability → cross-entropy loss를 한 흐름으로 명확히 분리한 figure 추가
 
 ## 1-2. Linear Classifier / Loss
 
 - [ ] linear score `Wx+b`를 입력 vector와 weight matrix 관점에서 시각화
-- [ ] softmax와 hinge loss 비교 figure 개선
+- [x] softmax와 hinge loss 비교 figure 개선
 - [ ] linear decision boundary vs nonlinear boundary 비교
 - [ ] regularization term이 data loss에 더해지는 구조를 별도 작은 figure로 설명
 
@@ -78,19 +80,19 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 1-4. Neural Networks / Training Tricks
 
-- [ ] sigmoid / tanh / ReLU / Leaky ReLU 함수 모양 비교
-- [ ] activation별 gradient 특성 표시
+- [x] sigmoid / tanh / ReLU / Leaky ReLU 함수 모양 비교
+- [x] activation별 gradient 특성 표시
 - [ ] vanishing / exploding gradient figure 추가
 - [ ] initialization이 activation variance에 미치는 영향
-- [ ] BatchNorm train vs inference 차이
+- [x] BatchNorm train vs inference 차이
 - [ ] dropout train vs inference 구조
 - [ ] L2 weight decay 직관
 - [ ] underfit / good fit / overfit 학습곡선 비교
-- [ ] augmentation 전/후 예시를 더 이미지다운 형태로 표현
+- [x] augmentation 전/후 예시를 더 이미지다운 형태로 표현
 
 ## 1-5. CNN
 
-- [ ] 3×3 convolution 실제 숫자 계산 figure
+- [x] 3×3 convolution 실제 숫자 계산 figure
 - [ ] kernel sliding animation 느낌의 multi-panel figure
 - [ ] stride 1 vs 2
 - [ ] padding 0 vs same padding
@@ -140,9 +142,9 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [ ] Q/K/V self-attention
 - [ ] attention matrix / spatial heatmap
 - [ ] multi-head attention
-- [ ] CLIP image-text embedding alignment
-- [ ] DINO teacher-student / self-distillation
-- [ ] diffusion forward noise / reverse denoising
+- [x] CLIP image-text embedding alignment
+- [x] DINO teacher-student / self-distillation
+- [x] diffusion forward noise / reverse denoising
 
 ---
 
@@ -157,20 +159,20 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 2-2. Chapter 2 — Probability Distributions
 
-- [ ] Gaussian mean 변화
-- [ ] Gaussian variance 변화
-- [ ] covariance ellipse
+- [x] Gaussian mean 변화
+- [x] Gaussian variance 변화
+- [x] covariance ellipse
 - [ ] Bernoulli / Binomial 관계
-- [ ] Beta prior → observations → posterior
+- [x] Beta prior → observations → posterior
 - [ ] Dirichlet / multinomial intuition
 - [ ] maximum likelihood vs MAP 비교
 
 ## 2-3. Chapter 3 — Linear Models for Regression
 
 - [ ] raw linear regression
-- [ ] polynomial basis
-- [ ] Gaussian basis
-- [ ] sigmoid basis
+- [x] polynomial basis
+- [x] Gaussian basis
+- [x] sigmoid basis
 - [ ] regularization에 따른 curve 변화
 - [ ] Bayesian regression mean + uncertainty band
 - [ ] posterior predictive distribution
@@ -214,7 +216,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 - [ ] Bayesian network
 - [ ] Markov random field
-- [ ] factor graph
+- [x] factor graph
 - [ ] conditional independence
 - [ ] d-separation 대표 예시
 - [ ] message passing intuition
@@ -230,7 +232,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 2-10. Chapter 10 — Approximate Inference
 
-- [ ] true posterior vs variational approximation
+- [x] true posterior vs variational approximation
 - [ ] ELBO decomposition
   - expected log-likelihood
   - KL term
@@ -241,11 +243,11 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 2-11. Chapter 11 — Sampling Methods
 
-- [ ] Monte Carlo sampling
+- [x] Monte Carlo sampling
 - [ ] importance sampling
 - [ ] rejection sampling
-- [ ] MCMC random walk
-- [ ] burn-in
+- [x] MCMC random walk
+- [x] burn-in
 - [ ] autocorrelation
 - [ ] effective sample size
 - [ ] HMC trajectory intuition
@@ -263,10 +265,10 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 ## 2-13. Chapter 13 — Sequential Data
 
 - [ ] HMM hidden state / observation chain
-- [ ] filtering
-- [ ] prediction
-- [ ] smoothing
-- [ ] Viterbi decoding
+- [x] filtering
+- [x] prediction
+- [x] smoothing
+- [x] Viterbi decoding
 - [ ] Kalman filter predict/update
 - [ ] particle filter intuition
 
