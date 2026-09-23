@@ -54,15 +54,35 @@ for path in [ROOT / 'index.html', *sorted((ROOT / 'notes').glob('*.html'))]:
 index_html = (ROOT / 'index.html').read_text(encoding='utf-8')
 if '논문 해설' in index_html:
     errors.append('Legacy paper-review top-level category remains in index.html')
-if '>핵심 주제<' not in index_html:
-    errors.append('Missing topic-first top-level category in index.html')
+for required_group in [
+    '이미지·CNN',
+    'Transformer·Attention',
+    'Vision Tasks·Segmentation',
+    '학습·평가',
+    'Anomaly Detection',
+    '종합 이론',
+]:
+    if f'>{required_group}<' not in index_html:
+        errors.append(f'Missing topic-first category in index.html: {required_group}')
 for forbidden_link in ['notes/resnet.html', 'notes/unet.html']:
     if forbidden_link in index_html:
         errors.append(f'Legacy standalone topic card remains: {forbidden_link}')
 
 required_topic_anchors = {
-    ROOT / 'notes' / 'cnn.html': ['resnet-problem', 'resnet-block', 'resnet-projection'],
-    ROOT / 'notes' / 'tasks.html': ['unet-problem', 'unet-architecture', 'unet-concat'],
+    ROOT / 'notes' / 'cnn.html': [
+        'architectures',
+        'resnet_problem',
+        'residual_block',
+        'residual_shape',
+        'resnet_bottleneck',
+        'resnet_scope',
+    ],
+    ROOT / 'notes' / 'tasks.html': [
+        'segmentation_context',
+        'unet_architecture',
+        'unet_original',
+        'unet_scope',
+    ],
 }
 for topic_path, anchors in required_topic_anchors.items():
     parser = pages.get(topic_path.resolve())
@@ -101,6 +121,19 @@ reference_source = (ROOT / 'scripts' / 'reference_figures.py').read_text(
 paper_source = (ROOT / 'scripts' / 'paper_figures.py').read_text(encoding='utf-8')
 build_source = (ROOT / 'scripts' / 'build.py').read_text(encoding='utf-8')
 
+for forbidden_note in ["note('resnet'", "note('unet'"]:
+    if forbidden_note in build_source:
+        errors.append(
+            f'Legacy standalone paper page remains in build source: {forbidden_note}'
+        )
+
+for forbidden_group in ["'논문 해설'", "'핵심 주제'"]:
+    if forbidden_group in build_source:
+        errors.append(
+            f'Legacy source-type/top-level grouping remains: {forbidden_group}'
+        )
+
+
 for forbidden in [
     'v=3 if c==1 else 0',
     'Layer 1: local edge',
@@ -122,9 +155,6 @@ for forbidden in [
 ]:
     if forbidden in reference_source:
         errors.append(f'Reference wording regression remains: {forbidden}')
-
-if "'논문 해설'" in build_source and "groups = ['기초 개념', '논문 해설'" in build_source:
-    errors.append('Legacy navigation taxonomy remains in build source')
 
 for forbidden in [
     'values=[0.02,0.2,0.65,1.0]',
