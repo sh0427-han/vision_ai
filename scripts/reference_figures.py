@@ -965,7 +965,7 @@ def _elbo_decomposition(x, y, w, h):
         f'<text x="{x+22}" y="{y+h-48}" class="small">'
         "log p(x) = ELBO(q) + KL(q(z)||p(z|x))</text>",
         f'<text x="{x+22}" y="{y+h-24}" class="small">'
-        "KL >= 0, so ELBO <= log p(x)</text>",
+        "KL is nonnegative; ELBO is a lower bound on log p(x)</text>",
     ]
     return "".join(parts)
 
