@@ -303,7 +303,7 @@ downsampling 후 몇 cell로 남는지 계산하는 것이 중요합니다.</p>
                     "더 자세히",
                     (
                         '<a href="cnn.html">CNN의 원리</a>에서 커널 한 칸 계산과 채널 '
-                        'shape를, <a href="cnn.html#resnet-problem">CNN 문서의 ResNet 섹션</a>에서 residual 연결을 '
+                        'shape를, <a href="cnn.html#resnet_problem">CNN 문서의 ResNet 섹션</a>에서 residual 연결을 '
                         "수치 예시로 확인할 수 있습니다."
                     ),
                 ),
@@ -497,7 +497,7 @@ CNN 이후의 시각 모델은 서로 결합되기도 합니다. 이 주제들�
                         ),
                         (
                             "CNN architecture · ResNet",
-                            '<a href="cnn.html#resnet-problem">CNN · ResNet</a>',
+                            '<a href="cnn.html#resnet_problem">CNN · ResNet</a>',
                             "identity/projection shortcut",
                         ),
                         (
@@ -507,7 +507,7 @@ CNN 이후의 시각 모델은 서로 결합되기도 합니다. 이 주제들�
                         ),
                         (
                             "Segmentation · U-Net",
-                            '<a href="tasks.html#unet-problem">Vision Tasks · U-Net</a>',
+                            '<a href="tasks.html#unet_architecture">Vision Tasks · U-Net</a>',
                             "encoder-decoder, skip concat",
                         ),
                     ],
