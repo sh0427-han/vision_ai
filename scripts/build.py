@@ -540,6 +540,128 @@ def asset_figure(filename, alt, caption):
     )
 
 
+CH01_APPLE = "../assets/diagrams/illustrations/ch01/apple-real.webp"
+CH01_APPLE_R = "../assets/diagrams/illustrations/ch01/apple-r.webp"
+CH01_APPLE_G = "../assets/diagrams/illustrations/ch01/apple-g.webp"
+CH01_APPLE_B = "../assets/diagrams/illustrations/ch01/apple-b.webp"
+
+CH01_PIXEL_GRID = [
+    [(199,34,24),(183,5,7),(177,4,6),(170,5,4),(177,8,11),(178,29,21),(187,28,23),(180,25,20)],
+    [(193,16,16),(176,4,4),(172,5,7),(156,2,2),(168,5,6),(172,7,9),(170,9,11),(164,6,9)],
+    [(187,8,9),(176,4,8),(169,3,4),(159,3,2),(173,6,9),(167,7,8),(163,5,8),(160,6,9)],
+    [(170,5,5),(180,5,7),(169,4,6),(167,9,8),(173,9,13),(157,5,7),(163,13,14),(153,8,11)],
+    [(189,14,15),(184,12,13),(175,9,11),(163,12,12),(175,13,15),(156,3,7),(149,4,8),(145,4,6)],
+    [(203,45,28),(185,28,21),(178,12,15),(178,15,15),(169,11,15),(153,4,10),(150,4,7),(155,6,11)],
+    [(195,37,22),(191,31,21),(173,15,17),(166,10,14),(177,22,19),(165,11,14),(153,9,12),(154,16,16)],
+    [(192,26,19),(183,21,16),(165,9,13),(165,8,12),(176,25,19),(160,10,12),(149,6,11),(151,5,9)],
+]
+
+
+def chapter01_image_to_pixels():
+    cells = []
+    for row_idx, row in enumerate(CH01_PIXEL_GRID):
+        for col_idx, (r, g, b) in enumerate(row):
+            selected = row_idx == 3 and col_idx == 4
+            cells.append(
+                f'<span class="{"selected" if selected else ""}" '
+                f'style="background:rgb({r},{g},{b})" '
+                f'aria-label="R {r}, G {g}, B {b}"></span>'
+            )
+    return (
+        '<figure class="chapter-photo-figure chapter-photo-pixels">'
+        '<div class="photo-pixel-layout">'
+        '<div class="chapter-photo-card">'
+        '<span class="chapter-photo-label">실사형 생성 이미지</span>'
+        f'<img src="{CH01_APPLE}" alt="나무 테이블 위의 실제처럼 표현된 빨간 사과" loading="lazy" decoding="async">'
+        '<span class="photo-region-marker" aria-hidden="true"></span>'
+        '</div>'
+        '<div class="pixel-zoom-card">'
+        '<div class="pixel-zoom-head"><strong>사과 표면 일부를 8 × 8로 downsample</strong>'
+        '<span>각 칸은 RGB 값 하나를 가진 공간 위치</span></div>'
+        f'<div class="chapter-pixel-grid">{"".join(cells)}</div>'
+        '<div class="pixel-sample-readout"><span>선택 cell</span><strong>[R,G,B] = [173, 9, 13]</strong></div>'
+        '</div>'
+        '</div>'
+        '<figcaption>실사형 생성 이미지를 사용한 강의용 예시입니다. JPEG/PNG 파일은 decode된 뒤 픽셀 배열이 되며, 오른쪽 격자는 사과 표면의 작은 영역을 8 × 8로 축소해 얻은 실제 RGB 값 예시입니다.</figcaption>'
+        '</figure>'
+    )
+
+
+def chapter01_rgb_channels():
+    cards = [
+        ("Original RGB", CH01_APPLE, "rgb"),
+        ("R channel", CH01_APPLE_R, "r"),
+        ("G channel", CH01_APPLE_G, "g"),
+        ("B channel", CH01_APPLE_B, "b"),
+    ]
+    items = []
+    for title, src, kind in cards:
+        items.append(
+            f'<div class="rgb-photo-card channel-{kind}">'
+            f'<span class="rgb-channel-title">{title}</span>'
+            f'<img src="{src}" alt="{title}로 본 동일한 사과 이미지" loading="lazy" decoding="async">'
+            '</div>'
+        )
+    return (
+        '<figure class="chapter-photo-figure">'
+        '<div class="rgb-photo-grid">' + "".join(items) + '</div>'
+        '<div class="rgb-photo-readout">'
+        '<strong>같은 위치의 원본 pixel: [R,G,B] = [167, 4, 7]</strong>'
+        '<span>R/G/B channel 이미지는 같은 원본의 해당 channel 값만 grayscale intensity로 표시했습니다.</span>'
+        '</div>'
+        '<figcaption>동일한 실사형 생성 사과 이미지를 실제 R·G·B channel 값으로 분리한 강의용 figure입니다. 채널은 직렬 단계가 아니라 같은 공간 좌표에 존재하는 병렬 값입니다.</figcaption>'
+        '</figure>'
+    )
+
+
+def chapter01_resize_photo():
+    cards = [
+        ("원본 4:3", "original", "원본 비율과 전체 장면 유지"),
+        ("직접 square resize", "stretch", "정사각형에 강제로 맞추면 geometry 왜곡"),
+        ("비율 유지 + crop", "crop", "비율은 유지하지만 가장자리 일부 손실"),
+        ("비율 유지 + pad", "pad", "전체 장면은 유지하지만 빈 영역 추가"),
+    ]
+    items = []
+    for title, kind, note in cards:
+        items.append(
+            f'<div class="resize-photo-card resize-{kind}">'
+            f'<span class="resize-photo-title">{title}</span>'
+            f'<div class="resize-photo-stage"><img src="{CH01_APPLE}" alt="{title} 예시의 빨간 사과" loading="lazy" decoding="async"></div>'
+            f'<span class="resize-photo-note">{note}</span>'
+            '</div>'
+        )
+    return (
+        '<figure class="chapter-photo-figure">'
+        '<div class="resize-photo-grid">' + "".join(items) + '</div>'
+        '<figcaption>같은 실사형 생성 이미지를 브라우저에서 서로 다른 resize 방식으로 표시한 비교입니다. 실제 전처리에서는 interpolation 방식과 최종 해상도에 따라 작은 texture·defect가 추가로 약해질 수 있습니다.</figcaption>'
+        '</figure>'
+    )
+
+
+def chapter01_lighting_photo():
+    cards = [
+        ("어두운 조건", "dark", "brightness ≈ 0.55"),
+        ("기준", "reference", "brightness = 1.0"),
+        ("밝은 조건", "bright", "brightness ≈ 1.30"),
+        ("과노출 직관", "over", "brightness ≈ 1.75"),
+    ]
+    items = []
+    for title, kind, note in cards:
+        items.append(
+            f'<div class="lighting-photo-card lighting-{kind}">'
+            f'<span class="lighting-photo-title">{title}</span>'
+            f'<img src="{CH01_APPLE}" alt="{title}으로 표시한 동일한 빨간 사과" loading="lazy" decoding="async">'
+            f'<span class="lighting-photo-note">{note}</span>'
+            '</div>'
+        )
+    return (
+        '<figure class="chapter-photo-figure">'
+        '<div class="lighting-photo-grid">' + "".join(items) + '</div>'
+        '<figcaption>같은 실사형 생성 이미지를 brightness filter로 비교한 시각적 직관입니다. 실제 카메라의 exposure·gamma·white balance를 재현한 물리 모델은 아니며, 정확한 gain과 clipping 계산은 위의 interactive 실습에서 확인합니다.</figcaption>'
+        '</figure>'
+    )
+
+
 SECTION_VISUALS = {
     ("pixels", "layout"): ["pixels-layout.svg"],
     ("pixels", "normalization"): ["pixels-normalization.svg"],
@@ -713,11 +835,11 @@ def note(slug, title, subtitle, group, label, minutes, sections, sources):
 
 
 note('pixels', '이미지는 어떻게 숫자가 될까?', '이미지 파일이 픽셀 배열과 모델 입력 Tensor로 바뀌는 과정을 shape·채널·값 범위 관점에서 이해합니다.', '이미지·CNN', '01 · IMAGE & TENSOR', 20, [
-section('overview', '이미지 파일과 픽셀 배열은 같은 것이 아니다', '''<p>카메라나 저장장치에 있는 JPEG·PNG 파일은 곧바로 <code>[H,W,C]</code> 숫자 배열인 것이 아닙니다. 파일에는 압축된 이미지 데이터와 형식 정보가 들어 있고, <strong>decoder가 파일을 해석한 뒤</strong> 비로소 각 위치의 픽셀 값을 가진 raster 배열을 얻습니다. 모델은 파일 형식 자체보다 이렇게 디코딩되고 전처리된 숫자 배열을 입력으로 받습니다.</p><p>예를 들어 디코딩된 224 × 224 RGB 이미지는 공간 위치가 50,176개이고, 각 위치에 R·G·B 세 값이 있으므로 총 <strong>150,528개의 채널 값</strong>을 가집니다. JPEG 파일의 용량이 작다고 해서 모델 입력의 숫자 개수도 적다는 뜻은 아닙니다. 압축 파일 크기와 디코딩된 배열 크기는 다른 개념입니다.</p>''' + callout('먼저 구분할 것', '파일 → decode → 픽셀 배열 → 전처리 → Tensor → 모델 순서로 생각하면, 이미지 I/O 문제와 모델 입력 문제를 섞지 않게 됩니다.') + asset_figure('illustrations/ch01/image-to-pixels.svg', '합성 사과 장면에서 픽셀 격자와 RGB 값으로 확대되는 그림', '설명용 합성 일러스트. 이미지 파일을 decode한 뒤 raster의 일부 영역을 픽셀 격자와 RGB 숫자로 확대해 보여 줍니다.')),
-section('pixels', '한 픽셀에는 무엇이 들어 있을까?', table(['표현', '자료 구조 예시', '의미'], [('8-bit Grayscale 예시', '<code>[H, W]</code> · 값 0~255', '한 위치를 밝기 값 하나로 표현합니다. 이 예시에서는 0이 검정, 255가 흰색입니다.'), ('RGB', '<code>[H, W, 3]</code> · <code>[220, 60, 30]</code>', '같은 공간 위치에 R, G, B 세 채널 값이 있습니다.'), ('RGBA', '<code>[H, W, 4]</code>', 'RGB에 투명도 alpha 채널이 추가된 예입니다. 모델이 항상 3채널만 받는 것은 아닙니다.')]) + '''<p>RGB 이미지 한 장을 세 장의 2차원 평면으로 생각해도 됩니다. R plane, G plane, B plane은 <strong>같은 (y,x) 좌표</strong>를 공유하며, 한 픽셀의 색은 그 위치의 세 채널 값을 함께 읽어 결정됩니다.</p><p>여기서 0~255는 흔한 8-bit 표현의 예시입니다. 실제 파이프라인에서는 10/12/16-bit 센서 값, float 이미지, 다른 color space도 사용할 수 있습니다. 또한 저장된 RGB 숫자는 조명·노출·white balance·감마 같은 카메라 처리의 영향을 받은 값이지, 물체의 고정된 “진짜 색 숫자”가 아닙니다.</p>''' + asset_figure('illustrations/ch01/rgb-channel-decomposition.svg', '합성 사과 RGB 이미지와 R G B 채널 plane 비교', '설명용 합성 일러스트. 같은 장면을 RGB 원본과 R·G·B channel intensity plane으로 나누어 한 픽셀이 세 값으로 구성됨을 보여 줍니다.')),
+section('overview', '이미지 파일과 픽셀 배열은 같은 것이 아니다', '''<p>카메라나 저장장치에 있는 JPEG·PNG 파일은 곧바로 <code>[H,W,C]</code> 숫자 배열인 것이 아닙니다. 파일에는 압축된 이미지 데이터와 형식 정보가 들어 있고, <strong>decoder가 파일을 해석한 뒤</strong> 비로소 각 위치의 픽셀 값을 가진 raster 배열을 얻습니다. 모델은 파일 형식 자체보다 이렇게 디코딩되고 전처리된 숫자 배열을 입력으로 받습니다.</p><p>예를 들어 디코딩된 224 × 224 RGB 이미지는 공간 위치가 50,176개이고, 각 위치에 R·G·B 세 값이 있으므로 총 <strong>150,528개의 채널 값</strong>을 가집니다. JPEG 파일의 용량이 작다고 해서 모델 입력의 숫자 개수도 적다는 뜻은 아닙니다. 압축 파일 크기와 디코딩된 배열 크기는 다른 개념입니다.</p>''' + callout('먼저 구분할 것', '파일 → decode → 픽셀 배열 → 전처리 → Tensor → 모델 순서로 생각하면, 이미지 I/O 문제와 모델 입력 문제를 섞지 않게 됩니다.') + chapter01_image_to_pixels()),
+section('pixels', '한 픽셀에는 무엇이 들어 있을까?', table(['표현', '자료 구조 예시', '의미'], [('8-bit Grayscale 예시', '<code>[H, W]</code> · 값 0~255', '한 위치를 밝기 값 하나로 표현합니다. 이 예시에서는 0이 검정, 255가 흰색입니다.'), ('RGB', '<code>[H, W, 3]</code> · <code>[220, 60, 30]</code>', '같은 공간 위치에 R, G, B 세 채널 값이 있습니다.'), ('RGBA', '<code>[H, W, 4]</code>', 'RGB에 투명도 alpha 채널이 추가된 예입니다. 모델이 항상 3채널만 받는 것은 아닙니다.')]) + '''<p>RGB 이미지 한 장을 세 장의 2차원 평면으로 생각해도 됩니다. R plane, G plane, B plane은 <strong>같은 (y,x) 좌표</strong>를 공유하며, 한 픽셀의 색은 그 위치의 세 채널 값을 함께 읽어 결정됩니다.</p><p>여기서 0~255는 흔한 8-bit 표현의 예시입니다. 실제 파이프라인에서는 10/12/16-bit 센서 값, float 이미지, 다른 color space도 사용할 수 있습니다. 또한 저장된 RGB 숫자는 조명·노출·white balance·감마 같은 카메라 처리의 영향을 받은 값이지, 물체의 고정된 “진짜 색 숫자”가 아닙니다.</p>''' + chapter01_rgb_channels()),
 section('layout', 'HWC, CHW, NCHW는 무엇이 다른가?', table(['표기', '예시 shape', '어디서 자주 보나'], [('HWC', '<code>[224, 224, 3]</code>', 'NumPy/OpenCV 계열의 디코딩 배열에서 흔한 축 순서'), ('CHW', '<code>[3, 224, 224]</code>', 'Torchvision의 image Tensor에서 흔한 축 순서'), ('NCHW', '<code>[32, 3, 224, 224]</code>', 'PyTorch <code>Conv2d</code>에 batch를 포함해 넣는 대표 형태')]) + '''<p>H, W, C, N은 각각 height, width, channel, batch를 뜻합니다. 같은 이미지라도 <code>[H,W,C]</code>와 <code>[C,H,W]</code>는 숫자의 개수가 같지만 <strong>축의 의미와 순서가 다릅니다.</strong> 이 순서를 바꿀 때는 <code>reshape</code>가 아니라 <code>transpose</code> 또는 <code>permute</code>처럼 축 자체를 재배치하는 연산을 사용해야 합니다.</p><p>OpenCV의 기본 컬러 읽기 결과는 BGR 순서입니다. 따라서 shape가 <code>[H,W,3]</code>으로 맞더라도 RGB 모델에 그대로 넣으면 빨강과 파랑 채널의 의미가 바뀔 수 있습니다. <strong>shape, channel order, dtype, value range를 함께 확인</strong>해야 합니다.</p>''' + callout('1920 × 1080 표기의 함정', '영상 해상도는 보통 width × height로 말하지만, HWC 배열 shape는 [height, width, channel] 순서이므로 [1080, 1920, 3]이 됩니다.')),
-section('resize', 'Resize는 단순히 픽셀 수만 줄이지 않는다', '''<p>모델 입력 크기를 맞추기 위해 resize를 자주 사용하지만, resize는 원본 픽셀을 그대로 골라 담는 작업이 아니라 새 격자에 값을 <strong>resampling</strong>하는 과정입니다. 특히 1920 × 1080 같은 16:9 이미지를 224 × 224로 직접 늘이거나 줄이면 종횡비가 바뀌어 원이나 객체 모양이 찌그러질 수 있습니다.</p>''' + table(['방법', '장점', '주의점'], [('직접 224×224 resize', '구현이 단순하고 출력 shape가 바로 고정됨', '원본 종횡비가 다르면 geometry 왜곡 가능'), ('비율 유지 후 center/random crop', '형태 비율을 유지', '가장자리 객체나 작은 defect가 crop으로 사라질 수 있음'), ('비율 유지 후 padding/letterbox', '전체 장면을 유지', 'padding 영역이 추가되고 실제 유효 영역 비율이 달라짐')]) + '''<p>또한 강한 downsampling에서는 작은 패턴이 몇 픽셀로 줄거나 interpolation 과정에서 약해질 수 있습니다. 작은 defect가 중요한 산업 영상이라면 “모델이 받는 최종 크기에서 defect가 몇 픽셀로 남는가?”를 반드시 확인해야 합니다. 사전학습 모델을 사용할 때는 임의의 resize 규칙을 만들기보다 해당 weight가 제공하는 공식 transform을 먼저 확인하는 편이 안전합니다.</p>''' + asset_figure('illustrations/ch01/resize-effects.svg', '같은 합성 장면의 stretch crop pad resize 비교', '설명용 합성 일러스트. 직접 square resize, aspect-ratio 유지 crop, padding이 geometry와 작은 feature 보존에 주는 차이를 비교합니다.')),
-section('illumination', '같은 대상이어도 픽셀 값은 달라진다', '''<p>컴퓨터는 “같은 물체”라는 의미를 직접 입력받지 않습니다. 조명 세기, 노출, 색온도, white balance, 감마, 센서 노이즈가 바뀌면 같은 구조도 다른 숫자 배열로 기록될 수 있습니다. 아래 실습은 이 현상 중 <strong>밝기 gain과 clipping만 단순화해서</strong> 보여 주는 합성 예시입니다.</p><div class="lab"><div class="lab-heading"><h3>밝기와 픽셀 값</h3><span class="lab-badge">INTERACTIVE</span></div><div class="controls"><label for="brightness">밝기 배율 <output id="brightness-value">1.00</output></label><input id="brightness" type="range" min="30" max="180" value="100" step="5"></div><div class="lab-display"><canvas id="pixel-canvas" width="256" height="256" aria-label="밝기 변화에 따른 8 × 8 합성 패턴"></canvas><div id="pixel-matrix" class="matrix" style="grid-template-columns:repeat(8,1fr)" aria-label="동일한 합성 패턴의 픽셀 값"></div></div><p class="lab-note">표시값 = clip(round(원래 값 × gain), 0, 255). 실제 카메라의 노출·감마·white balance·노이즈를 모두 재현하는 물리 모델은 아닙니다.</p></div><p>예를 들어 원래 값 170에 gain 1.8을 적용하면 306이지만 8-bit 범위에서는 255로 잘립니다. 이처럼 서로 다른 원래 값이 모두 255가 되면 <strong>saturation으로 정보가 손실</strong>됩니다. 모델의 조명 강건성을 이야기할 때는 단순 augmentation뿐 아니라 실제 촬영 조건과 train/test 입력 분포를 함께 봐야 합니다.</p>''' + asset_figure('illustrations/ch01/lighting-conditions.svg', '같은 합성 사과의 dark reference bright overexposed 조건 비교', '설명용 합성 일러스트. 같은 위치의 RGB 값이 밝기 조건에 따라 변하고 clipping에서 정보가 손실되는 모습을 보여 줍니다.')),
+section('resize', 'Resize는 단순히 픽셀 수만 줄이지 않는다', '''<p>모델 입력 크기를 맞추기 위해 resize를 자주 사용하지만, resize는 원본 픽셀을 그대로 골라 담는 작업이 아니라 새 격자에 값을 <strong>resampling</strong>하는 과정입니다. 특히 1920 × 1080 같은 16:9 이미지를 224 × 224로 직접 늘이거나 줄이면 종횡비가 바뀌어 원이나 객체 모양이 찌그러질 수 있습니다.</p>''' + table(['방법', '장점', '주의점'], [('직접 224×224 resize', '구현이 단순하고 출력 shape가 바로 고정됨', '원본 종횡비가 다르면 geometry 왜곡 가능'), ('비율 유지 후 center/random crop', '형태 비율을 유지', '가장자리 객체나 작은 defect가 crop으로 사라질 수 있음'), ('비율 유지 후 padding/letterbox', '전체 장면을 유지', 'padding 영역이 추가되고 실제 유효 영역 비율이 달라짐')]) + '''<p>또한 강한 downsampling에서는 작은 패턴이 몇 픽셀로 줄거나 interpolation 과정에서 약해질 수 있습니다. 작은 defect가 중요한 산업 영상이라면 “모델이 받는 최종 크기에서 defect가 몇 픽셀로 남는가?”를 반드시 확인해야 합니다. 사전학습 모델을 사용할 때는 임의의 resize 규칙을 만들기보다 해당 weight가 제공하는 공식 transform을 먼저 확인하는 편이 안전합니다.</p>''' + chapter01_resize_photo()),
+section('illumination', '같은 대상이어도 픽셀 값은 달라진다', '''<p>컴퓨터는 “같은 물체”라는 의미를 직접 입력받지 않습니다. 조명 세기, 노출, 색온도, white balance, 감마, 센서 노이즈가 바뀌면 같은 구조도 다른 숫자 배열로 기록될 수 있습니다. 아래 실습은 이 현상 중 <strong>밝기 gain과 clipping만 단순화해서</strong> 보여 주는 합성 예시입니다.</p><div class="lab"><div class="lab-heading"><h3>밝기와 픽셀 값</h3><span class="lab-badge">INTERACTIVE</span></div><div class="controls"><label for="brightness">밝기 배율 <output id="brightness-value">1.00</output></label><input id="brightness" type="range" min="30" max="180" value="100" step="5"></div><div class="lab-display"><canvas id="pixel-canvas" width="256" height="256" aria-label="밝기 변화에 따른 8 × 8 합성 패턴"></canvas><div id="pixel-matrix" class="matrix" style="grid-template-columns:repeat(8,1fr)" aria-label="동일한 합성 패턴의 픽셀 값"></div></div><p class="lab-note">표시값 = clip(round(원래 값 × gain), 0, 255). 실제 카메라의 노출·감마·white balance·노이즈를 모두 재현하는 물리 모델은 아닙니다.</p></div><p>예를 들어 원래 값 170에 gain 1.8을 적용하면 306이지만 8-bit 범위에서는 255로 잘립니다. 이처럼 서로 다른 원래 값이 모두 255가 되면 <strong>saturation으로 정보가 손실</strong>됩니다. 모델의 조명 강건성을 이야기할 때는 단순 augmentation뿐 아니라 실제 촬영 조건과 train/test 입력 분포를 함께 봐야 합니다.</p>''' + chapter01_lighting_photo()),
 section('normalization', 'dtype, scaling, normalization을 따로 확인하기', '''<p><code>uint8 → float32</code>는 자료형 변환이고, 255로 나누어 0~255를 0~1 범위로 바꾸는 것은 <strong>scaling</strong>입니다. 그 다음 채널별 평균과 표준편차를 이용해 값을 바꾸는 과정은 Torchvision에서 <strong>Normalize</strong>라고 부릅니다. 세 단계는 목적이 다르므로 “정규화했다”라는 한 문장으로 뭉뚱그리면 전처리 오류를 찾기 어렵습니다.</p>''' + equation('x_scaled = x_uint8 / 255\nx_normalized = (x_scaled − mean) / std') + '''<p>가상의 한 채널에서 픽셀 값이 128, mean이 0.5, std가 0.25라면 <code>128/255 ≈ 0.50196</code>이고, 이후 <code>(0.50196 − 0.5)/0.25 ≈ 0.00784</code>가 됩니다. normalization 이후 값은 0~1 범위를 벗어나거나 음수가 될 수 있으며, 이것은 오류가 아닙니다.</p><p>실제 RGB에서는 보통 채널마다 <code>mean[c]</code>, <code>std[c]</code>를 따로 사용합니다. 특히 사전학습 weight를 사용할 때는 resize/crop, dtype, scaling, normalization까지 포함한 공식 preprocessing transform을 그대로 확인해야 합니다.</p>''' + callout('모델 입력은 하나의 계약', '입력 크기 · axis order · channel order · dtype · value range · normalization이 모두 맞아야 합니다. 학습과 추론에서 이 계약이 달라지면 shape가 같아도 성능이 크게 흔들릴 수 있습니다.')),
 section('check', '스스로 설명해 보기', '''<details><summary>JPEG 파일을 읽기 전부터 [H,W,3] 배열이라고 말해도 될까?</summary><p>아닙니다. JPEG/PNG는 인코딩된 파일 형식이고, decoder가 해석한 뒤 픽셀 배열을 얻습니다.</p></details><details><summary>224 × 224 RGB 이미지의 값은 왜 50,176개가 아니라 150,528개일까?</summary><p>224 × 224 = 50,176은 공간 위치의 수입니다. 각 위치에 RGB 세 채널 값이 있으므로 50,176 × 3 = 150,528개입니다.</p></details><details><summary>[H,W,C]를 [C,H,W]로 바꿀 때 reshape를 쓰면 왜 위험할까?</summary><p>reshape는 저장된 숫자를 새 shape로 다시 해석할 뿐 축의 의미를 올바르게 교환하지 않습니다. transpose/permute처럼 axis를 명시적으로 재배치해야 합니다.</p></details><details><summary>1920 × 1080을 224 × 224로 바로 resize하면 항상 괜찮을까?</summary><p>아닙니다. 종횡비가 바뀌면 geometry가 왜곡될 수 있고, 강한 downsampling에서는 작은 패턴이 사라질 수 있습니다. 모델의 공식 transform과 task 특성을 기준으로 crop/pad/resize 전략을 선택해야 합니다.</p></details><details><summary>배치 크기를 16에서 32로 바꾸면 모델 파라미터 수도 두 배가 될까?</summary><p>아닙니다. 파라미터 수는 그대로이고, 한 번에 처리하는 입력과 중간 activation 양이 늘어 일반적으로 메모리 사용량이 증가합니다.</p></details>''')
 ], [('Torchvision · Getting started with transforms v2', 'https://docs.pytorch.org/vision/main/auto_examples/transforms/plot_transforms_getting_started.html', 'decode된 image Tensor의 shape, dtype scaling, Normalize를 포함한 공식 전처리 예시입니다.'), ('PyTorch · Conv2d', 'https://docs.pytorch.org/docs/main/generated/torch.nn.Conv2d.html', 'Conv2d가 받는 CHW/NCHW 입력 shape와 channel 의미를 확인할 수 있습니다.'), ('Torchvision · Models and pre-trained weights', 'https://docs.pytorch.org/vision/main/models.html', '사전학습 weight가 제공하는 preprocessing transform을 확인하는 공식 문서입니다.'), ('OpenCV · Image file reading and writing', 'https://docs.opencv.org/4.x/d4/da8/group__imgcodecs.html', '이미지 파일 decode와 OpenCV 컬러 이미지 읽기의 공식 문서입니다.')])

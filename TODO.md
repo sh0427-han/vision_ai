@@ -17,7 +17,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 > 앞으로는 한 번에 한 챕터만 검토한다. 본문·수식·figure·caption·desktop/mobile 렌더링을 완료한 뒤 다음 챕터로 넘어간다.
 
-- [x] 01 · 이미지와 텐서 — 파일 decode / RGB pixel / HWC·CHW·NCHW / resize / illumination / scaling·normalization 재구성 + image-like static illustration 4종 적용 및 렌더링 검수
+- [x] 01 · 이미지와 텐서 — 실사형 사과 WebP + 실제 R/G/B channel 파생 이미지 적용, pixel/resize/illumination을 HTML·CSS로 재구성하고 기존 사과 SVG 4종 제거
 - [ ] 02 · CNN · ResNet
 - [ ] 03 · Transformer · ViT
 - [ ] 04 · Vision Tasks · U-Net

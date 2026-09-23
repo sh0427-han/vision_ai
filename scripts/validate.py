@@ -122,6 +122,26 @@ paper_source = (ROOT / 'scripts' / 'paper_figures.py').read_text(encoding='utf-8
 extra_source = (ROOT / 'scripts' / 'extra_diagrams.py').read_text(encoding='utf-8')
 build_source = (ROOT / 'scripts' / 'build.py').read_text(encoding='utf-8')
 
+chapter1_photo_assets = [
+    ROOT / 'assets' / 'diagrams' / 'illustrations' / 'ch01' / 'apple-real.webp',
+    ROOT / 'assets' / 'diagrams' / 'illustrations' / 'ch01' / 'apple-r.webp',
+    ROOT / 'assets' / 'diagrams' / 'illustrations' / 'ch01' / 'apple-g.webp',
+    ROOT / 'assets' / 'diagrams' / 'illustrations' / 'ch01' / 'apple-b.webp',
+]
+for asset in chapter1_photo_assets:
+    if not asset.exists():
+        errors.append(f'Missing Chapter 01 realistic photo asset: {asset.relative_to(ROOT)}')
+
+for obsolete in [
+    'illustrations/ch01/image-to-pixels.svg',
+    'illustrations/ch01/rgb-channel-decomposition.svg',
+    'illustrations/ch01/resize-effects.svg',
+    'illustrations/ch01/lighting-conditions.svg',
+]:
+    if obsolete in build_source:
+        errors.append(f'Obsolete crude Chapter 01 SVG is still referenced: {obsolete}')
+
+
 for source_name, source_text in [
     ('reference_figures.py', reference_source),
     ('paper_figures.py', paper_source),
