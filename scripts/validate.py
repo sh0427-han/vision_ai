@@ -119,7 +119,28 @@ reference_source = (ROOT / 'scripts' / 'reference_figures.py').read_text(
 )
 
 paper_source = (ROOT / 'scripts' / 'paper_figures.py').read_text(encoding='utf-8')
+extra_source = (ROOT / 'scripts' / 'extra_diagrams.py').read_text(encoding='utf-8')
 build_source = (ROOT / 'scripts' / 'build.py').read_text(encoding='utf-8')
+
+for forbidden in [
+    '"train-overfit.svg": ("curve"',
+    '"train-threshold.svg": ("curve"',
+    '"cs-optimization.svg": ("curve"',
+]:
+    if forbidden in extra_source:
+        errors.append(
+            f'Extra-diagram semantic regression remains: generic curve used for {forbidden}'
+        )
+
+for required in [
+    'def _overfit_curve(',
+    'def _threshold_curve(',
+    'def _optimization_curve(',
+    'validation loss rises',
+    'False-positive rate',
+]:
+    if required not in extra_source:
+        errors.append(f'Missing audited extra-diagram safeguard: {required}')
 
 for forbidden_note in ["note('resnet'", "note('unet'"]:
     if forbidden_note in build_source:

@@ -15,6 +15,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] 실제 Pages artifact raster QA에서 잘못된 extra teaching curve 3종(optimization / overfit / threshold) 발견·교정
 - [x] 실제 figure inventory와 TODO를 대조하여 기존 구현 항목의 stale checkbox 정리
 - [x] gradient stability / dropout mode·fit / VGG·transfer / activation-max·Grad-CAM figure 보강
 - [x] generative-vs-discriminative / kernel·GP / graph inference / mean-field VI / MCMC diagnostics / state-space / boosting figure 보강
@@ -53,7 +54,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [ ] 일부 개념은 “그림 수”는 많지만 핵심 intuition을 보여주는 대표 figure가 부족하다.
 - [ ] 일부 figure는 실제 plot/heatmap/feature map보다 개념 요약 카드에 가깝다.
 - [ ] 모바일/좁은 화면에서 text와 panel spacing을 다시 확인해야 한다.
-- [ ] 모든 figure를 브라우저 raster render 기준으로 최종 육안 QA해야 한다. (정의·수식·수치·caption의 source-level semantic 전수 검수는 완료)
+- [ ] 모든 figure의 최종 브라우저 육안 QA는 계속 진행 중. Pages artifact를 rasterize해 reference/paper/extra를 검수했고, 현재 발견된 semantic curve 오류는 교정 완료했으나 모바일 실제 브라우저와 한글 font fallback 확인이 남아 있다.
 
 ### 공통 수정 원칙
 

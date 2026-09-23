@@ -122,6 +122,72 @@ def _curve(title, subtitle, labels):
     return _frame(title, subtitle, "".join(body))
 
 
+
+def _optimization_curve(title, subtitle):
+    """Loss should decrease as optimization progresses."""
+    body = [
+        '<path d="M150 410 H1080 M150 410 V145" class="edge"/>',
+        '<text x="1090" y="438" text-anchor="end" class="m">iteration</text>',
+        '<text x="125" y="155" text-anchor="end" class="m">loss</text>',
+        '<path d="M175 190 C300 225 410 275 535 320 C675 365 835 382 1035 390" '
+        'stroke="#2454d8" stroke-width="6" fill="none"/>',
+    ]
+    points = [(175,190),(285,226),(395,270),(515,316),(650,352),(800,375),(960,387)]
+    for i,(x,y) in enumerate(points):
+        body.append(f'<circle cx="{x}" cy="{y}" r="7" fill="#08796f"/>')
+        if i < len(points)-1:
+            nx,ny=points[i+1]
+            body.append(_arrow(x+10,y+4,nx-10,ny-4))
+    body += [
+        '<text x="235" y="175" class="m" fill="#2454d8">high loss</text>',
+        '<text x="875" y="360" class="m" fill="#08796f">lower loss</text>',
+        '<text x="665" y="215" class="m">each marker = one parameter update</text>',
+    ]
+    return _frame(title, subtitle, "".join(body))
+
+
+def _overfit_curve(title, subtitle):
+    """Training loss falls; validation loss bottoms out then rises."""
+    body = [
+        '<path d="M150 410 H1080 M150 410 V145" class="edge"/>',
+        '<text x="1090" y="438" text-anchor="end" class="m">epoch</text>',
+        '<text x="125" y="155" text-anchor="end" class="m">loss</text>',
+        '<path d="M175 195 C310 245 440 305 570 345 C710 378 865 392 1045 398" '
+        'stroke="#2454d8" stroke-width="6" fill="none"/>',
+        '<path d="M175 205 C305 250 430 300 555 330 C665 350 760 345 850 320 '
+        'C930 298 995 270 1045 245" stroke="#a24d18" stroke-width="6" fill="none"/>',
+        '<line x1="725" y1="155" x2="725" y2="410" stroke="#7891b7" '
+        'stroke-width="3" stroke-dasharray="10 8"/>',
+        '<text x="740" y="180" class="m">best val checkpoint</text>',
+        '<text x="835" y="215" class="m" fill="#a24d18">validation loss rises</text>',
+        '<text x="835" y="388" class="m" fill="#2454d8">train loss keeps falling</text>',
+        '<text x="900" y="285" class="m">overfit region</text>',
+    ]
+    return _frame(title, subtitle, "".join(body))
+
+
+def _threshold_curve(title, subtitle):
+    """For fixed scores, recall and FPR are non-increasing as threshold rises."""
+    body = [
+        '<path d="M150 410 H1080 M150 410 V145" class="edge"/>',
+        '<text x="1090" y="438" text-anchor="end" class="m">threshold →</text>',
+        '<text x="125" y="155" text-anchor="end" class="m">rate</text>',
+        '<text x="155" y="445" class="m">low</text>',
+        '<text x="1045" y="445" text-anchor="end" class="m">high</text>',
+        '<path d="M175 175 C300 185 430 210 560 250 C710 300 865 350 1045 385" '
+        'stroke="#2454d8" stroke-width="6" fill="none"/>',
+        '<path d="M175 235 C300 255 430 290 560 325 C710 362 865 390 1045 402" '
+        'stroke="#08796f" stroke-width="6" fill="none"/>',
+        '<line x1="590" y1="155" x2="590" y2="410" stroke="#a24d18" '
+        'stroke-width="3" stroke-dasharray="10 8"/>',
+        '<text x="605" y="180" class="m" fill="#a24d18">example operating threshold</text>',
+        '<text x="860" y="310" class="m" fill="#2454d8">Recall</text>',
+        '<text x="860" y="382" class="m" fill="#08796f">False-positive rate</text>',
+        '<text x="235" y="205" class="m">more samples predicted positive</text>',
+        '<text x="760" y="245" class="m">fewer samples predicted positive</text>',
+    ]
+    return _frame(title, subtitle, "".join(body))
+
 def _confusion():
     body = """<g transform="translate(330 150)">
 <rect width="220" height="130" fill="#e5f5f2" stroke="#8ac7a5"/>
@@ -251,9 +317,9 @@ SPECS = {
     "train-leakage.svg": ("compare", "좋은 분할 vs Data leakage", "같은 원본 영상의 유사 frame이 섞이면 성능이 부풀 수 있습니다.", "좋은 split", ["원본 그룹 단위 분리","시간대/설비 누수 방지","실제 일반화 평가"], "나쁜 split", ["frame random split","near-duplicate 섞임","평가 과대추정"]),
     "train-confusion.svg": ("confusion",),
     "train-prf.svg": ("compare", "Precision과 Recall의 관점", "같은 confusion matrix에서 서로 다른 질문을 합니다.", "Precision", ["이상이라고 한 것 중","얼마나 진짜 이상인가?","FP에 민감"], "Recall", ["실제 이상 중","얼마나 놓치지 않았나?","FN에 민감"]),
-    "train-threshold.svg": ("curve", "Threshold를 바꾸면 무엇이 변할까?", "기준을 낮추면 더 많은 샘플을 positive로 판정하는 경향이 있습니다.", ["Recall","False Positive","Threshold"]),
+    "train-threshold.svg": ("threshold_curve", "Threshold를 바꾸면 무엇이 변할까?", "고정된 score에서 threshold를 높이면 positive 판정 수가 줄어 Recall과 false-positive rate가 감소하거나 유지됩니다."),
     "train-curves.svg": ("compare", "ROC curve와 PR curve", "불균형 데이터에서는 PR curve도 함께 보는 것이 중요합니다.", "ROC", ["TPR vs FPR","threshold 전 범위","음성 샘플 영향 큼"], "PR", ["Precision vs Recall","positive 성능 집중","희소 이상 탐지에 유용"]),
-    "train-overfit.svg": ("curve", "Overfitting의 전형적 신호", "train loss는 계속 낮아지는데 validation loss가 다시 높아질 수 있습니다.", ["Train loss","Validation loss"]),
+    "train-overfit.svg": ("overfit_curve", "Overfitting의 전형적 신호", "train loss는 계속 낮아져도 validation loss가 최저점을 지난 뒤 다시 높아질 수 있습니다."),
 
     # ResNet
     "resnet-plain-vs.svg": ("compare", "Plain network vs Residual network", "Residual connection은 깊은 네트워크의 최적화 문제를 재표현합니다.", "Plain", ["층을 순차 연결","전체 H(x)를 직접 학습","깊어지면 degradation 가능"], "Residual", ["shortcut으로 x 전달","F(x)=H(x)-x 학습","identity 경로 확보"]),
@@ -280,7 +346,7 @@ SPECS = {
     "cs-linear.svg": ("flow", "Linear classifier", "입력 벡터를 가중치 행렬과 곱해 클래스별 score를 만듭니다.", [["x","D features"],["W","K×D"],["Wx+b","scores"],["Argmax","class"]]),
     "cs-softmax.svg": ("flow", "Score → Softmax → Cross-Entropy", "원시 score를 확률 형태로 바꾸고 정답 확률에 loss를 줍니다.", [["Logits","2,1,-1"],["exp","양수화"],["Normalize","sum=1"],["p(y)","정답 확률"],["Loss","-log p(y)"]]),
     "cs-backprop.svg": ("flow", "Backpropagation 계산 그래프", "forward에서 값을 만들고 backward에서 chain rule로 gradient를 전달합니다.", [["Input","x"],["Layer","z=f(x)"],["Loss","L(z)"],["∂L/∂z","local"],["∂L/∂x","chain rule"]]),
-    "cs-optimization.svg": ("curve", "Optimization 경로", "gradient 방향과 learning rate가 parameter 이동 경로를 결정합니다.", ["Loss 감소","Update step"]),
+    "cs-optimization.svg": ("optimization_curve", "Optimization에서 loss가 줄어드는 과정", "각 update가 parameter를 바꾸며 objective loss를 낮추는 기본 흐름을 보여줍니다."),
     "cs-augmentation.svg": ("compare", "원본과 Augmentation", "라벨 의미를 유지하는 범위에서 입력 변화를 만들어 일반화를 돕습니다.", "Original", ["고정 조명/위치","데이터 다양성 제한","과적합 가능"], "Augmented", ["crop/flip/color 등","입력 분포 다양화","task 의미 보존 필요"]),
     "cs-transfer.svg": ("flow", "Transfer Learning 전략", "사전학습 특징을 그대로 쓰거나 일부·전체를 미세조정할 수 있습니다.", [["Pretrained","backbone"],["Freeze","feature extractor"],["Replace head","new task"],["Fine-tune","필요 층"],["Validate","generalization"]]),
     "cs-modern-map.svg": ("flow", "현대 Vision 학습 흐름", "CNN 이후 Transformer·self-supervised·vision-language·diffusion으로 확장됩니다.", [["CNN","local features"],["ViT","attention"],["SSL","unlabeled"],["CLIP/DINO","representation"],["Diffusion","generation"]]),
@@ -312,6 +378,12 @@ def _render(spec):
         return _matrix(spec[1], spec[2])
     if kind == "curve":
         return _curve(spec[1], spec[2], spec[3])
+    if kind == "optimization_curve":
+        return _optimization_curve(spec[1], spec[2])
+    if kind == "overfit_curve":
+        return _overfit_curve(spec[1], spec[2])
+    if kind == "threshold_curve":
+        return _threshold_curve(spec[1], spec[2])
     if kind == "confusion":
         return _confusion()
     if kind == "gaussian":
