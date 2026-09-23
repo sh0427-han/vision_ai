@@ -15,6 +15,9 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] 잘못된 시각 설명 교정: SVM hinge loss, augmentation 조건, DINO teacher/student 방향, PCA projection, HMM Viterbi, GMM, ensemble/MoE, IoU/NMS
+- [x] CS231n multi-channel convolution / receptive field / ViT attention figure 추가
+- [x] PRML Bernoulli-Binomial / ML-MAP figure 추가
 - [x] CS231n 핵심 figure를 numeric matrix / chain rule / optimizer trajectory / LR curve / pooling / residual flow 중심으로 보강
 - [x] PRML 핵심 figure를 entropy / posterior predictive uncertainty / importance sampling / PCA projection·reconstruction 중심으로 보강
 - [x] CNN / ViT / PatchCore에 paper-style multi-panel figure 적용
@@ -99,24 +102,24 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [ ] stride 1 vs 2
 - [ ] padding 0 vs same padding
 - [ ] dilation 비교
-- [ ] multi-channel convolution
+- [x] multi-channel convolution
   - RGB input
   - 3×3×3 filter
   - channel-wise sum
   - output feature map
-- [ ] output channel 여러 개가 여러 filter에서 생성되는 구조
-- [ ] receptive field growth
+- [x] output channel 여러 개가 여러 filter에서 생성되는 구조
+- [x] receptive field growth
 - [x] max pooling vs average pooling
 - [ ] early / middle / deep layer feature hierarchy
 - [ ] 실제 feature-map / edge-response 느낌의 synthetic visualization 추가
 
 ## 1-6. Architecture
 
-- [ ] LeNet / AlexNet / VGG / ResNet / ViT 비교 figure
+- [x] LeNet / AlexNet / VGG / ResNet / ViT 비교 figure
 - [x] plain block vs residual block
 - [x] residual connection의 gradient flow
 - [ ] VGG의 repeated 3×3 stack intuition
-- [ ] architecture별 핵심 차이를 숫자표가 아닌 시각 구조로 비교
+- [x] architecture별 핵심 차이를 숫자표가 아닌 시각 구조로 비교
 
 ## 1-7. Understanding CNN
 
@@ -135,15 +138,15 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 1-9. Detection / Segmentation / Modern Vision
 
-- [ ] classification vs detection vs semantic segmentation vs instance segmentation
-- [ ] bbox IoU
-- [ ] NMS 단계별 figure
-- [ ] semantic vs instance mask
-- [ ] ViT patch embedding
+- [x] classification vs detection vs semantic segmentation vs instance segmentation
+- [x] bbox IoU
+- [x] NMS 단계별 figure
+- [x] semantic vs instance mask
+- [x] ViT patch embedding
 - [ ] positional embedding
-- [ ] Q/K/V self-attention
-- [ ] attention matrix / spatial heatmap
-- [ ] multi-head attention
+- [x] Q/K/V self-attention
+- [x] attention matrix / spatial heatmap
+- [x] multi-head attention
 - [x] CLIP image-text embedding alignment
 - [x] DINO teacher-student / self-distillation
 - [x] diffusion forward noise / reverse denoising
@@ -164,10 +167,10 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] Gaussian mean 변화
 - [x] Gaussian variance 변화
 - [x] covariance ellipse
-- [ ] Bernoulli / Binomial 관계
+- [x] Bernoulli / Binomial 관계
 - [x] Beta prior → observations → posterior
 - [ ] Dirichlet / multinomial intuition
-- [ ] maximum likelihood vs MAP 비교
+- [x] maximum likelihood vs MAP 비교
 
 ## 2-3. Chapter 3 — Linear Models for Regression
 
@@ -225,9 +228,9 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 2-9. Chapter 9 — Mixture Models / EM
 
-- [ ] Gaussian mixture density
+- [x] Gaussian mixture density
 - [ ] component별 cluster coloring
-- [ ] responsibility `r_nk`
+- [x] responsibility `r_nk`
 - [ ] E-step
 - [ ] M-step
 - [ ] EM iteration에 따라 mean/covariance가 이동하는 sequence figure
@@ -266,7 +269,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 2-13. Chapter 13 — Sequential Data
 
-- [ ] HMM hidden state / observation chain
+- [x] HMM hidden state / observation chain
 - [x] filtering
 - [x] prediction
 - [x] smoothing
@@ -277,11 +280,11 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 ## 2-14. Chapter 14 — Combining Models
 
 - [ ] Bayesian model averaging
-- [ ] simple ensemble averaging
+- [x] simple ensemble averaging
 - [ ] boosting intuition
 - [ ] decision tree / ensemble concept
-- [ ] mixture of experts
-- [ ] gating network
+- [x] mixture of experts
+- [x] gating network
 - [ ] bias/variance reduction through ensembles
 
 ---
