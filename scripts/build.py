@@ -554,8 +554,8 @@ SECTION_VISUALS = {
     ("vit", "tokens"): [],
     ("vit", "attention"): [],
 
-    ("tasks", "overview"): ["tasks-three-way.svg"],
-    ("tasks", "visual"): ["tasks-segmentation.svg"],
+    ("tasks", "overview"): [],
+    ("tasks", "visual"): [],
     ("tasks", "pipeline"): [],
 
     ("training", "loop"): [],
