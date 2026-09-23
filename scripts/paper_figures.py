@@ -102,47 +102,106 @@ def _cnn_overview():
                 "논문 figure처럼 입력·중간 표현·출력을 한 화면에서 연결합니다.", "".join(b), 720)
 
 
+
 def _cnn_convolution():
-    b=[]
-    for p in [(35,120,245,245,"a","5×5 input"),(305,120,175,245,"b","3×3 kernel"),
-              (505,120,245,245,"c","selected patch"),(775,120,390,245,"d","multiply & sum"),
-              (250,410,700,260,"e","output feature map")]:
+    b = []
+    for p in [
+        (35,120,245,245,"a","5×5 input"),
+        (305,120,175,245,"b","3×3 kernel"),
+        (505,120,245,245,"c","selected patch"),
+        (775,120,390,245,"d","multiply & sum"),
+        (250,410,700,260,"e","output feature map"),
+    ]:
         b.append(_panel(*p))
-    vals=[[0,0,1,1,1]]*5
+
+    values = [[0,0,1,1,1] for _ in range(5)]
     for r in range(5):
         for c in range(5):
-            x=62+c*38;y=168+r*34
-            fill="#2f63d8" if c>=2 else "#dce8fb"
-            if r<3 and c<3: fill="#2454d8" if c==2 else "#cfe0fb"
-            tc="#fff" if fill in ("#2454d8","#2f63d8") else "#203455"
-            b.append(f'<rect x="{x}" y="{y}" width="30" height="27" rx="4" fill="{fill}" stroke="#9fb8e4"/>')
-            b.append(f'<text x="{x+15}" y="{y+19}" text-anchor="middle" font-size="15" fill="{tc}">{vals[r][c]}</text>')
-    k=[[-1,0,1],[-1,0,1],[-1,0,1]]
-    for r in range(3):
-        for c in range(3):
-            x=335+c*42;y=190+r*43
-            b.append(f'<rect x="{x}" y="{y}" width="32" height="32" rx="5" class="orange"/>')
-            b.append(f'<text x="{x+16}" y="{y+22}" text-anchor="middle" class="body">{k[r][c]}</text>')
-    for r in range(3):
-        for c in range(3):
-            x=548+c*50;y=190+r*43
-            value=1 if c==2 else 0
-            fill="#2454d8" if value else "#e8effb"; tc="#fff" if value else "#203455"
-            b.append(f'<rect x="{x}" y="{y}" width="40" height="32" rx="5" fill="{fill}" stroke="#9fb8e4"/>')
-            b.append(f'<text x="{x+20}" y="{y+22}" text-anchor="middle" font-size="16" fill="{tc}">{value}</text>')
-    for i,expr in enumerate(["0×−1 + 0×0 + 1×1 = 1","0×−1 + 0×0 + 1×1 = 1","0×−1 + 0×0 + 1×1 = 1"]):
-        b.append(f'<text x="820" y="{190+i*48}" class="body">{expr}</text>')
-    b.append('<path d="M815 324 H1120" class="thin"/><text x="820" y="350" class="label">1 + 1 + 1 + bias(0) = 3</text>')
-    for r in range(3):
-        for c in range(3):
-            x=420+c*110;y=485+r*52
-            v=3 if c==1 else 0; fill="#2454d8" if v else "#eef3fb"; tc="#fff" if v else "#203455"
-            b.append(f'<rect x="{x}" y="{y}" width="76" height="36" rx="6" fill="{fill}" stroke="#9fb8e4"/>')
-            b.append(f'<text x="{x+38}" y="{y+24}" text-anchor="middle" font-size="18" fill="{tc}">{v}</text>')
-    b.append('<text x="420" y="650" class="small">수직 경계가 있는 위치에서 큰 값이 나타나는 고정 예시 kernel입니다.</text>')
-    return _svg("Figure 2. Convolution mechanics",
-                "입력 patch와 kernel의 element-wise 곱이 output 한 위치로 연결됩니다.", "".join(b), 710)
+            x = 62 + c * 38
+            y = 168 + r * 34
+            fill = "#2f63d8" if c >= 2 else "#dce8fb"
+            if r < 3 and c < 3:
+                fill = "#2454d8" if c == 2 else "#cfe0fb"
+            tc = "#fff" if fill in ("#2454d8", "#2f63d8") else "#203455"
+            b.append(
+                f'<rect x="{x}" y="{y}" width="30" height="27" rx="4" '
+                f'fill="{fill}" stroke="#9fb8e4"/>'
+            )
+            b.append(
+                f'<text x="{x+15}" y="{y+19}" text-anchor="middle" '
+                f'font-size="15" fill="{tc}">{values[r][c]}</text>'
+            )
 
+    kernel = [[-1,0,1],[-1,0,1],[-1,0,1]]
+    for r in range(3):
+        for c in range(3):
+            x = 335 + c * 42
+            y = 190 + r * 43
+            b.append(
+                f'<rect x="{x}" y="{y}" width="32" height="32" rx="5" '
+                'class="orange"/>'
+            )
+            b.append(
+                f'<text x="{x+16}" y="{y+22}" text-anchor="middle" '
+                f'class="body">{kernel[r][c]}</text>'
+            )
+
+    for r in range(3):
+        for c in range(3):
+            x = 548 + c * 50
+            y = 190 + r * 43
+            value = 1 if c == 2 else 0
+            fill = "#2454d8" if value else "#e8effb"
+            tc = "#fff" if value else "#203455"
+            b.append(
+                f'<rect x="{x}" y="{y}" width="40" height="32" rx="5" '
+                f'fill="{fill}" stroke="#9fb8e4"/>'
+            )
+            b.append(
+                f'<text x="{x+20}" y="{y+22}" text-anchor="middle" '
+                f'font-size="16" fill="{tc}">{value}</text>'
+            )
+
+    for i, expr in enumerate([
+        "0×−1 + 0×0 + 1×1 = 1",
+        "0×−1 + 0×0 + 1×1 = 1",
+        "0×−1 + 0×0 + 1×1 = 1",
+    ]):
+        b.append(f'<text x="820" y="{190+i*48}" class="body">{expr}</text>')
+    b.append(
+        '<path d="M815 324 H1120" class="thin"/>'
+        '<text x="820" y="350" class="label">'
+        '1 + 1 + 1 + bias(0) = 3</text>'
+    )
+
+    # Cross-correlation for each 3-column window:
+    # [0,0,1] -> 3, [0,1,1] -> 3, [1,1,1] -> 0.
+    output = [[3,3,0],[3,3,0],[3,3,0]]
+    for r, row in enumerate(output):
+        for c, value in enumerate(row):
+            x = 420 + c * 110
+            y = 485 + r * 52
+            fill = "#2454d8" if value else "#eef3fb"
+            tc = "#fff" if value else "#203455"
+            b.append(
+                f'<rect x="{x}" y="{y}" width="76" height="36" rx="6" '
+                f'fill="{fill}" stroke="#9fb8e4"/>'
+            )
+            b.append(
+                f'<text x="{x+38}" y="{y+24}" text-anchor="middle" '
+                f'font-size="18" fill="{tc}">{value}</text>'
+            )
+    b.append(
+        '<text x="420" y="650" class="small">'
+        '각 행의 출력은 [3, 3, 0]. 고정 kernel의 설명용 cross-correlation 예시입니다.'
+        '</text>'
+    )
+    return _svg(
+        "Figure 2. Convolution mechanics",
+        "입력 patch와 kernel의 element-wise 곱이 output 한 위치로 연결됩니다.",
+        "".join(b),
+        710,
+    )
 
 def _cnn_multichannel():
     b=[]
@@ -193,24 +252,64 @@ def _cnn_stride_padding():
                 "같은 input이라도 stride와 padding 설정에 따라 sampling 밀도와 output 크기가 달라집니다.", "".join(b), 700)
 
 
-def _cnn_receptive():
-    b=[]
-    b.append(_panel(35,120,1130,520,"a","Receptive field grows through depth"))
-    b.append('<rect x="80" y="180" width="1020" height="390" rx="22" fill="#fff7ee" stroke="#efc59c"/>')
-    b.append('<ellipse cx="545" cy="380" rx="240" ry="160" fill="#efc087" stroke="#c98a49" stroke-width="3"/>')
-    b.append('<polygon points="365,280 435,205 465,310" fill="#efc087" stroke="#c98a49" stroke-width="3"/>')
-    b.append('<polygon points="725,280 655,205 625,310" fill="#efc087" stroke="#c98a49" stroke-width="3"/>')
-    b.append('<circle cx="475" cy="365" r="18" fill="#26364d"/><circle cx="620" cy="365" r="18" fill="#26364d"/>')
-    b.append('<rect x="450" y="340" width="55" height="55" rx="8" fill="none" stroke="#2454d8" stroke-width="5"/>')
-    b.append('<rect x="405" y="300" width="150" height="145" rx="10" fill="none" stroke="#08796f" stroke-width="5"/>')
-    b.append('<rect x="300" y="225" width="490" height="300" rx="14" fill="none" stroke="#a24d18" stroke-width="5"/>')
-    b.append('<text x="835" y="300" class="label" fill="#2454d8">Layer 1: local edge</text>')
-    b.append('<text x="835" y="360" class="label" fill="#08796f">Layer 2: part context</text>')
-    b.append('<text x="835" y="430" class="label" fill="#a24d18">Deep layer: object context</text>')
-    b.append('<text x="835" y="490" class="small">이론적 receptive field와 실제 영향력 분포는 같지 않을 수 있습니다.</text>')
-    return _svg("Figure 5. Receptive-field growth",
-                "깊은 layer의 unit일수록 더 넓은 입력 문맥과 연결됩니다.", "".join(b), 690)
 
+def _cnn_receptive():
+    b = []
+    b.append(_panel(35,120,1130,520,"a","Receptive field grows through depth"))
+    b.append(
+        '<rect x="80" y="180" width="1020" height="390" rx="22" '
+        'fill="#fff7ee" stroke="#efc59c"/>'
+    )
+    b.append(
+        '<ellipse cx="545" cy="380" rx="240" ry="160" '
+        'fill="#efc087" stroke="#c98a49" stroke-width="3"/>'
+    )
+    b.append(
+        '<polygon points="365,280 435,205 465,310" '
+        'fill="#efc087" stroke="#c98a49" stroke-width="3"/>'
+    )
+    b.append(
+        '<polygon points="725,280 655,205 625,310" '
+        'fill="#efc087" stroke="#c98a49" stroke-width="3"/>'
+    )
+    b.append(
+        '<circle cx="475" cy="365" r="18" fill="#26364d"/>'
+        '<circle cx="620" cy="365" r="18" fill="#26364d"/>'
+    )
+    b.append(
+        '<rect x="450" y="340" width="55" height="55" rx="8" '
+        'fill="none" stroke="#2454d8" stroke-width="5"/>'
+    )
+    b.append(
+        '<rect x="405" y="300" width="150" height="145" rx="10" '
+        'fill="none" stroke="#08796f" stroke-width="5"/>'
+    )
+    b.append(
+        '<rect x="300" y="225" width="490" height="300" rx="14" '
+        'fill="none" stroke="#a24d18" stroke-width="5"/>'
+    )
+    b.append(
+        '<text x="835" y="300" class="label" fill="#2454d8">'
+        'shallower unit: local region</text>'
+    )
+    b.append(
+        '<text x="835" y="360" class="label" fill="#08796f">'
+        'deeper unit: broader region</text>'
+    )
+    b.append(
+        '<text x="835" y="430" class="label" fill="#a24d18">'
+        'more layers: larger context</text>'
+    )
+    b.append(
+        '<text x="835" y="490" class="small">'
+        '넓은 수용영역이 특정 semantic 의미를 자동 보장하지는 않습니다.</text>'
+    )
+    return _svg(
+        "Figure 5. Receptive-field growth",
+        "깊은 layer의 unit일수록 더 넓은 입력 영역과 연결될 수 있습니다.",
+        "".join(b),
+        690,
+    )
 
 def _cnn_pooling():
     b=[]
@@ -273,30 +372,73 @@ def _vit_overview():
                 "image → patch → token → transformer encoder → classification head", "".join(b), 690)
 
 
+
 def _vit_patch_embedding():
-    b=[]
-    for p in [(35,120,360,500,"a","16×16 patching"),(425,120,330,500,"b","flatten"),(785,120,380,500,"c","linear projection")]:
+    b = []
+    for p in [
+        (35,120,360,500,"a","patching (schematic grid)"),
+        (425,120,330,500,"b","flatten"),
+        (785,120,380,500,"c","linear projection"),
+    ]:
         b.append(_panel(*p))
     for r in range(7):
         for c in range(7):
-            fill="#2454d8" if (r in (2,3) and c in (3,4)) else "#dce7fa"
-            b.append(f'<rect x="{80+c*38}" y="{185+r*38}" width="34" height="34" rx="4" fill="{fill}" stroke="#fff"/>')
-    b.append('<rect x="190" y="300" width="72" height="72" fill="none" stroke="#a24d18" stroke-width="5"/>')
-    b.append('<text x="80" y="500" class="body">224/16 = 14 → 14×14 = 196 patches</text>')
+            fill = "#2454d8" if (r in (2,3) and c in (3,4)) else "#dce7fa"
+            b.append(
+                f'<rect x="{80+c*38}" y="{185+r*38}" width="34" height="34" '
+                f'rx="4" fill="{fill}" stroke="#fff"/>'
+            )
+    b.append(
+        '<rect x="190" y="300" width="72" height="72" '
+        'fill="none" stroke="#a24d18" stroke-width="5"/>'
+    )
+    b.append(
+        '<text x="80" y="500" class="body">'
+        'ViT-B/16 실제 예: 224/16=14 → 196 patches</text>'
+    )
+    b.append(
+        '<text x="80" y="535" class="small">'
+        '위 7×7 grid는 가독성을 위한 축약 도식입니다.</text>'
+    )
     for i in range(12):
-        x=480+(i%3)*72;y=190+(i//3)*62
-        b.append(f'<rect x="{x}" y="{y}" width="55" height="42" rx="6" fill="{"#2454d8" if i in (2,5,8) else "#eef3fb"}" stroke="#9fb8e4"/>')
-    b.append('<text x="475" y="485" class="body">16×16×3 = 768 values</text><text x="475" y="530" class="small">2D patch를 1D vector로 펼침</text>')
+        x = 480 + (i % 3) * 72
+        y = 190 + (i // 3) * 62
+        b.append(
+            f'<rect x="{x}" y="{y}" width="55" height="42" rx="6" '
+            f'fill="{"#2454d8" if i in (2,5,8) else "#eef3fb"}" '
+            'stroke="#9fb8e4"/>'
+        )
+    b.append(
+        '<text x="475" y="485" class="body">16×16×3 = 768 values</text>'
+        '<text x="475" y="530" class="small">2D patch를 1D vector로 펼침</text>'
+    )
     b.append(_arrow(735,350,790,350))
-    b.append('<rect x="840" y="200" width="270" height="95" rx="14" class="orange"/>')
-    b.append('<text x="975" y="240" text-anchor="middle" class="label">z = x_patch E + b</text>')
-    b.append('<text x="975" y="270" text-anchor="middle" class="body">E ∈ R^[P²C × D]</text>')
+    b.append(
+        '<rect x="840" y="200" width="270" height="95" rx="14" class="orange"/>'
+    )
+    b.append(
+        '<text x="975" y="240" text-anchor="middle" class="label">'
+        'z = x_patch E + b</text>'
+    )
+    b.append(
+        '<text x="975" y="270" text-anchor="middle" class="body">'
+        'E ∈ R^[P²C × D]</text>'
+    )
     for i in range(8):
-        b.append(f'<rect x="{850+i*30}" y="355" width="18" height="{65+(i%3)*18}" rx="5" fill="{"#2454d8" if i%2==0 else "#8eace7"}"/>')
-    b.append('<text x="840" y="515" class="body">output: D-dimensional token</text>')
-    return _svg("Figure 2. Patch embedding",
-                "patch를 잘라 펼친 뒤 learned linear projection으로 token embedding을 만듭니다.", "".join(b), 670)
-
+        b.append(
+            f'<rect x="{850+i*30}" y="355" width="18" '
+            f'height="{65+(i%3)*18}" rx="5" '
+            f'fill="{"#2454d8" if i%2==0 else "#8eace7"}"/>'
+        )
+    b.append(
+        '<text x="840" y="515" class="body">output: D-dimensional token</text>'
+    )
+    return _svg(
+        "Figure 2. Patch embedding",
+        "patch를 펼친 뒤 learned linear projection으로 token embedding을 만듭니다.",
+        "".join(b),
+        670,
+    )
 
 def _vit_cls_position():
     b=[]
@@ -344,54 +486,117 @@ def _vit_attention():
                 "Q·K 유사도로 attention weight를 만들고, 그 weight로 V를 혼합합니다.", "".join(b), 640)
 
 
+
 def _vit_multihead():
-    b=[]
-    for p in [(35,120,1130,500,"a","Different heads can focus on different token relations")]:
-        b.append(_panel(*p))
-    centers=[(190,300,"Head 1","nearby shape","#2454d8"),(465,300,"Head 2","long-range relation","#08796f"),(740,300,"Head 3","texture/color","#a24d18")]
-    for cx,cy,h,sub,col in centers:
-        b.append(f'<circle cx="{cx}" cy="{cy}" r="90" fill="#fff" stroke="{col}" stroke-width="4"/>')
+    b = []
+    b.append(
+        _panel(
+            35,120,1130,500,"a",
+            "Illustrative relation patterns from different heads",
+        )
+    )
+    centers = [
+        (190,300,"Head 1","example pattern A","#2454d8"),
+        (465,300,"Head 2","example pattern B","#08796f"),
+        (740,300,"Head 3","example pattern C","#a24d18"),
+    ]
+    for cx, cy, head, sub, color in centers:
+        b.append(
+            f'<circle cx="{cx}" cy="{cy}" r="90" fill="#fff" '
+            f'stroke="{color}" stroke-width="4"/>'
+        )
         for i in range(6):
-            px=cx-55+(i%3)*55;py=cy-35+(i//3)*70
-            b.append(f'<circle cx="{px}" cy="{py}" r="10" fill="{"#203455" if i==0 else "#b8c7df"}"/>')
-        if h=="Head 1":
-            b.append(f'<path d="M{cx-55} {cy-35} L{cx} {cy-35} L{cx+55} {cy-35}" stroke="{col}" stroke-width="4" fill="none"/>')
-        elif h=="Head 2":
-            b.append(f'<path d="M{cx-55} {cy-35} L{cx+55} {cy+35}" stroke="{col}" stroke-width="4" fill="none"/>')
+            px = cx - 55 + (i % 3) * 55
+            py = cy - 35 + (i // 3) * 70
+            b.append(
+                f'<circle cx="{px}" cy="{py}" r="10" '
+                f'fill="{"#203455" if i==0 else "#b8c7df"}"/>'
+            )
+        if head == "Head 1":
+            b.append(
+                f'<path d="M{cx-55} {cy-35} L{cx} {cy-35} '
+                f'L{cx+55} {cy-35}" stroke="{color}" '
+                'stroke-width="4" fill="none"/>'
+            )
+        elif head == "Head 2":
+            b.append(
+                f'<path d="M{cx-55} {cy-35} L{cx+55} {cy+35}" '
+                f'stroke="{color}" stroke-width="4" fill="none"/>'
+            )
         else:
-            b.append(f'<path d="M{cx} {cy-35} L{cx-55} {cy+35} M{cx} {cy-35} L{cx+55} {cy+35}" stroke="{col}" stroke-width="4" fill="none"/>')
-        b.append(f'<text x="{cx}" y="430" text-anchor="middle" class="label">{h}</text><text x="{cx}" y="458" text-anchor="middle" class="small">{sub}</text>')
+            b.append(
+                f'<path d="M{cx} {cy-35} L{cx-55} {cy+35} '
+                f'M{cx} {cy-35} L{cx+55} {cy+35}" '
+                f'stroke="{color}" stroke-width="4" fill="none"/>'
+            )
+        b.append(
+            f'<text x="{cx}" y="430" text-anchor="middle" '
+            f'class="label">{head}</text>'
+            f'<text x="{cx}" y="458" text-anchor="middle" '
+            f'class="small">{sub}</text>'
+        )
     b.append(_arrow(840,300,955,300))
-    b.append('<rect x="970" y="235" width="145" height="130" rx="16" class="blue"/>')
-    b.append('<text x="1042" y="285" text-anchor="middle" class="label">Concat</text><text x="1042" y="325" text-anchor="middle" class="body">+ projection</text>')
-    b.append('<text x="115" y="560" class="small">각 head에 특정 의미가 반드시 고정되는 것은 아니며, 서로 다른 subspace에서 관계를 학습한다는 점이 핵심입니다.</text>')
-    return _svg("Figure 5. Multi-head self-attention",
-                "여러 attention head가 병렬로 서로 다른 관계 패턴을 표현할 수 있습니다.", "".join(b), 670)
+    b.append(
+        '<rect x="970" y="235" width="145" height="130" rx="16" class="blue"/>'
+    )
+    b.append(
+        '<text x="1042" y="285" text-anchor="middle" class="label">Concat</text>'
+        '<text x="1042" y="325" text-anchor="middle" class="body">+ projection</text>'
+    )
+    b.append(
+        '<text x="115" y="560" class="small">'
+        '각 head의 사람이 붙인 의미는 고정되지 않습니다. '
+        '서로 다른 learned projections에서 관계를 병렬 계산하는 예시입니다.</text>'
+    )
+    return _svg(
+        "Figure 5. Multi-head self-attention",
+        "여러 attention head가 서로 다른 learned relation pattern을 병렬 계산합니다.",
+        "".join(b),
+        670,
+    )
 
 
 def _vit_attention_map():
-    b=[]
-    for p in [(35,120,520,500,"a","Patch grid"),(605,120,560,500,"b","Example attention map")]:
+    b = []
+    for p in [
+        (35,120,520,500,"a","Patch grid"),
+        (605,120,560,500,"b","Synthetic attention example"),
+    ]:
         b.append(_panel(*p))
-    # object-like patch grid
     for r in range(7):
         for c in range(7):
-            active=(2<=r<=5 and 2<=c<=4)
-            fill="#e8eef8" if not active else "#d6aa78"
-            b.append(f'<rect x="{95+c*55}" y="{190+r*50}" width="48" height="43" rx="5" fill="{fill}" stroke="#fff"/>')
-    b.append('<circle cx="287" cy="300" r="10" fill="#2454d8"/><text x="100" y="575" class="small">파란 점: query patch</text>')
-    vals=[]
+            active = 2 <= r <= 5 and 2 <= c <= 4
+            fill = "#e8eef8" if not active else "#d6aa78"
+            b.append(
+                f'<rect x="{95+c*55}" y="{190+r*50}" width="48" height="43" '
+                f'rx="5" fill="{fill}" stroke="#fff"/>'
+            )
+    b.append(
+        '<circle cx="287" cy="300" r="10" fill="#2454d8"/>'
+        '<text x="100" y="575" class="small">파란 점: query patch</text>'
+    )
+    vals = []
     for r in range(7):
-        row=[]
+        row = []
         for c in range(7):
-            d=abs(r-3)+abs(c-3)
+            d = abs(r-3) + abs(c-3)
             row.append(max(0,4-d))
         vals.append(row)
     b.append(_grid(675,185,7,7,52,"heat",vals))
-    b.append('<text x="675" y="575" class="small">예시 heatmap: query token이 다른 patch를 얼마나 참고하는지 시각화</text>')
-    return _svg("Figure 6. Attention map as a spatial heatmap",
-                "attention weight를 원래 patch 위치로 되돌리면 관계를 공간 heatmap처럼 볼 수 있습니다.", "".join(b), 670)
-
+    b.append(
+        '<text x="675" y="555" class="small">'
+        '합성 heatmap: 실제 모델에서 측정한 attention이 아닙니다.</text>'
+    )
+    b.append(
+        '<text x="675" y="585" class="small">'
+        '행/열의 weight를 patch 위치에 대응해 읽는 방법만 설명합니다.</text>'
+    )
+    return _svg(
+        "Figure 6. Attention map as a spatial heatmap",
+        "attention weight를 patch 위치에 대응시키는 방법을 합성 예시로 보여줍니다.",
+        "".join(b),
+        670,
+    )
 
 def _pc_overview():
     b=[]
@@ -512,68 +717,50 @@ def _pc_heatmap():
                 "지역 feature score를 원래 공간에 다시 배치하면 결함 위치를 heatmap으로 표현할 수 있습니다.", "".join(b), 650)
 
 
+
 def _pc_score_aggregation():
-    b=[]
-    for p in [(35,120,520,500,"a","Patch-score distribution"),(605,120,560,500,"b","Image-level decision")]:
+    b = []
+    for p in [
+        (35,120,520,500,"a","Patch-score distribution"),
+        (605,120,560,500,"b","Operational decision (generic)"),
+    ]:
         b.append(_panel(*p))
-    # histogram-like bars
-    vals=[28,42,58,82,110,145,120,82,48,22]
-    for i,h in enumerate(vals):
-        x=90+i*40
-        b.append(f'<rect x="{x}" y="{520-h}" width="28" height="{h}" rx="4" fill="#8eace7"/>')
-    b.append('<rect x="420" y="260" width="28" height="260" rx="4" fill="#a24d18"/>')
-    b.append('<text x="88" y="560" class="small">대부분 낮은 patch score + 일부 높은 patch score</text>')
+    vals = [28,42,58,82,110,145,120,82,48,22]
+    for i, height in enumerate(vals):
+        x = 90 + i * 40
+        b.append(
+            f'<rect x="{x}" y="{520-height}" width="28" height="{height}" '
+            'rx="4" fill="#8eace7"/>'
+        )
+    b.append(
+        '<rect x="420" y="260" width="28" height="260" rx="4" fill="#a24d18"/>'
+    )
+    b.append(
+        '<text x="88" y="560" class="small">'
+        '합성 patch-score 분포: 실제 PatchCore benchmark 결과가 아닙니다.</text>'
+    )
     b.append('<path d="M670 500 H1095 M670 500 V200" class="thin"/>')
-    b.append('<path d="M690 470 C780 445 840 400 900 330 C970 250 1030 220 1080 210" stroke="#2454d8" stroke-width="5" fill="none"/>')
-    b.append('<line x1="670" y1="330" x2="1095" y2="330" stroke="#a24d18" stroke-width="3" stroke-dasharray="10 7"/>')
-    b.append('<text x="930" y="315" class="body">operating threshold</text>')
-    b.append('<text x="690" y="555" class="small">image score 집계 방식과 threshold는 실제 운영 목적에 맞게 별도 검증 필요</text>')
-    return _svg("Figure 6. From patch scores to an image-level decision",
-                "지역 이상 점수를 image score로 집계한 뒤 운영 threshold와 비교합니다.", "".join(b), 660)
-
-
-BUILDERS = {
-    "cnn-paper-overview.svg": _cnn_overview,
-    "cnn-paper-convolution.svg": _cnn_convolution,
-    "cnn-paper-multichannel.svg": _cnn_multichannel,
-    "cnn-paper-stride-padding.svg": _cnn_stride_padding,
-    "cnn-paper-receptive-field.svg": _cnn_receptive,
-    "cnn-paper-pooling.svg": _cnn_pooling,
-    "vit-paper-overview.svg": _vit_overview,
-    "vit-paper-patch-embedding.svg": _vit_patch_embedding,
-    "vit-paper-cls-position.svg": _vit_cls_position,
-    "vit-paper-attention.svg": _vit_attention,
-    "vit-paper-multihead.svg": _vit_multihead,
-    "vit-paper-attention-map.svg": _vit_attention_map,
-    "patchcore-paper-overview.svg": _pc_overview,
-    "patchcore-paper-features.svg": _pc_features,
-    "patchcore-paper-coreset.svg": _pc_coreset,
-    "patchcore-paper-nearest.svg": _pc_nearest,
-    "patchcore-paper-heatmap.svg": _pc_heatmap,
-    "patchcore-paper-score.svg": _pc_score_aggregation,
-}
-
-PAPER_FIGURE_META = {
-    "cnn-paper-overview.svg": ("CNN overview", "입력에서 feature hierarchy와 prediction까지 한 화면에서 연결합니다."),
-    "cnn-paper-convolution.svg": ("Convolution mechanics", "3×3 patch와 kernel의 곱셈-합산을 실제 숫자 grid로 보여줍니다."),
-    "cnn-paper-multichannel.svg": ("Multi-channel convolution", "RGB channel별 response가 output channel로 합쳐지는 구조입니다."),
-    "cnn-paper-stride-padding.svg": ("Stride and padding", "stride와 padding에 따른 sampling과 output 크기를 비교합니다."),
-    "cnn-paper-receptive-field.svg": ("Receptive-field growth", "layer depth에 따라 입력에서 연결되는 공간 범위가 넓어지는 모습을 보여줍니다."),
-    "cnn-paper-pooling.svg": ("Pooling", "max/average pooling의 수치 예와 의미를 비교합니다."),
-    "vit-paper-overview.svg": ("Vision Transformer overview", "image에서 patch token을 거쳐 classification까지 이어지는 전체 과정입니다."),
-    "vit-paper-patch-embedding.svg": ("Patch embedding", "patching, flatten, projection을 숫자/벡터 관점에서 연결합니다."),
-    "vit-paper-cls-position.svg": ("CLS and position", "CLS token과 positional embedding이 sequence에 들어가는 방식을 보여줍니다."),
-    "vit-paper-attention.svg": ("Self-attention", "Q/K/V, attention matrix, weighted value mixing을 한 figure로 연결합니다."),
-    "vit-paper-multihead.svg": ("Multi-head attention", "여러 head가 서로 다른 token relation을 병렬로 표현하는 개념도입니다."),
-    "vit-paper-attention-map.svg": ("Attention heatmap", "attention matrix를 image patch 위치에 대응한 heatmap으로 읽는 예시입니다."),
-    "patchcore-paper-overview.svg": ("PatchCore overview", "정상 feature memory와 test nearest-neighbor distance를 연결합니다."),
-    "patchcore-paper-features.svg": ("Local feature descriptors", "중간 CNN feature map에서 지역 descriptor가 만들어지는 과정을 보여줍니다."),
-    "patchcore-paper-coreset.svg": ("Coreset selection", "전체 normal feature cloud와 representative subset을 scatter 형태로 비교합니다."),
-    "patchcore-paper-nearest.svg": ("Nearest-neighbor scoring", "feature space에서 정상과 가까운 query, 먼 query의 거리 차이를 보여줍니다."),
-    "patchcore-paper-heatmap.svg": ("Anomaly heatmap", "patch score가 spatial heatmap과 overlay로 변환되는 과정을 보여줍니다."),
-    "patchcore-paper-score.svg": ("Image-level score", "patch-score distribution을 image-level decision으로 연결하는 개념입니다."),
-}
-
+    b.append(
+        '<path d="M690 470 C780 445 840 400 900 330 '
+        'C970 250 1030 220 1080 210" '
+        'stroke="#2454d8" stroke-width="5" fill="none"/>'
+    )
+    b.append(
+        '<line x1="670" y1="330" x2="1095" y2="330" '
+        'stroke="#a24d18" stroke-width="3" stroke-dasharray="10 7"/>'
+    )
+    b.append('<text x="930" y="315" class="body">example threshold</text>')
+    b.append(
+        '<text x="690" y="555" class="small">'
+        '원 논문의 image-level scoring은 재가중 세부가 있으므로 구현을 별도 확인합니다.'
+        '</text>'
+    )
+    return _svg(
+        "Figure 6. Patch scores and an operational decision",
+        "지역 score를 최종 판정에 연결하는 일반화된 흐름이며 원 논문 식을 대체하지 않습니다.",
+        "".join(b),
+        660,
+    )
 
 def build_paper_figures(output_dir):
     output_dir = Path(output_dir)
