@@ -2,7 +2,7 @@
 
 > Repository: https://github.com/sh0427-han/vision_ai  
 > Pages: https://sh0427-han.github.io/vision_ai/  
-> TODO 작성 시점의 main commit: `d8f6f5d19fedd08c2aafed2b86ccd156c5f4bbc8`
+> TODO 작성 시점의 main commit: `afc720165cbb1676e90ea2999c443596805c45a2`
 
 ## 작업 목적
 
@@ -15,6 +15,13 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] 44개 reference figure + 18개 paper-style figure + 실제 삽입 extra diagram을 정의·수식·수치 기준으로 전수 semantic audit
+- [x] paper-style CNN convolution output 수치 오류 수정: 3×3 output 각 행 `[3, 3, 0]`
+- [x] ViT patch-grid 축약 도식 / multi-head 의미 / attention heatmap이 합성 예시임을 명시
+- [x] receptive field를 edge/part/object 의미와 자동 대응시키는 과도한 설명 제거
+- [x] SVM support-vector 표시 좌표, Bayes likelihood 축 의미, VI/ELBO·MCMC 표현 교정
+- [x] `논문 해설` 최상위 카테고리를 제거하고 주제 중심 구조로 재편
+- [x] ResNet → CNN, U-Net → Vision Tasks에 병합; ViT·PatchCore는 Transformer/Anomaly Detection의 대표 논문으로 재프레이밍
 - [x] 잘못된 시각 설명 교정: SVM hinge loss, augmentation 조건, DINO teacher/student 방향, PCA projection, HMM Viterbi, GMM, ensemble/MoE, IoU/NMS
 - [x] CS231n multi-channel convolution / receptive field / ViT attention figure 추가
 - [x] PRML Bernoulli-Binomial / ML-MAP figure 추가
@@ -23,7 +30,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] CNN / ViT / PatchCore에 paper-style multi-panel figure 적용
 - [x] CS231n / PRML에 대형 reference figure atlas 추가
 - [x] `scripts/reference_figures.py` 추가
-- [x] 현재 main 기준 CS231n 22개 + PRML 19개 = 총 41개 reference SVG 생성
+- [x] 현재 main 기준 CS231n 24개 + PRML 20개 = 총 44개 reference SVG 생성
 - [x] 기존 simple diagram 일부는 종합 페이지에서 중복되지 않도록 비활성화
 - [x] build / validate / GitHub Pages deploy 성공
 - [x] figure를 1열 전체 폭으로 표시하여 크기 문제 완화
@@ -40,7 +47,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [ ] 일부 개념은 “그림 수”는 많지만 핵심 intuition을 보여주는 대표 figure가 부족하다.
 - [ ] 일부 figure는 실제 plot/heatmap/feature map보다 개념 요약 카드에 가깝다.
 - [ ] 모바일/좁은 화면에서 text와 panel spacing을 다시 확인해야 한다.
-- [ ] 모든 figure를 실제 렌더링 이미지로 육안 QA하지 않았다.
+- [ ] 모든 figure를 브라우저 raster render 기준으로 최종 육안 QA해야 한다. (source/semantic 전수 검수와 SVG 정적 검증은 완료)
 
 ### 공통 수정 원칙
 
@@ -340,7 +347,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [ ] `sh0427-han/vision_ai` 최신 main 조회
 - [ ] 이 `TODO.md` 확인
 - [ ] `scripts/reference_figures.py` 및 현재 `REFERENCE_VISUALS` 확인
-- [ ] CS231n / PRML 현재 생성 figure 전부 렌더링하여 visual QA
+- [ ] 배포 artifact를 raster render하여 CS231n / PRML + paper-style figure 최종 visual QA
 - [ ] 텍스트 overflow / clipping / 중복 figure 우선 수정
 - [ ] 위 누락 figure 중 흐름상 필수 항목 추가
 - [ ] build 실행
