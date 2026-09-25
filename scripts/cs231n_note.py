@@ -63,50 +63,111 @@ captioning, self-supervised learning, diffusion, CLIP과 DINO까지 연결합니
             ),
             section(
                 "classification",
-                "1. Image Classification: 데이터가 곧 경험이다",
+                "1. Image Classification: 픽셀 배열에서 의미 있는 label로",
                 """
-<p>이미지 분류의 입력은 픽셀 배열 <code>x</code>, 출력은 K개 클래스 중 하나입니다.
-가장 단순한 데이터 기반 접근인 k-Nearest Neighbor(kNN)는 새 이미지와 학습 이미지를
-직접 비교합니다. 별도의 학습 가능한 가중치는 없지만, 추론 시 학습 데이터를 검색해야
-하므로 데이터가 커질수록 비용이 커집니다.</p>
+<h3>1) 문제 정의: 이미지 하나를 고정된 class 중 하나로 분류한다</h3>
+<p>Image Classification(이미지 분류)은 입력 이미지 <code>x</code>를 받아 미리 정한
+K개의 class 중 하나의 label을 예측하는 문제입니다. 학습 데이터는
+<code>(image, label)</code> 쌍이고, 최종 평가는 학습 중 보지 않은 이미지에서
+정답 label을 얼마나 잘 맞추는지 확인합니다. 모델이 내부적으로 score나 probability를
+출력할 수 있지만, 이 장에서 먼저 볼 핵심은 <strong>픽셀 배열에서 의미 있는 class를
+구분하는 규칙을 데이터로부터 학습한다</strong>는 점입니다.</p>
+
+<h3>2) 사람에게 같은 물체가 컴퓨터의 픽셀 공간에서는 크게 달라질 수 있다</h3>
+<p>CS231n은 이미지 분류가 어려운 이유로 viewpoint variation(시점 변화),
+scale variation(크기 변화), deformation(변형), occlusion(가림),
+illumination(조명), background clutter(복잡한 배경), intra-class variation
+(같은 class 내부의 외형 차이)을 제시합니다. 사람은 이런 변화가 있어도 같은
+물체라고 판단하지만, raw pixel 값은 크게 바뀔 수 있습니다. 반대로 서로 다른
+class라도 배경색이나 전체 밝기가 비슷하면 픽셀 거리는 작아질 수 있습니다.</p>
+
+<h3>3) Data-driven approach: 규칙을 직접 코딩하지 않고 예시에서 학습한다</h3>
+<p>고양이·자동차처럼 복잡한 시각 개념을 사람이 if-else 규칙으로 모두 작성하기는
+어렵습니다. 대신 labeled training set을 모으고, 학습 알고리즘이 데이터에서
+분류 규칙을 찾게 합니다. 이 흐름을 가장 단순하게 보여 주는 baseline이
+<strong>k-Nearest Neighbor (kNN, k-최근접 이웃)</strong>입니다. kNN은 별도의
+신경망 파라미터를 학습하는 대신 training sample을 저장해 두고, 새 입력과 가까운
+sample들의 label을 이용해 예측합니다.</p>
 """
                 + equation(
                     "L1 거리 = Σᵢ |xᵢ − yᵢ|\n"
                     "L2 거리 = √(Σᵢ (xᵢ − yᵢ)²)"
                 )
                 + """
-<p>예를 들어 두 3차원 벡터가 <code>[1, 2, 3]</code>과 <code>[2, 2, 5]</code>라면
-L1 거리는 3, L2 거리는 √5 ≈ 2.236입니다. 실제 32 × 32 × 3 CIFAR-10 이미지는
-3,072차원이므로 단순 픽셀 거리는 배경 이동, 조명, 물체 위치 변화에 매우 민감합니다.
-이 한계가 “유용한 특징을 학습하는 모델”로 넘어가는 동기가 됩니다.</p>
+<p>예를 들어 두 3차원 벡터가 <code>[1, 2, 3]</code>과
+<code>[2, 2, 5]</code>라면 L1 거리는 3이고 L2 거리는
+<code>√5 ≈ 2.236</code>입니다. CIFAR-10의 32 × 32 × 3 이미지를 한 줄로 펴면
+3,072차원 벡터가 됩니다. 이 공간에서 픽셀별 차이를 그대로 더하면 작은 이동,
+조명 변화, 배경 변화도 모두 거리로 계산됩니다.</p>
+
+<h3>4) k는 “몇 개의 이웃에게 투표시킬 것인가”를 정하는 hyperparameter다</h3>
+<p><code>k=1</code>이면 가장 가까운 sample 하나의 label을 사용합니다.
+<code>k&gt;1</code>이면 가까운 k개 sample의 label을 모아 다수결로 예측합니다.
+k를 늘리면 한 개의 이상치에 덜 민감해지고 decision region이 더 부드러워질 수 있지만,
+너무 큰 k는 서로 다른 local structure를 뭉개거나 다수 class 쪽으로 편향시킬 수
+있습니다. 따라서 k는 데이터에 맞춰 선택해야 하는 <strong>hyperparameter
+(학습으로 직접 정하지 않고 사용자가 탐색하는 설정값)</strong>입니다.</p>
+<p>거리 함수도 hyperparameter입니다. L1은 좌표별 절댓값 차이를 더하고,
+L2는 큰 좌표 차이에 더 큰 벌점을 줍니다. L2로 최근접 순서만 구할 때는
+제곱근이 단조 증가 함수이므로 <code>√</code>를 생략하고 제곱거리만 비교해도
+이웃의 순서는 같습니다.</p>
+<p>Brute-force kNN에서 “training”은 사실상 데이터를 저장하는 일에 가깝습니다.
+반면 test image 하나를 예측하려면 N개의 training sample과 D차원 거리를 비교하므로
+대략 <code>O(ND)</code> 계산이 필요하고, training data 자체도 보관해야 합니다.
+즉 학습은 가볍지만 추론이 무거운 구조입니다.</p>
 """
                 + table(
-                    ["분할", "역할", "하면 안 되는 일"],
+                    ["데이터", "무엇에 사용하는가", "경계"],
                     [
                         (
                             "Train",
-                            "파라미터를 학습",
-                            "Test 성능을 보고 반복 수정",
+                            "classifier를 학습하거나 kNN의 reference sample로 사용",
+                            "모델 선택 기준으로 Test를 대신 사용하지 않음",
                         ),
                         (
                             "Validation",
-                            "하이퍼파라미터·모델 선택",
-                            "최종 일반화 성능처럼 보고",
+                            "k, distance metric, 모델·하이퍼파라미터 선택",
+                            "여기서 반복 비교한 결과를 최종 Test 성능처럼 해석하지 않음",
                         ),
                         (
                             "Test",
-                            "최종 선택이 끝난 뒤 1회 평가",
-                            "threshold·증강·구조를 다시 맞춤",
+                            "모든 선택이 끝난 뒤 최종 일반화 성능 확인",
+                            "결과를 보고 다시 threshold·구조를 맞추지 않음",
                         ),
                     ],
                 )
                 + """
-<p>CS231n은 kNN의 <code>k</code>, 거리 함수 같은 하이퍼파라미터를 validation으로
-고르는 흐름을 강조합니다. 데이터가 충분히 큰 경우에는 단일 validation split을,
-작은 경우에는 cross-validation을 고려할 수 있습니다. 이미지·영상에서는 같은 원본의
-프레임이 train과 test에 동시에 들어가지 않도록 <strong>그룹 단위 분리</strong>까지
-추가로 생각해야 합니다.</p>
-""",
+<h3>5) Validation으로 선택하고 Test는 마지막까지 격리한다</h3>
+<p>kNN에서는 어떤 <code>k</code>가 좋은지, L1과 L2 중 어떤 거리가 좋은지 미리
+알 수 없습니다. 따라서 training data의 일부를 validation set으로 분리해 여러
+설정을 비교하고, 선택이 끝난 뒤 test set을 한 번 사용합니다. validation data가
+너무 작아 결과 변동이 큰 경우에는 training data를 여러 fold로 나누어 validation
+역할을 순환시키는 cross-validation을 사용할 수 있습니다. 이때도 <strong>test set은
+fold 안에 들어가지 않습니다.</strong></p>
+<p>CS231n의 기본 예시는 독립적인 이미지 데이터를 train/validation으로 나누는
+방식입니다. 그러나 영상 frame, burst 촬영, 같은 wafer/lot처럼 서로 매우 비슷한
+sample이 묶여 있는 데이터에서는 random frame split만 하면 거의 같은 장면이
+train과 validation/test에 동시에 들어가 성능이 과대평가될 수 있습니다. 이런 경우에는
+원본 video·설비·lot 같은 source 단위로 묶어서 분리하는 grouped split이 필요합니다.</p>
+"""
+                + callout(
+                    "CS231n 원문과 실무 확장을 구분하기",
+                    (
+                        "kNN, L1/L2, validation과 cross-validation은 CS231n Image "
+                        "Classification 노트의 핵심 내용입니다. 영상·near-duplicate를 "
+                        "source 단위로 분리하는 grouped split은 같은 일반화 원칙을 "
+                        "산업 Vision 데이터에 확장한 실무 규칙입니다."
+                    ),
+                )
+                + callout(
+                    "이 장에서 가져갈 핵심",
+                    (
+                        "raw pixel 거리는 semantic similarity와 다를 수 있습니다. "
+                        "kNN은 이 한계를 아주 단순한 형태로 보여 주고, k와 거리 함수는 "
+                        "validation에서 선택해야 합니다. 이 문제의식이 다음 장의 "
+                        "학습 가능한 feature와 classifier로 넘어가는 출발점입니다."
+                    ),
+                ),
             ),
             section(
                 "linear",

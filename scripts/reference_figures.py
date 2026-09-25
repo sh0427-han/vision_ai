@@ -379,33 +379,229 @@ def _value_grid(x, y, values, cell=32, fill="#f4f7fb"):
     return "".join(parts)
 
 
-def _knn_semantics(x, y, w, h):
-    parts = [
-        f'<text x="{x+20}" y="{y+45}" class="label">same class</text>',
-        f'<text x="{x+20}" y="{y+205}" class="label">different class</text>',
+
+def _classification_challenges(x, y, w, h):
+    """Compact visual examples of nuisance variation in image classification."""
+    parts = []
+    cards = [
+        ("viewpoint", "view"),
+        ("scale", "scale"),
+        ("deformation", "deform"),
+        ("occlusion", "occlude"),
+        ("illumination", "light"),
+        ("background", "background"),
     ]
-    patterns = [
-        ([6, 7, 11, 12, 16, 17], [7, 8, 12, 13, 17, 18]),
-        ([6, 8, 12, 16, 18], [6, 7, 12, 17, 18]),
-    ]
-    row_y = [y + 65, y + 225]
-    for idx, (left_hot, right_hot) in enumerate(patterns):
-        yy = row_y[idx]
-        parts.append(_grid(x + 35, yy, 5, 5, 22, "gray", left_hot))
-        parts.append(_arrow(x + 160, yy + 52, x + 210, yy + 52))
-        parts.append(_grid(x + 225, yy, 5, 5, 22, "gray", right_hot))
-        label = "pixel distance: large" if idx == 0 else "pixel distance: small"
-        color = "#a24d18" if idx == 0 else "#08796f"
+    cols = 3
+    gap = 12
+    card_w = (w - gap * (cols - 1)) / cols
+    card_h = 132
+    for idx, (label, mode) in enumerate(cards):
+        row, col = divmod(idx, cols)
+        px = x + col * (card_w + gap)
+        py = y + 48 + row * (card_h + 14)
+        cx = px + card_w / 2
+        cy = py + 77
         parts.append(
-            f'<text x="{x+365}" y="{yy+58}" class="body" fill="{color}">'
+            f'<rect x="{px}" y="{py}" width="{card_w}" height="{card_h}" rx="10" '
+            'fill="#fbfcfe" stroke="#d6deea"/>'
+        )
+        parts.append(
+            f'<text x="{cx}" y="{py+24}" text-anchor="middle" class="small">'
             f'{_e(label)}</text>'
         )
+        if mode == "view":
+            parts.append(
+                f'<polygon points="{cx-44},{cy+20} {cx-18},{cy-18} {cx+7},{cy+20}" '
+                'fill="#8faee8"/>'
+            )
+            parts.append(
+                f'<polygon points="{cx+16},{cy+24} {cx+50},{cy-8} {cx+53},{cy+28}" '
+                'fill="#8faee8"/>'
+            )
+        elif mode == "scale":
+            parts.append(f'<circle cx="{cx-28}" cy="{cy+8}" r="15" fill="#8faee8"/>')
+            parts.append(f'<circle cx="{cx+28}" cy="{cy+3}" r="31" fill="#8faee8"/>')
+        elif mode == "deform":
+            parts.append(f'<circle cx="{cx-30}" cy="{cy+6}" r="24" fill="#8faee8"/>')
+            parts.append(
+                f'<ellipse cx="{cx+31}" cy="{cy+6}" rx="34" ry="18" fill="#8faee8"/>'
+            )
+        elif mode == "occlude":
+            parts.append(f'<circle cx="{cx}" cy="{cy+5}" r="35" fill="#8faee8"/>')
+            parts.append(
+                f'<rect x="{cx-5}" y="{cy-38}" width="54" height="78" '
+                'fill="#c6ced9" opacity=".92"/>'
+            )
+        elif mode == "light":
+            parts.append(f'<circle cx="{cx-30}" cy="{cy+5}" r="27" fill="#c7d8fa"/>')
+            parts.append(f'<circle cx="{cx+30}" cy="{cy+5}" r="27" fill="#355b9f"/>')
+        else:
+            parts.append(
+                f'<rect x="{px+15}" y="{py+43}" width="{card_w-30}" height="70" '
+                'fill="#eef2f6" stroke="#d6deea"/>'
+            )
+            for j in range(8):
+                dx = px + 26 + (j % 4) * 26
+                dy = py + 55 + (j // 4) * 38
+                parts.append(f'<circle cx="{dx}" cy="{dy}" r="6" fill="#c3ccd9"/>')
+            parts.append(f'<circle cx="{cx}" cy="{cy+6}" r="24" fill="#8faee8"/>')
     parts.append(
-        f'<text x="{x+20}" y="{y+h-18}" class="small">'
-        "raw pixels measure appearance, not semantic identity</text>"
+        f'<text x="{x+18}" y="{y+h-18}" class="small">'
+        "label should stay stable across nuisance variation</text>"
     )
     return "".join(parts)
 
+
+def _classification_pipeline(x, y, w, h):
+    """Data-driven image classification: examples -> learned model -> unseen image."""
+    parts = []
+    left = x + 20
+    train_y = y + 92
+    for idx, (shape, label) in enumerate([
+        ("circle", "A"), ("square", "B"), ("circle", "A"), ("square", "B")
+    ]):
+        px = left + idx * 56
+        if shape == "circle":
+            parts.append(f'<circle cx="{px+20}" cy="{train_y}" r="17" fill="#8faee8"/>')
+        else:
+            parts.append(
+                f'<rect x="{px+3}" y="{train_y-17}" width="34" height="34" rx="5" '
+                'fill="#8ccdbb"/>'
+            )
+        parts.append(
+            f'<text x="{px+20}" y="{train_y+43}" text-anchor="middle" class="small">'
+            f'{label}</text>'
+        )
+    parts.append(
+        f'<text x="{left}" y="{y+48}" class="small">labeled training examples</text>'
+    )
+
+    model_x = x + w * .57
+    parts.append(_arrow(x + 245, train_y, model_x - 52, train_y))
+    parts.append(
+        f'<rect x="{model_x-48}" y="{train_y-35}" width="96" height="70" rx="11" '
+        'fill="#edf3ff" stroke="#8faee8" stroke-width="2"/>'
+    )
+    parts.append(
+        f'<text x="{model_x}" y="{train_y-5}" text-anchor="middle" class="small">'
+        "learn</text>"
+    )
+    parts.append(
+        f'<text x="{model_x}" y="{train_y+20}" text-anchor="middle" class="small">'
+        "classifier</text>"
+    )
+
+    test_y = y + 245
+    parts.append(
+        f'<circle cx="{x+82}" cy="{test_y}" r="28" fill="#8faee8" opacity=".85"/>'
+    )
+    parts.append(
+        f'<text x="{x+82}" y="{test_y+48}" text-anchor="middle" class="small">'
+        "unseen image</text>"
+    )
+    parts.append(_arrow(x + 116, test_y, model_x - 52, test_y))
+    parts.append(
+        f'<rect x="{model_x-48}" y="{test_y-35}" width="96" height="70" rx="11" '
+        'fill="#edf3ff" stroke="#8faee8" stroke-width="2"/>'
+    )
+    parts.append(
+        f'<text x="{model_x}" y="{test_y+5}" text-anchor="middle" class="small">'
+        "predict</text>"
+    )
+    parts.append(_arrow(model_x + 50, test_y, x + w - 115, test_y))
+    parts.append(
+        f'<rect x="{x+w-110}" y="{test_y-30}" width="88" height="60" rx="10" '
+        'fill="#e9f7f2" stroke="#8ccdbb" stroke-width="2"/>'
+    )
+    parts.append(
+        f'<text x="{x+w-66}" y="{test_y+6}" text-anchor="middle" class="label">'
+        "label A</text>"
+    )
+    parts.append(
+        f'<text x="{x+18}" y="{y+h-18}" class="small">'
+        "learn rules from examples instead of hand-coding each class</text>"
+    )
+    return "".join(parts)
+
+
+def _knn_vote(x, y, w, h):
+    """Same neighborhood, different k: nearest outlier vs majority vote."""
+    parts = []
+    halves = [
+        (x + 20, "k = 1", "predict B", 22),
+        (x + w / 2 + 5, "k = 5", "predict A", 49),
+    ]
+    sub_w = w / 2 - 28
+    for ox, klabel, pred, radius in halves:
+        cx = ox + sub_w * .52
+        cy = y + 190
+        parts.append(
+            f'<rect x="{ox}" y="{y+52}" width="{sub_w}" height="{h-105}" rx="10" '
+            'fill="#fbfcfe" stroke="#d6deea"/>'
+        )
+        parts.append(
+            f'<text x="{ox+sub_w/2}" y="{y+80}" text-anchor="middle" class="label">'
+            f'{klabel}</text>'
+        )
+        # Class A = blue circles, class B = green squares.
+        points = [
+            (-15, 3, "B"), (23, -12, "A"), (-25, -18, "A"),
+            (32, 16, "A"), (-35, 18, "B"), (58, -40, "B"), (-64, 42, "A"),
+        ]
+        for dx, dy, cls in points:
+            px, py = cx + dx, cy + dy
+            if cls == "A":
+                parts.append(f'<circle cx="{px}" cy="{py}" r="8" fill="#2454d8"/>')
+            else:
+                parts.append(
+                    f'<rect x="{px-7}" y="{py-7}" width="14" height="14" rx="2" '
+                    'fill="#08796f"/>'
+                )
+        parts.append(
+            f'<circle cx="{cx}" cy="{cy}" r="{radius}" fill="none" '
+            'stroke="#a24d18" stroke-width="2.5" stroke-dasharray="6 5"/>'
+        )
+        parts.append(
+            f'<polygon points="{cx},{cy-10} {cx+9},{cy} {cx},{cy+10} '
+            f'{cx-9},{cy}" fill="#a24d18"/>'
+        )
+        parts.append(
+            f'<text x="{ox+sub_w/2}" y="{y+h-37}" text-anchor="middle" '
+            f'class="small">{pred}</text>'
+        )
+    parts.append(
+        f'<text x="{x+18}" y="{y+38}" class="small">'
+        "A = blue circles, B = green squares, orange diamond = query</text>"
+    )
+    return "".join(parts)
+
+
+def _knn_semantics(x, y, w, h):
+    """Binary toy grids where pixel L1 distance conflicts with class semantics."""
+    parts = [
+        f'<text x="{x+20}" y="{y+42}" class="label">same class, shifted pattern</text>',
+        f'<text x="{x+20}" y="{y+205}" class="label">different class, similar pixels</text>',
+    ]
+    patterns = [
+        ([6, 7, 11, 12, 16, 17], [7, 8, 12, 13, 17, 18], "binary L1 = 6"),
+        ([6, 8, 12, 16, 18], [6, 7, 12, 17, 18], "binary L1 = 4"),
+    ]
+    row_y = [y + 62, y + 225]
+    for idx, (left_hot, right_hot, distance) in enumerate(patterns):
+        yy = row_y[idx]
+        parts.append(_grid(x + 35, yy, 5, 5, 22, "gray", left_hot))
+        parts.append(_arrow(x + 160, yy + 52, x + 205, yy + 52))
+        parts.append(_grid(x + 220, yy, 5, 5, 22, "gray", right_hot))
+        color = "#a24d18" if idx == 0 else "#08796f"
+        parts.append(
+            f'<text x="{x+355}" y="{yy+58}" class="body" fill="{color}">'
+            f'{distance}</text>'
+        )
+    parts.append(
+        f'<text x="{x+20}" y="{y+h-18}" class="small">'
+        "smaller pixel distance does not guarantee same semantic class</text>"
+    )
+    return "".join(parts)
 
 def _grouped_split(x, y, w, h):
     parts = [
@@ -3623,6 +3819,12 @@ def _panel_content(kind, x, y, w, h, data):
         return _importance_sampling(x,y,w,h)
     if kind=="pca_projection":
         return _pca_projection(x,y,w,h)
+    if kind=="classification_challenges":
+        return _classification_challenges(x,y,w,h)
+    if kind=="classification_pipeline":
+        return _classification_pipeline(x,y,w,h)
+    if kind=="knn_vote":
+        return _knn_vote(x,y,w,h)
     if kind=="knn":
         return _scatter(x,y,w,h,"curve",True)
     if kind=="knn_semantics":
@@ -3764,11 +3966,15 @@ def _render(spec):
 
 FIGURES = {
     # CS231n — classification / linear
-    "cs-knn-distance.svg": dict(title="kNN and pixel-space distance",subtitle="Raw-pixel distance can disagree with semantic similarity.",panels=[
-        dict(title="k nearest neighbors",kind="knn"),
-        dict(title="pixel distance failure cases",kind="knn_semantics"),
+    "cs-classification-problem.svg": dict(title="Image classification: stable labels under visual variation",subtitle="The class should stay stable even when viewpoint, scale, occlusion, illumination or background changes the pixels.",panels=[
+        dict(title="nuisance variation",kind="classification_challenges"),
+        dict(title="data-driven learning pipeline",kind="classification_pipeline"),
     ]),
-    "cs-split.svg": dict(title="Train / validation / test",subtitle="Validation guides choices; grouped splitting keeps near-duplicates from leaking across sets.",panels=[
+    "cs-knn-distance.svg": dict(title="kNN: neighbor voting and pixel-space distance",subtitle="k controls the local vote; raw-pixel distance can still disagree with semantic similarity.",panels=[
+        dict(title="same neighborhood, different k",kind="knn_vote"),
+        dict(title="pixel-distance failure cases",kind="knn_semantics"),
+    ]),
+    "cs-split.svg": dict(title="Train / validation / test",subtitle="Validation guides model choices; grouped splitting is a practical safeguard when samples share a source.",panels=[
         dict(title="distinct data roles",kind="split_roles"),
         dict(title="random frames vs grouped sources",kind="grouped_split"),
     ]),
@@ -4062,7 +4268,7 @@ REFERENCE_FIGURE_META = {
 
 
 REFERENCE_VISUALS = {
-    ("cs231n","classification"): ["cs-knn-distance.svg","cs-split.svg"],
+    ("cs231n","classification"): ["cs-classification-problem.svg","cs-knn-distance.svg","cs-split.svg"],
     ("cs231n","linear"): ["cs-linear-score.svg","cs-softmax-loss.svg","cs-decision-boundary.svg","cs-regularization-objective.svg"],
     ("cs231n","optimization"): ["cs-computational-chain.svg","cs-optimizers.svg","cs-lr-saddle.svg","cs-gradient-stability.svg"],
     ("cs231n","nn"): ["cs-activations.svg","cs-init-bn.svg","cs-reg-dropout.svg","cs-dropout-fit.svg"],

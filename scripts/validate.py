@@ -107,8 +107,8 @@ for path, parser in pages.items():
 extra_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'extra').glob('*.svg'))
 paper_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'paper').glob('*.svg'))
 reference_diagrams = sorted((ROOT / 'assets' / 'diagrams' / 'reference').glob('*.svg'))
-if len(reference_diagrams) != 68:
-    errors.append(f'Expected 68 CS231n/PRML reference figures, found {len(reference_diagrams)}')
+if len(reference_diagrams) != 69:
+    errors.append(f'Expected 69 CS231n/PRML reference figures, found {len(reference_diagrams)}')
 if len(paper_diagrams) != 18:
     errors.append(f'Expected 18 paper-style diagrams, found {len(paper_diagrams)}')
 if len(extra_diagrams) < 60:
@@ -254,6 +254,7 @@ for forbidden in [
         )
 
 for required in [
+    'cs-classification-problem.svg',
     'cs-conv-channels-rf.svg',
     'cs-attention.svg',
     'cs-gradient-stability.svg',

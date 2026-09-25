@@ -31,6 +31,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 
 ## 현재 완료 상태
 
+- [x] 챕터별 검토 방식으로 전환: CS231n Chapter 1 Image Classification 본문·kNN·split figure를 원문 기준으로 재구성
 - [x] 실제 Chromium 390px/430px에서 9개 페이지 mobile layout 검증: global horizontal overflow 0, 본문 viewport 이탈 0, sidebar open/Esc close 정상
 - [x] 모바일 wide reference/paper figure에 좌우 스크롤 안내 표시 추가
 - [x] 820px mobile-scroll 기준 text-density 상위 reference figure를 raster 재검수하고 장문 annotation을 짧은 label로 축약
@@ -63,7 +64,7 @@ CS231n과 PRML(Christopher Bishop, *Pattern Recognition and Machine Learning*) �
 - [x] CNN / ViT / PatchCore에 paper-style multi-panel figure 적용
 - [x] CS231n / PRML에 대형 reference figure atlas 추가
 - [x] `scripts/reference_figures.py` 추가
-- [x] reference atlas를 CS231n 30개 + PRML 38개 = 총 68개 SVG로 확장
+- [x] reference atlas를 CS231n 31개 + PRML 38개 = 총 69개 SVG로 확장
 - [x] 기존 simple diagram 일부는 종합 페이지에서 중복되지 않도록 비활성화
 - [x] build / validate / GitHub Pages deploy 성공
 - [x] figure를 1열 전체 폭으로 표시하여 크기 문제 완화

@@ -28,6 +28,13 @@
 - 새 글은 기존 관련 글과 연결한다. 구현되지 않은 메뉴나 빈 페이지를 게시하지 않는다.
 - 실험·업무의 비공개 데이터나 개인 정보를 자동으로 공개 문서에 복사하지 않는다.
 
+## 챕터별 검토 방식
+
+- 큰 문서를 한 번에 전수 수정하지 않는다. 품질 개선은 기본적으로 **한 번에 하나의 챕터/섹션**만 대상으로 한다.
+- 각 챕터마다 원문/공식 자료 대조 → 본문 흐름 → 수식·숫자 → figure 의미 → caption → 실제 렌더링 → build/validate 순서로 완료한 뒤 다음 챕터로 넘어간다.
+- 현재 챕터와 직접 관련 없는 다른 챕터의 문장·figure는 같은 PR에서 함께 손대지 않는다. 공통 인프라 수정이 꼭 필요한 경우에만 예외로 한다.
+- 챕터 검토 완료 시 무엇을 수정했고 무엇을 다음 챕터로 미뤘는지 TODO.md에 기록한다.
+
 ## 유지보수
 
 1. 기존 `scripts/build.py`의 해당 `note(...)`를 읽고 콘텐츠를 수정한다.
@@ -93,7 +100,7 @@ CS231n 공개 강의 노트의 전체 학습 흐름과 Bishop PRML 14개 장 전
 
 ## CS231n / PRML 시각 아틀라스
 
-- `scripts/reference_figures.py`에서 CS231n 30개, PRML 38개, 총 68개의 대형 multi-panel SVG figure를 생성한다.
+- `scripts/reference_figures.py`에서 CS231n 31개, PRML 38개, 총 69개의 대형 multi-panel SVG figure를 생성한다.
 - CS231n은 kNN, split, linear classifier, softmax/hinge, regularization/L2, optimization/backprop, gradient stability, activation/init/BN/dropout, convolution sliding/feature response, CNN, architecture/VGG, transfer learning, detection/segmentation, visualization/Grad-CAM, modern topics를 시각적으로 커버한다.
 - PRML은 Bayes/posterior predictive, Gaussian/Beta/Dirichlet, regression, bias-variance, generative/discriminative classification, neural-network regularization/early stopping, polynomial/RBF kernel·GP·SVM·RVM, graphical inference, GMM/EM evolution, VI/ELBO/mean-field/EP, Monte Carlo/rejection/MCMC diagnostics, PCA explained variance/PPCA/Factor Analysis/ICA, HMM/Kalman/particle filtering, decision-tree ensemble/MoE/boosting까지 시각적으로 커버한다.
 - 종합 강의 페이지에서는 같은 개념의 기존 simple diagram을 중복 삽입하지 않고 reference figure를 우선한다.
