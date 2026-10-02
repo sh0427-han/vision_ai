@@ -102,3 +102,12 @@ CS231n 공개 강의 노트의 전체 학습 흐름과 Bishop PRML 14개 장 전
 - panel title이 길어지면 글자 크기를 자동 조정하고, 모바일에서는 reference figure를 넓게 유지한 채 가로 스크롤로 읽도록 한다.
 - `scripts/validate.py`에서 reference SVG XML/viewBox/text anchor와 과도하게 긴 내부 label을 정적 검증한다.
 - figure 설명은 수식·정의와 직접 대조해 검증한다. SVM margin, HMM inference target, PCA projection, MoE routing처럼 방향·조건이 중요한 개념은 generic pipeline으로 대체하지 않는다.
+
+
+## 분야별 탐색
+
+- 상단 분야: 반도체 / AI / Vision AI.
+- 반도체: Memory Book, Process Book 외부 링크.
+- AI: 학습·평가, PRML. Vision AI: 이미지·CNN, Transformer·ViT, Vision Tasks, Anomaly Detection, CS231n.
+- 홈페이지는 `?topic=semiconductor|ai|vision`으로 선택 분야를 유지한다. 기본 분야는 Vision AI다.
+- 분야 선택 시 자료 카드와 왼쪽 목차가 함께 바뀐다. 상세 문서의 분야 탭은 해당 분야 홈페이지로 이동한다.

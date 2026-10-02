@@ -923,31 +923,50 @@ patchcore["sections"][0] = (
 )
 
 
+TOPIC_LABELS = {'semiconductor': '반도체', 'ai': 'AI', 'vision': 'Vision AI'}
+
+
+def topic_for(slug):
+    return 'ai' if slug in ('training', 'prml') else 'vision'
+
+
+def topic_tabs(current, prefix):
+    active = topic_for(current) if current != 'home' else 'vision'
+    return '<nav class="topic-tabs" aria-label="학습 분야">' + ''.join(
+        f'<a href="{prefix}index.html?topic={topic}" data-topic-tab="{topic}" '
+        f'{"aria-current=page" if topic == active else ""}>{label}</a>'
+        for topic, label in TOPIC_LABELS.items()
+    ) + '</nav>'
+
+
 def nav(current, prefix):
-    groups = ['이미지·CNN', 'Transformer·Attention', 'Vision Tasks·Segmentation', '학습·평가', 'Anomaly Detection', '종합 이론']
     names = {
-        'pixels': '이미지와 텐서',
-        'cnn': 'CNN · ResNet',
-        'vit': 'Transformer · ViT',
-        'tasks': 'Vision Tasks · U-Net',
-        'training': '학습과 평가',
-        'patchcore': 'Anomaly Detection',
-        'cs231n': 'CS231n 전체 정리',
-        'prml': 'PRML 전체 정리',
+        'pixels': '이미지와 텐서', 'cnn': 'CNN · ResNet',
+        'vit': 'Transformer · ViT', 'tasks': 'Vision Tasks · U-Net',
+        'training': '학습과 평가', 'patchcore': 'Anomaly Detection',
+        'cs231n': 'CS231n 전체 정리', 'prml': 'PRML 전체 정리',
     }
-    content = f'<a href="{prefix}index.html" {"aria-current=page" if current == "home" else ""}><span>00</span>학습 노트 전체</a>'
-    for group in groups:
-        content += f'<p class="nav-label">{group}</p>'
+    active = topic_for(current) if current != 'home' else 'vision'
+    content = ''
+    for topic, label in TOPIC_LABELS.items():
+        content += f'<div data-topic-nav="{topic}" {"hidden" if topic != active else ""}>'
+        content += f'<a href="{prefix}index.html?topic={topic}">{label} 자료 전체</a>'
+        if topic == 'semiconductor':
+            for name, url in [('Memory Book', 'https://memorybook.euiyun.com/index.html'), ('Process Book', 'https://processbook.euiyun.com/')]:
+                content += f'<a href="{url}" target="_blank" rel="noopener noreferrer">{name} ↗</a>'
         for item in NOTES:
-            if item['group'] == group:
-                content += f'<a href="{prefix}notes/{item["slug"]}.html" {"aria-current=page" if current == item["slug"] else ""}><span>{item["label"][:2]}</span>{names[item["slug"]]}</a>'
+            if topic_for(item['slug']) != topic:
+                continue
+            content += f'<p class="nav-label">{item["group"]}</p>'
+            content += f'<a href="{prefix}notes/{item["slug"]}.html" {"aria-current=page" if current == item["slug"] else ""}>{names[item["slug"]]}</a>'
+        content += '</div>'
     return content
 
 
 def page(title, description, current, body, prefix='', toc=''):
     return f'''<!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="{escape(description)}"><meta name="theme-color" content="#14213b"><title>{escape(title)} · Vision AI Notes</title><link rel="icon" href="{prefix}assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="{prefix}assets/site.css"><script src="{prefix}assets/site.js" defer></script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script></head>
-<body><a class="skip" href="#main">본문으로 이동</a><aside id="sidebar" class="sidebar"><a class="brand" href="{prefix}index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Vision AI Notes</a><p class="sub">이해하고, 연결하고, 쌓아가기.</p><nav aria-label="학습 주제">{nav(current, prefix)}</nav><div class="sidebar-foot">Personal study notebook<br><a href="https://github.com/sh0427-han/vision_ai">GitHub 저장소 ↗</a></div></aside><div class="shell"><header class="topbar"><button class="menu" type="button" aria-label="목차 열기" aria-controls="sidebar" aria-expanded="false">목차</button><span class="trail">Vision AI / {"학습 노트" if current == "home" else "개념과 구조"}</span><a href="{prefix}index.html">전체 자료 보기</a></header><div class="layout{' home' if current == 'home' else ''}"><main id="main">{body}</main>{toc}</div></div></body></html>'''
+<body data-page="{current}"><a class="skip" href="#main">본문으로 이동</a><aside id="sidebar" class="sidebar"><a class="brand" href="{prefix}index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Study Notes</a><p class="sub">이해하고, 연결하고, 쌓아가기.</p><nav aria-label="학습 주제">{nav(current, prefix)}</nav><div class="sidebar-foot">Personal study notebook<br><a href="https://github.com/sh0427-han/vision_ai">GitHub 저장소 ↗</a></div></aside><div class="shell"><header class="topbar"><button class="menu" type="button" aria-label="목차 열기" aria-controls="sidebar" aria-expanded="false">목차</button>{topic_tabs(current, prefix)}<a href="{prefix}index.html">전체 자료 보기</a></header><div class="layout{' home' if current == 'home' else ''}"><main id="main">{body}</main>{toc}</div></div></body></html>'''
 
 
 def miniature(slug):
@@ -1027,27 +1046,42 @@ def render():
             encoding='utf-8',
         )
 
-    home = f'''<div class="home-intro"><p class="eyebrow">VISION AI · STUDY NOTEBOOK</p><h1>이미지에서 시작해,<br>모델의 동작까지.</h1><p class="lead">숫자가 특징이 되고, 특징이 판단이 되는 과정.<br>큰 주제를 먼저 이해하고, 관련 논문·강의·교과서를 근거와 사례로 연결하는 학습 노트입니다.</p><a class="start-link" href="notes/pixels.html">이미지와 텐서부터 시작하기 <span aria-hidden="true">→</span></a><div class="meta"><span class="tag">{len(NOTES)}개 학습 자료</span><span class="tag">4개 인터랙티브 예시</span><span class="tag">논문 · 공식 자료 기반</span></div></div>'''
-    group_subtitles = {
+    home = '<div class="home-intro"><p class="eyebrow" id="topic-eyebrow">VISION AI · STUDY NOTEBOOK</p><h1 id="topic-heading">이미지에서 시작해, 모델의 동작까지.</h1><p class="lead" id="topic-description">이미지·모델·평가를 연결해 이해하는 학습 자료입니다.</p></div>'
+    summaries = {
         '이미지·CNN': '픽셀 · 텐서 · 합성곱 · ResNet',
         'Transformer·Attention': 'token · Q/K/V · ViT',
         'Vision Tasks·Segmentation': '분류 · 탐지 · mask · U-Net',
         '학습·평가': 'split · optimization · metric · threshold',
         'Anomaly Detection': 'normal feature · memory bank · PatchCore',
-        '종합 이론': 'CS231n · PRML을 큰 흐름으로 다시 연결',
+        '종합 이론': '강의 · 교과서의 개념 연결',
     }
-    for group in ['이미지·CNN', 'Transformer·Attention', 'Vision Tasks·Segmentation', '학습·평가', 'Anomaly Detection', '종합 이론']:
-        home += f'<div class="section-label"><h2>{group}</h2><span>{group_subtitles[group]}</span></div><div class="note-grid">'
-        for item in NOTES:
-            if item['group'] != group:
-                continue
-            home += f'<a class="note-card" href="notes/{item["slug"]}.html"><div class="mini-viz">{miniature(item["slug"])}</div><div class="card-body"><div class="card-meta"><span>{item["label"]}</span><span>약 {item["minutes"]}분</span></div><h3>{item["title"]}</h3><p>{item["subtitle"]}</p></div></a>'
+    for topic, label in TOPIC_LABELS.items():
+        home += f'<div data-topic-panel="{topic}" {"hidden" if topic != "vision" else ""}>'
+        if topic == 'semiconductor':
+            home += '<div class="section-label"><h2>반도체 학습 자료</h2><span>외부 자료 2개</span></div><p>Memory Book과 Process Book을 함께 보는 반도체 학습 공간입니다. 각 카드를 누르면 원본 자료가 새 탭에서 열립니다.</p><div class="note-grid">'
+            for name, url, description in [
+                ('Memory Book', 'https://memorybook.euiyun.com/index.html', '메모리 분야 공부를 위한 외부 자료'),
+                ('Process Book', 'https://processbook.euiyun.com/', '반도체 공정 공부를 위한 외부 자료'),
+            ]:
+                home += f'<a class="note-card" href="{url}" target="_blank" rel="noopener noreferrer"><div class="card-body"><div class="card-meta"><span>반도체 · 외부 자료</span><span>새 탭 ↗</span></div><h3>{name}</h3><p>{description}</p></div></a>'
+            home += '</div>'
+        else:
+            groups = list(dict.fromkeys(item['group'] for item in NOTES if topic_for(item['slug']) == topic))
+            for group in groups:
+                home += f'<div class="section-label"><h2>{group}</h2><span>{summaries[group]}</span></div><div class="note-grid">'
+                for item in NOTES:
+                    if item['group'] != group or topic_for(item['slug']) != topic:
+                        continue
+                    home += f'<a class="note-card" href="notes/{item["slug"]}.html"><div class="mini-viz">{miniature(item["slug"])}</div><div class="card-body"><div class="card-meta"><span>{item["label"]}</span><span>약 {item["minutes"]}분</span></div><h3>{item["title"]}</h3><p>{item["subtitle"]}</p></div></a>'
+                home += '</div>'
+            other_topic = 'vision' if topic == 'ai' else 'ai'
+            home += f'<section class="article-section"><h2>관련 분야로 이어서 공부하기</h2><p><a href="index.html?topic={other_topic}">{TOPIC_LABELS[other_topic]} 학습 자료 보기 →</a></p></section>'
         home += '</div>'
-    home += '''<section class="article-section" id="external-resources" aria-labelledby="external-resources-title"><h2 id="external-resources-title">함께 보는 외부 학습 자료</h2><p class="small">추천 자료 2개를 새 탭에서 열어 함께 읽어 보세요.</p><div class="note-grid"><a class="note-card" href="https://memorybook.euiyun.com/index.html" target="_blank" rel="noopener noreferrer"><div class="card-body"><div class="card-meta"><span>EXTERNAL RESOURCE</span><span>새 탭 ↗</span></div><h3>Memory Book</h3><p>memorybook.euiyun.com의 학습 자료 열기</p></div></a><a class="note-card" href="https://processbook.euiyun.com/" target="_blank" rel="noopener noreferrer"><div class="card-body"><div class="card-meta"><span>EXTERNAL RESOURCE</span><span>새 탭 ↗</span></div><h3>Process Book</h3><p>processbook.euiyun.com의 학습 자료 열기</p></div></a></div></section>'''
-    home += '''<section class="article-section"><h2>개념을 서로 연결해서 이해하기</h2><div class="two-col"><div class="mini-card"><h3>CNN 안에서 ResNet 이해하기</h3><p>합성곱의 지역 계산을 익힌 뒤, 같은 CNN 주제 안에서 깊은 네트워크의 residual learning으로 확장합니다.</p></div><div class="mini-card"><h3>패치에서 ViT·PatchCore로</h3><p>ViT의 입력 패치와 PatchCore의 지역 특징은 다른 개념입니다. 각 모델이 만드는 벡터와 사용하는 연산을 비교해 보세요.</p></div></div></section><footer class="footer">Vision AI Notes · 최초 작성 2026.09.22 · 설명용 예시는 실제 실험 결과와 구분해 표시합니다.</footer>'''
-    (ROOT / 'index.html').write_text(page('학습 노트', 'Vision AI 개념과 논문 내용을 도식, 수치 예시, 인터랙티브 실험으로 설명하는 한국어 학습 노트.', 'home', home), encoding='utf-8')
+    home += '<footer class="footer">Study Notes · 반도체 · AI · Vision AI · 설명용 예시는 실제 실험 결과와 구분해 표시합니다.</footer>'
+    (ROOT / 'index.html').write_text(page('학습 노트', '반도체, AI, Vision AI 분야별 한국어 학습 자료.', 'home', home), encoding='utf-8')
     print(f'Built {len(NOTES) + 1} HTML pages.')
 
 
 if __name__ == '__main__':
     render()
+

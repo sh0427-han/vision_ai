@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Christopher M. Bishop의 Pattern Recognition and Machine Learning 14개 장을 확률·추론·예측·잠재변수의 연결 구조로 정리합니다."><meta name="theme-color" content="#14213b"><title>PRML: 패턴인식과 머신러닝 전체 지도 · Vision AI Notes</title><link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../assets/site.css"><script src="../assets/site.js" defer></script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script></head>
+<body data-page="prml"><a class="skip" href="#main">본문으로 이동</a><aside id="sidebar" class="sidebar"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Study Notes</a><p class="sub">이해하고, 연결하고, 쌓아가기.</p><nav aria-label="학습 주제"><div data-topic-nav="semiconductor" hidden><a href="../index.html?topic=semiconductor">반도체 자료 전체</a><a href="https://memorybook.euiyun.com/index.html" target="_blank" rel="noopener noreferrer">Memory Book ↗</a><a href="https://processbook.euiyun.com/" target="_blank" rel="noopener noreferrer">Process Book ↗</a></div><div data-topic-nav="ai" ><a href="../index.html?topic=ai">AI 자료 전체</a><p class="nav-label">학습·평가</p><a href="../notes/training.html" >학습과 평가</a><p class="nav-label">종합 이론</p><a href="../notes/prml.html" aria-current=page>PRML 전체 정리</a></div><div data-topic-nav="vision" hidden><a href="../index.html?topic=vision">Vision AI 자료 전체</a><p class="nav-label">이미지·CNN</p><a href="../notes/pixels.html" >이미지와 텐서</a><p class="nav-label">이미지·CNN</p><a href="../notes/cnn.html" >CNN · ResNet</a><p class="nav-label">Transformer·Attention</p><a href="../notes/vit.html" >Transformer · ViT</a><p class="nav-label">Vision Tasks·Segmentation</p><a href="../notes/tasks.html" >Vision Tasks · U-Net</a><p class="nav-label">Anomaly Detection</p><a href="../notes/patchcore.html" >Anomaly Detection</a><p class="nav-label">종합 이론</p><a href="../notes/cs231n.html" >CS231n 전체 정리</a></div></nav><div class="sidebar-foot">Personal study notebook<br><a href="https://github.com/sh0427-han/vision_ai">GitHub 저장소 ↗</a></div></aside><div class="shell"><header class="topbar"><button class="menu" type="button" aria-label="목차 열기" aria-controls="sidebar" aria-expanded="false">목차</button><nav class="topic-tabs" aria-label="학습 분야"><a href="../index.html?topic=semiconductor" data-topic-tab="semiconductor" >반도체</a><a href="../index.html?topic=ai" data-topic-tab="ai" aria-current=page>AI</a><a href="../index.html?topic=vision" data-topic-tab="vision" >Vision AI</a></nav><a href="../index.html">전체 자료 보기</a></header><div class="layout"><main id="main"><header><p class="eyebrow">08 · PRML</p><h1>PRML: 패턴인식과 머신러닝 전체 지도</h1><p class="lead">Christopher M. Bishop의 Pattern Recognition and Machine Learning 14개 장을 확률·추론·예측·잠재변수의 연결 구조로 정리합니다.</p><div class="meta"><span class="tag">종합 이론</span><span class="tag">예상 학습 110분</span><span class="tag">수치 예시 · 직접 그린 도식</span></div></header><section class="article-section" id="map"><h2>PRML을 14개의 독립 알고리즘이 아니라 하나의 확률적 언어로 보기</h2>
+<p>PRML의 핵심은 알고리즘 이름을 많이 소개하는 데 있지 않습니다. 관측 데이터
+<code>D</code>, 미지의 파라미터·잠재변수, 확률분포, 추론과 의사결정을 하나의
+수학적 틀로 연결합니다. 2006년 책이라 현대 딥러닝 구조를 직접 다루지는 않지만,
+<strong>loss, regularization, uncertainty, <span class="term-inline"><span class="term-name">latent variable</span><span class="term-explain"> (모델에는 존재하지만 직접 관측되지 않는 숨은 변수)</span></span>, approximate inference</strong>
+같은 개념을 이해하는 기반은 지금도 그대로 이어집니다.</p>
+<figure><div class="diagram"><svg viewBox="0 0 760 135" role="img" aria-label="PRML 14개 장을 학습 목적에 따라 묶은 지도입니다. 책의 공식 장 순서는 아래 각 절에서 그대로 유지합니다."><defs><marker id="arrow-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7891b7"/></marker></defs><rect x="20.0" y="35" width="121.6" height="66" rx="9" class="box"/><text x="80.8" y="62" text-anchor="middle" class="label ">확률</text><text x="80.8" y="84" text-anchor="middle" class="sub ">Ch.1–2</text><path d="M 141.6 68 H 166.6" class="edge"/><rect x="169.6" y="35" width="121.6" height="66" rx="9" class="box"/><text x="230.39999999999998" y="62" text-anchor="middle" class="label ">예측 모델</text><text x="230.39999999999998" y="84" text-anchor="middle" class="sub ">Ch.3–7</text><path d="M 291.2 68 H 316.2" class="edge"/><rect x="319.2" y="35" width="121.6" height="66" rx="9" class="box"/><text x="380.0" y="62" text-anchor="middle" class="label ">그래프·잠재변수</text><text x="380.0" y="84" text-anchor="middle" class="sub ">Ch.8–9</text><path d="M 440.79999999999995 68 H 465.79999999999995" class="edge"/><rect x="468.79999999999995" y="35" width="121.6" height="66" rx="9" class="box"/><text x="529.5999999999999" y="62" text-anchor="middle" class="label ">근사 추론</text><text x="529.5999999999999" y="84" text-anchor="middle" class="sub ">Ch.10–11</text><path d="M 590.4 68 H 615.4" class="edge"/><rect x="618.4" y="35" width="121.6" height="66" rx="9" class="dark"/><text x="679.1999999999999" y="62" text-anchor="middle" class="label white">표현·시계열·결합</text><text x="679.1999999999999" y="84" text-anchor="middle" class="sub white">Ch.12–14</text></svg></div><figcaption><span class="term-inline"><span class="term-name">PRML</span><span class="term-explain"> (Pattern Recognition and Machine Learning, Christopher M. Bishop의 패턴인식·머신러닝 교재)</span></span> 14개 장을 학습 목적에 따라 묶은 지도입니다. 책의 공식 장 순서는 아래 각 절에서 그대로 유지합니다.</figcaption></figure>
+<p>Vision AI 관점에서는 픽셀·특징 벡터를 확률 변수로 보고, 분류는
+<code>p(class|x)</code>, 생성 모델은 <code>p(x)</code> 또는
+<code>p(x,z)</code>, 시계열은 <code>p(x₁:T,z₁:T)</code>처럼 확장해 생각할 수
+있습니다. 딥러닝 모델이 확률론을 없앤 것이 아니라, 복잡한 함수 근사를 신경망이
+담당하는 경우가 많아진 것입니다.</p>
+<div class="callout"><span class="label">범위</span><p>아래는 14개 장을 모두 포함한 학습용 해설입니다. 책의 문장·그림을 복제하지 않고, 장별 핵심 질문과 대표 수식, Vision AI 연결점을 재구성했습니다.</p></div></section><section class="article-section" id="ch1"><h2>1장. Introduction: 확률, 결정, 정보량을 한 프레임에 넣기</h2>
+<p>1장은 polynomial curve fitting을 통해 과적합, regularization, model selection을
+소개하고, 이후 책 전체에 쓰이는 확률론·결정이론·정보이론의 언어를 만듭니다.
+데이터를 정확히 맞추는 모델과 새로운 데이터에 잘 일반화하는 모델은 다를 수 있습니다.</p>
+<figure class="study-diagram"><img src="../assets/diagrams/prml-bayes.svg" alt="Prior와 likelihood를 결합해 posterior를 얻고 decision으로 연결하는 Bayesian 흐름" loading="lazy" decoding="async"><figcaption>PRML 전반을 관통하는 <span class="term-inline"><span class="term-name">prior</span><span class="term-explain"> (Prior distribution, 데이터를 보기 전에 가진 파라미터에 대한 믿음)</span></span> → <span class="term-inline"><span class="term-name">likelihood</span><span class="term-explain"> (주어진 파라미터에서 관측 데이터가 나타날 가능도를 보는 함수)</span></span> → <span class="term-inline"><span class="term-name">posterior</span><span class="term-explain"> (Posterior distribution, 데이터를 본 뒤 갱신된 파라미터 분포)</span></span> → decision 구조입니다.</figcaption></figure>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[p(w\mid D)
+=
+\frac{p(D\mid w)p(w)}{p(D)}
+\qquad\Longrightarrow\qquad
+\text{posterior}\propto\text{likelihood}\times\text{prior}\]</div></div>
+<p>Bayesian 관점에서는 하나의 최적 파라미터만 고르는 대신 데이터 관측 후의
+파라미터 불확실성 <code>p(w|D)</code>를 다룹니다. 예측은 가능한 파라미터에 대해
+평균낼 수 있습니다. 반면 maximum likelihood는 likelihood를 가장 크게 만드는
+파라미터를 찾습니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+H[p] &= -\sum_x p(x)\log p(x) \\
+D_{\mathrm{KL}}(q\|p)
+&=
+\sum_x q(x)\log\frac{q(x)}{p(x)}
+\end{aligned}\]</div></div>
+<p>결정이론은 posterior를 얻은 뒤 어떤 행동을 할지 분리합니다. 예를 들어 불량을
+놓치는 비용이 정상 오검보다 훨씬 크다면 단순 accuracy 최대화와 기대 비용 최소화는
+다른 threshold를 만들 수 있습니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-bayes-density.svg" alt="Bayes update and decision risk" loading="lazy" decoding="async"><figcaption><strong>Bayes update and decision risk</strong> — Data reshapes uncertainty from prior to posterior; decisions then minimize expected risk. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-posterior-predictive.svg" alt="Posterior parameters vs posterior predictive" loading="lazy" decoding="async"><figcaption><strong>Posterior parameters vs posterior predictive</strong> — Posterior uncertainty over parameters is integrated into predictions for a new target. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="ch2"><h2>2장. Probability Distributions: 데이터 타입에 맞는 분포 선택</h2>
+<p>Bernoulli/Binomial과 Beta, Multinomial과 Dirichlet, Gaussian과 같은 분포를
+통해 likelihood와 conjugate prior를 구체적으로 다룹니다. 핵심은 “분포 이름 암기”가
+아니라 어떤 값의 support와 통계적 가정을 표현하는지 이해하는 것입니다.</p>
+<div class="table-wrap"><table><thead><tr><th>관측</th><th>대표 분포</th><th>conjugate prior 예</th></tr></thead><tbody><tr><td>0/1 결과</td><td>Bernoulli / Binomial</td><td>Beta</td></tr><tr><td>K개 범주 count</td><td>Multinomial</td><td>Dirichlet</td></tr><tr><td>연속 벡터</td><td>Gaussian</td><td>Gaussian-Wishart 계열</td></tr></tbody></table></div>
+<p>예를 들어 불량 발생 확률 θ에 Beta(2,2) prior를 두고 10개 중 불량 3개를
+관찰하면 posterior는 Beta(5,9)가 됩니다. posterior mean은 5/14 ≈ 0.357입니다.
+관측 비율 0.3과 다른 이유는 prior 정보가 함께 반영됐기 때문입니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\operatorname{Beta}(a,b)
+\;+\;
+(m\ \text{successes},\ \ell\ \text{failures})
+\;\Longrightarrow\;
+\operatorname{Beta}(a+m,b+\ell)\]</div></div>
+<p>Gaussian에서는 평균 벡터와 covariance가 핵심입니다. covariance는 feature들이
+독립인지, 함께 변하는지를 표현합니다. 고차원 이미지에서 full covariance를 직접
+추정하면 파라미터 수가 급증하므로 구조적 가정이나 차원 축소가 필요해집니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-gaussian-beta.svg" alt="Gaussian geometry and Beta-Binomial update" loading="lazy" decoding="async"><figcaption><strong>Gaussian geometry and Beta-Binomial update</strong> — Mean, variance and covariance shape Gaussian uncertainty; conjugate priors allow analytic updates. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-discrete-map.svg" alt="Bernoulli, Binomial, maximum likelihood and MAP" loading="lazy" decoding="async"><figcaption><strong>Bernoulli, Binomial, maximum likelihood and <span class="term-inline"><span class="term-name">MAP</span><span class="term-explain"> (Maximum A Posteriori, 사후확률을 최대화하는 추정)</span></span></strong> — Bernoulli models one binary trial; Binomial counts successes; MAP combines likelihood with a prior. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-dirichlet-multinomial.svg" alt="Dirichlet–Multinomial conjugacy" loading="lazy" decoding="async"><figcaption><strong>Dirichlet–Multinomial conjugacy</strong> — Class counts add to Dirichlet concentration parameters for K-category data. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="ch3"><h2>3장. Linear Models for Regression: basis와 Bayesian regression</h2>
+<p>선형 회귀에서 “linear”는 입력 x 자체가 아니라 파라미터 w에 대해 선형이라는
+뜻입니다. 비선형 basis function φ(x)를 사용해도
+<code>y(x,w)=wᵀφ(x)</code>이면 linear model입니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+y(x,w) &= w^\top\phi(x) \\
+t &= y(x,w)+\varepsilon,\qquad
+\varepsilon\sim\mathcal{N}(0,\beta^{-1})
+\end{aligned}\]</div></div>
+<p>최소제곱은 Gaussian noise 가정 아래 maximum likelihood와 연결됩니다.
+L2 regularization을 더하면 Gaussian prior를 둔 MAP 추정과 연결됩니다. Bayesian
+linear regression에서는 w의 posterior 전체를 구해 predictive uncertainty까지
+전파합니다.</p>
+<div class="table-wrap"><table><thead><tr><th>관점</th><th>구하는 것</th><th>불확실성</th></tr></thead><tbody><tr><td>Least squares / <span class="term-inline"><span class="term-name">ML</span><span class="term-explain"> (Maximum Likelihood, 이 문서 문맥에서는 가능도를 최대화하는 최대우도 추정)</span></span></td><td>단일 w</td><td>noise를 별도 추정</td></tr><tr><td>MAP</td><td>prior를 반영한 단일 w</td><td>w posterior는 버림</td></tr><tr><td>Bayesian</td><td>p(w|D)</td><td>예측 분포에 반영</td></tr></tbody></table></div>
+<p>Vision에서는 feature extractor가 만든 임베딩 위에 linear regression head를
+붙이는 상황으로 생각할 수 있습니다. backbone이 비선형이어도 마지막 head 자체는
+선형 모델일 수 있습니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-regression-basis.svg" alt="Linear regression and basis expansion" loading="lazy" decoding="async"><figcaption><strong>Linear regression and basis expansion</strong> — The model can stay linear in its weights while nonlinear basis functions reshape the input. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-bias-reg.svg" alt="Bias–variance and regularization" loading="lazy" decoding="async"><figcaption><strong>Bias–variance and regularization</strong> — Model complexity trades approximation error against sensitivity to finite data. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="ch4"><h2>4장. Linear Models for Classification: 경계와 확률을 구분</h2>
+<p>분류는 연속 target을 예측하는 회귀와 달리 class posterior 또는 decision boundary를
+만듭니다. generative 방식은 class-conditional density와 prior를 모델링해 Bayes
+rule로 posterior를 만들고, discriminative 방식은 posterior 또는 경계를 직접
+모델링합니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+p(C_1\mid x) &= \sigma(w^\top x+b) \\
+\sigma(a) &= \frac{1}{1+e^{-a}}
+\end{aligned}\]</div></div>
+<p>다중 클래스에서는 softmax를 사용해 K개 score를 정규화할 수 있습니다.
+logistic regression의 decision boundary는 입력 feature 공간에서는 선형이지만,
+비선형 feature φ(x)를 쓰면 원 입력 공간에서는 비선형 경계를 만들 수 있습니다.</p>
+<p>이 장의 관점은 딥러닝 분류 head에도 그대로 이어집니다. CNN이 복잡한 feature를
+만든 뒤 마지막 linear layer와 softmax/cross-entropy가 class posterior를 근사하는
+구조로 볼 수 있습니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-sigmoid-boundary.svg" alt="Logistic regression" loading="lazy" decoding="async"><figcaption><strong>Logistic regression</strong> — Sigmoid converts a linear score to probability; the decision boundary stays linear. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-multiclass.svg" alt="Multi-class classification" loading="lazy" decoding="async"><figcaption><strong>Multi-class classification</strong> — One score or probability per class; prediction selects the largest class value. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-generative-discriminative.svg" alt="Generative and discriminative classification" loading="lazy" decoding="async"><figcaption><strong>Generative and discriminative classification</strong> — Generative models build class-conditionals; discriminative models directly parameterize class posteriors or boundaries. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="ch5"><h2>5장. Neural Networks: 비선형 basis를 데이터로 학습하기</h2>
+<p>고정 basis function을 사람이 정하는 대신 neural network는 hidden unit의
+비선형 변환 자체를 데이터로 학습합니다. feed-forward network, error backpropagation,
+Jacobian/Hessian, regularization과 Bayesian neural network 관점이 이 장의 주요
+주제입니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+a_j &= \sum_i w^{(1)}_{ji}x_i+b_j \\
+z_j &= h(a_j) \\
+y_k &= \sum_j w^{(2)}_{kj}z_j+c_k
+\end{aligned}\]</div></div>
+<p>역전파는 특정 신경망 전용 마법이 아니라 chain rule을 효율적으로 재사용하는
+알고리즘입니다. 현대 autograd가 같은 원리를 자동화합니다. PRML의 network는 오늘날의
+대규모 CNN/Transformer보다 작지만, loss surface와 regularization, uncertainty에 대한
+개념적 토대는 같습니다.</p>
+<p>Mixture Density Network처럼 네트워크가 단일 scalar가 아니라 확률분포의 파라미터를
+출력하게 만들 수도 있습니다. 즉 neural network는 “분류기”라는 하나의 모델 종류보다
+복잡한 함수의 parameterization 도구로 보는 편이 일반적입니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-nn-boundary.svg" alt="Neural networks as learned nonlinear basis functions" loading="lazy" decoding="async"><figcaption><strong>Neural networks as learned nonlinear basis functions</strong> — Hidden units learn features that enable nonlinear decision boundaries. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-forward-backprop.svg" alt="Forward and backward computation" loading="lazy" decoding="async"><figcaption><strong>Forward and backward computation</strong> — Values move forward; derivatives move backward through the same graph. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-nn-regularization.svg" alt="Neural-network regularization and early stopping" loading="lazy" decoding="async"><figcaption><strong>Neural-network regularization and early stopping</strong> — Regularization controls effective complexity; validation loss can select when to stop training. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="ch6"><h2>6장. Kernel Methods: 명시적 고차원 변환 없이 유사도 계산</h2>
+<p>Kernel method는 두 입력의 feature-space inner product를
+<code>k(x,x')</code>로 계산합니다. 적절한 kernel을 쓰면 고차원 feature vector를
+직접 만들지 않고도 비선형 관계를 다룰 수 있습니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+k(x,x') &= \phi(x)^\top\phi(x') \\
+k_{\mathrm{RBF}}(x,x')
+&=
+\exp\left(-\frac{\|x-x'\|^2}{2\sigma^2}\right)
+\end{aligned}\]</div></div>
+<p>이 장은 dual representation, kernel construction, <span class="term-inline"><span class="term-name">RBF</span><span class="term-explain"> (Radial Basis Function, 거리 기반 방사형 기저 함수)</span></span> networks, Gaussian
+Processes(<span class="term-inline"><span class="term-name">GP</span><span class="term-explain"> (Gaussian Process, 함수에 대한 확률분포를 정의하는 가우시안 프로세스)</span></span>)를 포함합니다. GP는 함수 값들의 joint Gaussian distribution을
+정의해 예측 평균뿐 아니라 불확실성도 제공합니다. 데이터 수 N에 대한 kernel matrix
+계산과 역행렬 비용 때문에 대규모 데이터에서는 계산이 큰 제약이 됩니다.</p>
+<p>딥러닝의 learned embedding에서도 cosine/RBF 같은 similarity를 사용하지만,
+그것이 곧 classical kernel machine과 같은 학습 알고리즘이라는 뜻은 아닙니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-kernel-feature.svg" alt="Feature space and the kernel trick" loading="lazy" decoding="async"><figcaption><strong>Feature space and the kernel trick</strong> — A nonlinear problem in input space can correspond to a linear separator in a richer feature space. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-polynomial-kernel.svg" alt="Polynomial kernel intuition" loading="lazy" decoding="async"><figcaption><strong>Polynomial kernel intuition</strong> — Polynomial kernels compare inputs through nonlinear feature interactions. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-kernel-gp.svg" alt="RBF kernels and Gaussian-process uncertainty" loading="lazy" decoding="async"><figcaption><strong>RBF kernels and Gaussian-process uncertainty</strong> — Kernel similarity defines a Gram matrix; Gaussian processes turn that kernel into predictive mean and uncertainty. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="ch7"><h2>7장. Sparse Kernel Machines: 결정에 필요한 일부 샘플에 집중</h2>
+<p>SVM은 margin을 최대화하는 결정 경계를 찾고, soft-margin에서는 일부 위반을
+허용해 데이터가 완전히 separable하지 않은 상황을 다룹니다. 해는 많은 경우 일부
+training point인 support vector에 의해 결정됩니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\mathcal{L}_{\mathrm{hinge}}
+=
+\max(0,1-yf(x)),
+\qquad
+y\in\{-1,+1\}\]</div></div>
+<p>Relevance Vector Machine(<span class="term-inline"><span class="term-name">RVM</span><span class="term-explain"> (Relevance Vector Machine, Bayesian 관점의 희소 커널 모델)</span></span>)은 유사한 kernel 형태를 Bayesian sparse model로
+구성하지만 SVM과 목적함수와 확률적 해석이 다릅니다. RVM은 automatic relevance
+determination을 통해 많은 weight를 사실상 제거해 sparse solution을 얻습니다.</p>
+<p>Vision에서 작은 데이터로 handcrafted feature나 고정 embedding을 분류할 때
+SVM은 여전히 유효한 baseline이 될 수 있습니다. deep model과 비교할 때는 feature
+extractor 학습 여부까지 포함해 공정하게 비교해야 합니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-svm.svg" alt="SVM margin and support vectors" loading="lazy" decoding="async"><figcaption><strong><span class="term-inline"><span class="term-name">SVM</span><span class="term-explain"> (Support Vector Machine, support vector와 margin을 이용하는 분류 모델)</span></span> margin and support vectors</strong> — Only samples on or inside the margin determine the optimal separating hyperplane. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-svm-c-rvm.svg" alt="Soft-margin C and sparse kernel machines" loading="lazy" decoding="async"><figcaption><strong>Soft-margin C and sparse kernel machines</strong> — C controls soft-margin penalties; RVM uses a sparse Bayesian kernel formulation. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="ch8"><h2>8장. Graphical Models: 복잡한 확률분포의 구조를 그림으로 표현</h2>
+<p>그래프의 node는 random variable, edge와 factor는 dependency 구조를 표현합니다.
+Directed graph인 Bayesian Network와 undirected graph인 Markov Random Field(<span class="term-inline"><span class="term-name">MRF</span><span class="term-explain"> (Markov Random Field, 무방향 그래프로 변수 의존성을 표현하는 모델)</span></span>),
+factor graph는 factorization과 conditional independence를 읽는 방식이 다릅니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[p(x_1,\ldots,x_K)
+=
+\prod_{k=1}^{K}
+p\!\left(x_k\mid\operatorname{pa}(x_k)\right)\]</div></div>
+<p>d-separation은 그래프 구조만으로 conditional independence를 판단하는 규칙입니다.
+Tree나 chain에서는 sum-product로 marginal을 효율적으로 계산하고, max-sum은 가장
+가능성 높은 상태 조합을 찾는 데 연결됩니다.</p>
+<p>PRML은 image denoising을 MRF 예시로 다룹니다. 각 pixel label이 이웃과 비슷하기를
+선호하면서 관측 pixel과도 맞도록 energy를 구성하는 방식입니다. 현대 segmentation의
+CNN과 계산 구조는 다르지만 “지역 일관성과 관측 evidence를 함께 사용한다”는 관점은
+비교해 볼 수 있습니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-graph-mrf.svg" alt="Graphical model families" loading="lazy" decoding="async"><figcaption><strong>Graphical model families</strong> — Directed graphs, undirected graphs and factor graphs encode dependencies with different primitives. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-graph-inference.svg" alt="Conditional independence and message passing" loading="lazy" decoding="async"><figcaption><strong>Conditional independence and message passing</strong> — Graph structure controls dependence; local messages propagate neighboring evidence. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="ch9"><h2>9장. Mixture Models and EM: 보이지 않는 군집 변수를 추론</h2>
+<p>Gaussian Mixture Model(<span class="term-inline"><span class="term-name">GMM</span><span class="term-explain"> (Gaussian Mixture Model, 여러 Gaussian 분포를 섞어 데이터를 표현하는 모델)</span></span>)은 하나의 Gaussian으로 설명하기 어려운 데이터를
+여러 component의 weighted sum으로 모델링합니다. 각 데이터가 어느 component에서
+왔는지 나타내는 latent assignment z가 관측되지 않았기 때문에 직접 최적화가
+복잡해집니다.</p>
+<figure class="study-diagram"><img src="../assets/diagrams/prml-em.svg" alt="E-step과 M-step을 반복해 숨은 변수와 파라미터를 번갈아 추정하는 EM 알고리즘" loading="lazy" decoding="async"><figcaption>E-step의 responsibility 추정과 M-step의 parameter update를 반복하는 흐름입니다.</figcaption></figure>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+p(x) &= \sum_{k=1}^{K}\pi_k\,
+\mathcal{N}(x\mid\mu_k,\Sigma_k) \\
+\gamma(z_k) &= p(z_k=1\mid x)
+\end{aligned}\]</div></div>
+<p>EM은 E-step에서 현재 파라미터로 latent variable의 posterior responsibility를
+계산하고, M-step에서 그 responsibility를 가중치처럼 사용해 파라미터를 갱신합니다.
+두 단계를 반복하면 likelihood는 감소하지 않는 방향으로 진행하지만 global optimum을
+보장하는 것은 아닙니다.</p>
+<p>K-means는 hard assignment를 쓰는 군집화로 볼 수 있고, GMM은 soft probability를
+제공합니다. 이미지 embedding을 군집화할 때 cluster 번호를 실제 의미 label로
+자동 해석하면 안 되며, feature와 distance assumption을 함께 확인해야 합니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-gmm-em.svg" alt="Gaussian mixtures and EM" loading="lazy" decoding="async"><figcaption><strong>Gaussian mixtures and <span class="term-inline"><span class="term-name">EM</span><span class="term-explain"> (Expectation-Maximization, 숨은 변수 추정과 파라미터 갱신을 반복하는 알고리즘)</span></span></strong> — A GMM mixes Gaussian components; EM alternates assignments and parameter updates. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-em-evolution.svg" alt="EM parameter evolution" loading="lazy" decoding="async"><figcaption><strong>EM parameter evolution</strong> — Responsibilities and component parameters alternate across EM iterations. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="ch10"><h2>10장. Approximate Inference: 정확한 posterior가 너무 어려울 때</h2>
+<p>복잡한 latent-variable model에서는 posterior 적분이나 합을 정확히 계산하기
+어려운 경우가 많습니다. Variational Inference는 다루기 쉬운 분포 q를 정하고
+실제 posterior에 가깝도록 최적화합니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+\log p(X)
+&=
+\operatorname{ELBO}(q)
++
+D_{\mathrm{KL}}\!\left(q(Z)\|p(Z\mid X)\right) \\
+\operatorname{ELBO}(q) &\le \log p(X)
+\end{aligned}\]</div></div>
+<p>mean-field variational inference는 q를 여러 factor의 곱으로 제한해 계산을
+단순화합니다. 제한된 family 때문에 근사 오차가 생깁니다. Expectation Propagation은
+각 factor를 근사하고 moment matching을 반복하는 다른 접근입니다.</p>
+<p>현대 VAE에서도 ELBO가 핵심 objective로 등장합니다. PRML의 variational inference를
+이해하면 “왜 reconstruction term과 <span class="term-inline"><span class="term-name">KL</span><span class="term-explain"> (Kullback–Leibler divergence, 두 확률분포 차이를 나타내는 발산량)</span></span> term이 함께 나오는가?”를 확률 모델 관점에서
+연결하기 쉬워집니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-vi-elbo.svg" alt="Variational inference and ELBO" loading="lazy" decoding="async"><figcaption><strong>Variational inference and <span class="term-inline"><span class="term-name">ELBO</span><span class="term-explain"> (Evidence Lower Bound, log evidence의 하한)</span></span></strong> — ELBO is a lower bound; maximizing it minimizes KL within the chosen variational family. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-vi-meanfield.svg" alt="Mean-field variational inference" loading="lazy" decoding="async"><figcaption><strong>Mean-field variational inference</strong> — Mean-field factorization simplifies the approximation; coordinate ascent updates one factor at a time. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-ep-vi.svg" alt="Expectation propagation vs variational inference" loading="lazy" decoding="async"><figcaption><strong>Expectation propagation vs variational inference</strong> — VI optimizes a global approximation; EP iteratively refines local site approximations using moment matching. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="ch11"><h2>11장. Sampling Methods: 적분 대신 샘플로 기대값 계산</h2>
+<p>분포에서 직접 적분하기 어렵다면 sample을 이용해 기대값을 근사할 수 있습니다.
+Rejection sampling, importance sampling, Sampling-Importance-Resampling,
+<span class="term-inline"><span class="term-name">MCMC</span><span class="term-explain"> (Markov Chain Monte Carlo, Markov chain을 이용한 Monte Carlo sampling)</span></span>, Metropolis-Hastings, Gibbs, slice sampling, Hybrid/Hamiltonian Monte
+Carlo가 이 장의 주요 흐름입니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\mathbb{E}_{p}[f(x)]
+\approx
+\frac{1}{N}\sum_{n=1}^{N}f(x^{(n)}),
+\qquad
+x^{(n)}\sim p(x)\]</div></div>
+<p>importance sampling은 target p에서 직접 sample하기 어려울 때 proposal q에서
+sample하고 weight <code>p(x)/q(x)</code>를 사용합니다. q가 중요한 영역을 충분히
+덮지 못하면 몇 sample의 weight가 지배해 분산이 커질 수 있습니다.</p>
+<p>MCMC sample은 독립이 아닐 수 있으므로 단순히 sample 개수만 보고 품질을 판단하면
+안 됩니다. mixing, autocorrelation, burn-in과 여러 chain의 일관성을 함께 봐야 합니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-monte-mcmc.svg" alt="Monte Carlo and MCMC" loading="lazy" decoding="async"><figcaption><strong>Monte Carlo and MCMC</strong> — Monte Carlo estimates expectations; MCMC uses a dependent chain with the target as its stationary distribution. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-rejection-sampling.svg" alt="Rejection sampling" loading="lazy" decoding="async"><figcaption><strong>Rejection sampling</strong> — Sample from a proposal envelope, then accept with probability proportional to p(x)/(M q(x)). <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-sampling-diagnostics.svg" alt="MCMC diagnostics and effective samples" loading="lazy" decoding="async"><figcaption><strong>MCMC diagnostics and effective samples</strong> — Autocorrelation lowers effective information; ESS and trajectories diagnose sampling quality. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="ch12"><h2>12장. Continuous Latent Variables: 고차원 데이터를 낮은 좌표로 설명</h2>
+<p>PCA는 가장 큰 분산 방향을 찾는 관점과 reconstruction error를 최소화하는 관점이
+같은 해로 이어집니다. Probabilistic <span class="term-inline"><span class="term-name">PCA</span><span class="term-explain"> (Principal Component Analysis, 주성분 분석)</span></span>(<span class="term-inline"><span class="term-name">PPCA</span><span class="term-explain"> (Probabilistic PCA, PCA의 확률적 잠재변수 모델)</span></span>)는 PCA를 Gaussian latent-variable
+model로 표현해 likelihood와 EM, Bayesian 확장으로 연결합니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+z &\sim \mathcal{N}(0,I) \\
+x &= Wz+\mu+\varepsilon,\qquad
+\varepsilon\sim\mathcal{N}(0,\sigma^2I)
+\end{aligned}\]</div></div>
+<p>이 장은 PCA, PPCA, Bayesian PCA, factor analysis, kernel PCA, <span class="term-inline"><span class="term-name">ICA</span><span class="term-explain"> (Independent Component Analysis, 독립 성분 분석)</span></span>,
+autoassociative neural network와 nonlinear manifold modelling까지 이어집니다.
+차원 축소는 visualization만을 위한 것이 아니라 noise 제거, 압축, latent structure
+탐색에 사용됩니다.</p>
+<p>Vision embedding을 PCA로 줄일 때 explained variance가 높다는 사실이 downstream
+분류에 필요한 정보가 모두 보존됐다는 뜻은 아닙니다. 분산이 큰 방향과 task에 중요한
+방향은 다를 수 있으므로 목적에 맞는 평가가 필요합니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-pca-dim.svg" alt="PCA and dimensionality reduction" loading="lazy" decoding="async"><figcaption><strong>PCA and dimensionality reduction</strong> — Principal components align the coordinate system with directions of largest data variance. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-pca-spectrum.svg" alt="PCA explained variance" loading="lazy" decoding="async"><figcaption><strong>PCA explained variance</strong> — Eigenvalues show variance per component; cumulative variance guides retained dimension. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-ppca.svg" alt="Probabilistic PCA" loading="lazy" decoding="async"><figcaption><strong>Probabilistic PCA</strong> — PPCA uses a linear latent subspace with isotropic Gaussian observation noise. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-factor-ica.svg" alt="Factor analysis and independent components" loading="lazy" decoding="async"><figcaption><strong>Factor analysis and independent components</strong> — Factor Analysis models latent factors plus feature noise; ICA seeks independent sources. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="ch13"><h2>13장. Sequential Data: 시간 순서를 확률 모델에 넣기</h2>
+<p>정적인 샘플이 아니라 시간 순서 <code>x₁:T</code>를 다루면 현재 상태와 이전 상태의
+dependency를 표현해야 합니다. Markov model은 제한된 과거만으로 다음 상태를 설명하는
+가정을 사용합니다.</p>
+<figure class="study-diagram"><img src="../assets/diagrams/prml-hmm.svg" alt="시간에 따라 전이하는 숨은 상태 z가 각 시점의 관측 x를 생성하는 Hidden Markov Model" loading="lazy" decoding="async"><figcaption>HMM의 state transition과 emission 관계를 시간축 위에 배치했습니다.</figcaption></figure>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[p(z_t\mid z_1,\ldots,z_{t-1})
+=
+p(z_t\mid z_{t-1})\]</div></div>
+<p>Hidden Markov Model(<span class="term-inline"><span class="term-name">HMM</span><span class="term-explain"> (Hidden Markov Model, 숨은 Markov 상태와 관측을 연결하는 시계열 모델)</span></span>)은 discrete latent state와 emission model을 사용합니다.
+forward-backward는 각 시점의 state posterior, Viterbi는 가장 가능성 높은 state
+sequence를 계산합니다. Linear Dynamical System(<span class="term-inline"><span class="term-name">LDS</span><span class="term-explain"> (Linear Dynamical System, 연속 잠재 상태를 갖는 선형 동역학 모델)</span></span>)은 continuous latent state로
+확장되며 Kalman filtering/smoothing과 연결됩니다. nonlinear/non-Gaussian 상황에서는
+particle filter 같은 sampling 기반 방법이 필요할 수 있습니다.</p>
+<p>영상 이상 검출에서 frame별 classifier 결과를 독립적으로 thresholding하는 대신
+“상태가 시간적으로 지속될 가능성”을 명시적으로 모델링하고 싶다면 HMM 관점이 하나의
+대안입니다. 단, 실제 적용은 transition 가정이 공정과 맞는지 검증해야 합니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-hmm-filter.svg" alt="Hidden Markov models, filtering and decoding" loading="lazy" decoding="async"><figcaption><strong>Hidden Markov models, filtering and decoding</strong> — The same state-space model supports filtering, prediction, smoothing and sequence decoding. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-state-space.svg" alt="Continuous state-space inference" loading="lazy" decoding="async"><figcaption><strong>Continuous state-space inference</strong> — Kalman filtering alternates prediction and correction; particle filters use weighted samples for harder dynamics. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="ch14"><h2>14장. Combining Models: 여러 예측을 어떻게 결합할까?</h2>
+<p>마지막 장은 Bayesian Model Averaging, committees, boosting, tree-based models,
+conditional mixture models와 mixtures of experts를 다룹니다. 단순 평균과
+“서로 다른 모델 가설에 대한 posterior averaging”은 개념적으로 다릅니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[y_{\mathrm{COM}}(x)
+=
+\frac{1}{M}\sum_{m=1}^{M}y_m(x)\]</div></div>
+<p>ensemble이 효과적이려면 모델들이 모두 같은 오류를 반복하지 않는 것이 중요합니다.
+Boosting은 이전 단계가 틀린 샘플에 더 집중하는 방식으로 weak learner를 순차적으로
+결합합니다. Mixture of Experts는 gating model이 입력에 따라 어떤 expert를 얼마나
+사용할지 결정합니다.</p>
+<div class="table-wrap"><table><thead><tr><th>결합 방식</th><th>핵심</th><th>주의점</th></tr></thead><tbody><tr><td>Average / committee</td><td>여러 predictor 평균</td><td>상관된 오류면 이득 제한</td></tr><tr><td>Bayesian model averaging</td><td>model posterior로 가중 평균</td><td>model set과 posterior 계산 필요</td></tr><tr><td>Boosting</td><td>순차적으로 어려운 샘플 보완</td><td>noise/outlier 민감 가능</td></tr><tr><td>Mixture of experts</td><td>입력별 gating</td><td>expert collapse·학습 안정성</td></tr></tbody></table></div>
+<p>현대 deep ensemble, snapshot ensemble, mixture-of-experts Transformer는 세부
+알고리즘이 PRML의 예시와 다를 수 있지만 “여러 가설을 결합해 bias/variance 또는
+전문화를 다룬다”는 상위 관점에서 연결해서 볼 수 있습니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-ensemble-moe.svg" alt="Ensembles and mixture of experts" loading="lazy" decoding="async"><figcaption><strong>Ensembles and mixture of experts</strong> — Committees average models; mixtures of experts use input-dependent gating. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-ensemble-boosting.svg" alt="Bayesian averaging, boosting and ensemble variance" loading="lazy" decoding="async"><figcaption><strong>Bayesian averaging, boosting and ensemble variance</strong> — Averaging combines models; boosting corrects errors sequentially; diversity can reduce variance. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-tree-ensemble.svg" alt="Decision trees and ensembles" loading="lazy" decoding="async"><figcaption><strong>Decision trees and ensembles</strong> — Tree ensembles combine multiple partitioning models; bagging and boosting obtain diversity in different ways. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="vision-bridge"><h2>PRML 개념을 Vision AI 개발에 다시 연결하기</h2><div class="table-wrap"><table><thead><tr><th>PRML 개념</th><th>Vision AI에서 만나는 형태</th><th>실무 질문</th></tr></thead><tbody><tr><td>Bayes / Decision theory</td><td>class probability + threshold</td><td>FN과 FP 비용이 같은가?</td></tr><tr><td>Regularization</td><td>weight decay, augmentation</td><td>train-val gap이 어떤가?</td></tr><tr><td>Latent variable</td><td>embedding, generative model</td><td>관측되지 않은 요인이 무엇인가?</td></tr><tr><td>Approximate inference</td><td><span class="term-inline"><span class="term-name">VAE</span><span class="term-explain"> (Variational Autoencoder, 변분 추론을 사용하는 생성 모델)</span></span>·Bayesian model</td><td>정확한 posterior 계산이 가능한가?</td></tr><tr><td>Sequential model</td><td>video/frame state</td><td>frame independence 가정이 맞는가?</td></tr><tr><td>Model combination</td><td>ensemble·<span class="term-inline"><span class="term-name">MoE</span><span class="term-explain"> (Mixture of Experts, 여러 expert와 gating을 결합하는 구조)</span></span></td><td>오류가 서로 얼마나 상관되는가?</td></tr></tbody></table></div>
+<p>PRML을 처음부터 모든 증명을 따라가며 읽는 것도 가능하지만, Vision AI 실무와
+연결하려면 1→2→3/4→5→8/9→10/11→12/13→14 순으로 “확률적 질문”을 먼저 잡고,
+필요한 수학을 다시 내려가는 방식이 효율적입니다. CNN/ViT 구조 자체는 별도 문서에서
+보고, PRML에서는 <strong>왜 그 출력을 probability/loss/decision으로 해석하는지</strong>
+보완하는 것이 좋습니다.</p>
+<div class="callout"><span class="label">추천 복습 방식</span><p>각 장을 읽을 때 (1) 관측 변수, (2) 미지 변수/파라미터, (3) likelihood, (4) prior가 있는지, (5) 정확한 추론이 가능한지, (6) 최종 decision rule이 무엇인지 여섯 칸으로 정리해 보세요.</p></div><div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/prml-vision-bridge.svg" alt="PRML concepts inside modern Vision AI" loading="lazy" decoding="async"><figcaption><strong>PRML concepts inside modern Vision AI</strong> — Probability tools support calibration, uncertainty, latent variables and sequences in Vision AI. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="sources"><h2>출처와 더 확인할 자료</h2><p class="small">본문은 이해를 위한 한국어 해설입니다. 도식은 직접 재구성했으며, 가상 수치와 단순화한 구조는 해당 위치에 표시했습니다.</p><ol class="references"><li><a href="https://www.microsoft.com/en-us/research/people/cmbishop/prml-book/" target="_blank" rel="noopener noreferrer">Christopher M. Bishop · PRML 공식 페이지 ↗</a><small>저자 공식 자료. 책 소개, 목차/샘플, 슬라이드, errata와 교육·연구 목적 figure 자료를 제공합니다.</small></li><li><a href="https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/" target="_blank" rel="noopener noreferrer">Pattern Recognition and Machine Learning · Microsoft Research ↗</a><small>2006년 Springer 출판 정보와 공식 PDF 접근점.</small></li><li><a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2006/01/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf" target="_blank" rel="noopener noreferrer">PRML · 전체 PDF ↗</a><small>14개 장 전체의 원문. 이 학습 문서는 원문의 문장·그림을 복제하지 않고 개념을 요약·재구성했습니다.</small></li></ol></section><nav class="pager" aria-label="이전 다음 자료"><a href="cs231n.html">← CS231n</a><a href="../index.html">전체 자료 →</a></nav><footer class="footer">Vision AI Notes · 개인 학습 자료 · 최초 작성 2026.09.22</footer></main><aside class="toc" aria-label="이 페이지 목차"><p>이 페이지에서</p><a href="#map">PRML을 14개의 독립 알고리즘이 아니라 하나의 확률적 언어로 보기</a><a href="#ch1">1장. Introduction: 확률, 결정, 정보량을 한 프레임에 넣기</a><a href="#ch2">2장. Probability Distributions: 데이터 타입에 맞는 분포 선택</a><a href="#ch3">3장. Linear Models for Regression: basis와 Bayesian regression</a><a href="#ch4">4장. Linear Models for Classification: 경계와 확률을 구분</a><a href="#ch5">5장. Neural Networks: 비선형 basis를 데이터로 학습하기</a><a href="#ch6">6장. Kernel Methods: 명시적 고차원 변환 없이 유사도 계산</a><a href="#ch7">7장. Sparse Kernel Machines: 결정에 필요한 일부 샘플에 집중</a><a href="#ch8">8장. Graphical Models: 복잡한 확률분포의 구조를 그림으로 표현</a><a href="#ch9">9장. Mixture Models and EM: 보이지 않는 군집 변수를 추론</a><a href="#ch10">10장. Approximate Inference: 정확한 posterior가 너무 어려울 때</a><a href="#ch11">11장. Sampling Methods: 적분 대신 샘플로 기대값 계산</a><a href="#ch12">12장. Continuous Latent Variables: 고차원 데이터를 낮은 좌표로 설명</a><a href="#ch13">13장. Sequential Data: 시간 순서를 확률 모델에 넣기</a><a href="#ch14">14장. Combining Models: 여러 예측을 어떻게 결합할까?</a><a href="#vision-bridge">PRML 개념을 Vision AI 개발에 다시 연결하기</a><a href="#sources">출처와 더 확인할 자료</a></aside></div></div></body></html>

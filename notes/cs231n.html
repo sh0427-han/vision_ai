@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Stanford CS231n 공개 노트를 따라 분류의 출발점부터 최적화, 신경망, CNN, 시각화, 전이학습과 현대 Vision 모델까지 연결합니다."><meta name="theme-color" content="#14213b"><title>CS231n: 주제별 Vision AI 개념을 연결하는 전체 흐름 · Vision AI Notes</title><link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../assets/site.css"><script src="../assets/site.js" defer></script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script></head>
+<body data-page="cs231n"><a class="skip" href="#main">본문으로 이동</a><aside id="sidebar" class="sidebar"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Study Notes</a><p class="sub">이해하고, 연결하고, 쌓아가기.</p><nav aria-label="학습 주제"><div data-topic-nav="semiconductor" hidden><a href="../index.html?topic=semiconductor">반도체 자료 전체</a><a href="https://memorybook.euiyun.com/index.html" target="_blank" rel="noopener noreferrer">Memory Book ↗</a><a href="https://processbook.euiyun.com/" target="_blank" rel="noopener noreferrer">Process Book ↗</a></div><div data-topic-nav="ai" hidden><a href="../index.html?topic=ai">AI 자료 전체</a><p class="nav-label">학습·평가</p><a href="../notes/training.html" >학습과 평가</a><p class="nav-label">종합 이론</p><a href="../notes/prml.html" >PRML 전체 정리</a></div><div data-topic-nav="vision" ><a href="../index.html?topic=vision">Vision AI 자료 전체</a><p class="nav-label">이미지·CNN</p><a href="../notes/pixels.html" >이미지와 텐서</a><p class="nav-label">이미지·CNN</p><a href="../notes/cnn.html" >CNN · ResNet</a><p class="nav-label">Transformer·Attention</p><a href="../notes/vit.html" >Transformer · ViT</a><p class="nav-label">Vision Tasks·Segmentation</p><a href="../notes/tasks.html" >Vision Tasks · U-Net</a><p class="nav-label">Anomaly Detection</p><a href="../notes/patchcore.html" >Anomaly Detection</a><p class="nav-label">종합 이론</p><a href="../notes/cs231n.html" aria-current=page>CS231n 전체 정리</a></div></nav><div class="sidebar-foot">Personal study notebook<br><a href="https://github.com/sh0427-han/vision_ai">GitHub 저장소 ↗</a></div></aside><div class="shell"><header class="topbar"><button class="menu" type="button" aria-label="목차 열기" aria-controls="sidebar" aria-expanded="false">목차</button><nav class="topic-tabs" aria-label="학습 분야"><a href="../index.html?topic=semiconductor" data-topic-tab="semiconductor" >반도체</a><a href="../index.html?topic=ai" data-topic-tab="ai" >AI</a><a href="../index.html?topic=vision" data-topic-tab="vision" aria-current=page>Vision AI</a></nav><a href="../index.html">전체 자료 보기</a></header><div class="layout"><main id="main"><header><p class="eyebrow">07 · CS231N COURSE MAP</p><h1>CS231n: 주제별 Vision AI 개념을 연결하는 전체 흐름</h1><p class="lead">Stanford CS231n 공개 노트를 따라 분류의 출발점부터 최적화, 신경망, CNN, 시각화, 전이학습과 현대 Vision 모델까지 연결합니다.</p><div class="meta"><span class="tag">종합 이론</span><span class="tag">예상 학습 70분</span><span class="tag">수치 예시 · 직접 그린 도식</span></div></header><section class="article-section" id="map"><h2>CS231n을 하나의 데이터 흐름으로 보기</h2>
+<p>CS231n의 공개 노트는 단순히 <span class="term-inline"><span class="term-name">CNN</span><span class="term-explain"> (Convolutional Neural Network, 합성곱 신경망)</span></span> 구조만 설명하지 않습니다. 먼저 이미지 분류를
+<strong>데이터에서 규칙을 학습하는 문제</strong>로 정의하고, 선형 분류기와 <span class="term-inline"><span class="term-name">loss</span><span class="term-explain"> (Loss function, 예측이 정답과 얼마나 다른지 수치로 표현한 값)</span></span>,
+최적화와 <span class="term-inline"><span class="term-name">역전파</span><span class="term-explain"> (chain rule을 이용해 뒤쪽부터 gradient를 계산하는 방법)</span></span>, 다층 신경망을 차례로 쌓은 뒤 CNN으로 넘어갑니다. 이 순서를 따르면
+“Conv를 왜 쓰는가?”보다 먼저 “모델은 무엇을 최소화하며, 파라미터는 어떻게
+바뀌는가?”를 이해하게 됩니다.</p>
+<figure><div class="diagram"><svg viewBox="0 0 760 135" role="img" aria-label="CS231n의 핵심 학습 흐름을 재구성한 개념도입니다. 각 단계는 뒤 단계의 전제가 됩니다."><defs><marker id="arrow-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7891b7"/></marker></defs><rect x="20.0" y="35" width="121.6" height="66" rx="9" class="box"/><text x="80.8" y="62" text-anchor="middle" class="label ">데이터</text><text x="80.8" y="84" text-anchor="middle" class="sub ">train · val · test</text><path d="M 141.6 68 H 166.6" class="edge"/><rect x="169.6" y="35" width="121.6" height="66" rx="9" class="box"/><text x="230.39999999999998" y="62" text-anchor="middle" class="label ">Score</text><text x="230.39999999999998" y="84" text-anchor="middle" class="sub ">f(x; W)</text><path d="M 291.2 68 H 316.2" class="edge"/><rect x="319.2" y="35" width="121.6" height="66" rx="9" class="box"/><text x="380.0" y="62" text-anchor="middle" class="label ">Loss</text><text x="380.0" y="84" text-anchor="middle" class="sub ">data + regularization</text><path d="M 440.79999999999995 68 H 465.79999999999995" class="edge"/><rect x="468.79999999999995" y="35" width="121.6" height="66" rx="9" class="box"/><text x="529.5999999999999" y="62" text-anchor="middle" class="label ">Gradient</text><text x="529.5999999999999" y="84" text-anchor="middle" class="sub ">backprop</text><path d="M 590.4 68 H 615.4" class="edge"/><rect x="618.4" y="35" width="121.6" height="66" rx="9" class="dark"/><text x="679.1999999999999" y="62" text-anchor="middle" class="label white">모델</text><text x="679.1999999999999" y="84" text-anchor="middle" class="sub white">NN · CNN</text></svg></div><figcaption>CS231n의 핵심 학습 흐름을 재구성한 개념도입니다. 각 단계는 뒤 단계의 전제가 됩니다.</figcaption></figure>
+<p>2026년 공개 페이지의 과제는 고전적인 CNN 학습을 넘어 Transformer 기반
+captioning, self-supervised learning, diffusion, CLIP과 DINO까지 연결합니다.
+따라서 이 문서는 <strong>기초 공개 노트</strong>와 <strong>최근 강의의 확장 주제</strong>를
+구분해 설명합니다.</p>
+<figure class="study-diagram"><img src="../assets/diagrams/cs231n-learning-loop.svg" alt="Data, score, loss, gradient, optimizer, validation으로 이어지는 CS231n 학습 루프" loading="lazy" decoding="async"><figcaption>CS231n에서 반복해서 등장하는 학습 과정을 하나의 루프로 정리했습니다.</figcaption></figure>
+<div class="callout"><span class="label">이 문서의 역할</span><p><span class="term-inline"><span class="term-name">CS231n</span><span class="term-explain"> (Stanford CS231n: Deep Learning for Computer Vision, Stanford의 컴퓨터 비전 딥러닝 강의)</span></span> 원문을 번역해 옮긴 자료가 아니라, 공개 노트의 학습 순서를 보존하면서 핵심 개념·수식·수치 예시를 Vision AI 관점에서 다시 설명한 요약 지도입니다.</p></div></section><section class="article-section" id="classification"><h2>1. Image Classification: 데이터가 곧 경험이다</h2>
+<p>이미지 분류의 입력은 픽셀 배열 <code>x</code>, 출력은 K개 클래스 중 하나입니다.
+가장 단순한 데이터 기반 접근인 k-Nearest Neighbor(<span class="term-inline"><span class="term-name">kNN</span><span class="term-explain"> (k-Nearest Neighbors, 가장 가까운 k개 샘플을 이용하는 방법)</span></span>)는 새 이미지와 학습 이미지를
+직접 비교합니다. 별도의 학습 가능한 가중치는 없지만, 추론 시 학습 데이터를 검색해야
+하므로 데이터가 커질수록 비용이 커집니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+d_{L1}(x,y) &= \sum_i |x_i-y_i| \\
+d_{L2}(x,y) &= \sqrt{\sum_i (x_i-y_i)^2}
+\end{aligned}\]</div></div>
+<p>예를 들어 두 3차원 벡터가 <code>[1, 2, 3]</code>과 <code>[2, 2, 5]</code>라면
+L1 거리는 3, L2 거리는 √5 ≈ 2.236입니다. 실제 32 × 32 × 3 CIFAR-10 이미지는
+3,072차원이므로 단순 픽셀 거리는 배경 이동, 조명, 물체 위치 변화에 매우 민감합니다.
+이 한계가 “유용한 특징을 학습하는 모델”로 넘어가는 동기가 됩니다.</p>
+<div class="table-wrap"><table><thead><tr><th>분할</th><th>역할</th><th>하면 안 되는 일</th></tr></thead><tbody><tr><td>Train</td><td>파라미터를 학습</td><td>Test 성능을 보고 반복 수정</td></tr><tr><td>Validation</td><td>하이퍼파라미터·모델 선택</td><td>최종 일반화 성능처럼 보고</td></tr><tr><td>Test</td><td>최종 선택이 끝난 뒤 1회 평가</td><td>threshold·증강·구조를 다시 맞춤</td></tr></tbody></table></div>
+<p>CS231n은 kNN의 <code>k</code>, 거리 함수 같은 하이퍼파라미터를 validation으로
+고르는 흐름을 강조합니다. 데이터가 충분히 큰 경우에는 단일 validation split을,
+작은 경우에는 cross-validation을 고려할 수 있습니다. 이미지·영상에서는 같은 원본의
+프레임이 train과 test에 동시에 들어가지 않도록 <strong>그룹 단위 분리</strong>까지
+추가로 생각해야 합니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-knn-distance.svg" alt="kNN and pixel-space distance" loading="lazy" decoding="async"><figcaption><strong>kNN and pixel-space distance</strong> — Raw-pixel distance can disagree with semantic similarity. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-split.svg" alt="Train / validation / test" loading="lazy" decoding="async"><figcaption><strong>Train / validation / test</strong> — Validation guides choices; grouped splitting keeps near-duplicates from leaking across sets. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="linear"><h2>2. Linear Classifier: 점수와 loss를 분리해서 보기</h2>
+<p>선형 분류기는 입력을 바로 클래스 점수로 바꿉니다. 이미지를 펼친 벡터가
+<code>x ∈ Rᴰ</code>, 클래스가 K개라면 <code>W ∈ Rᴷˣᴰ</code>,
+<code>b ∈ Rᴷ</code>입니다. 출력 score는 아직 확률이 아닙니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[s = Wx+b,
+\qquad
+x\in\mathbb{R}^{D},\
+W\in\mathbb{R}^{K\times D},\
+b\in\mathbb{R}^{K},\
+s\in\mathbb{R}^{K}\]</div></div>
+<p>예를 들어 <span class="term-inline"><span class="term-name">logit</span><span class="term-explain"> (Logit / raw class score, softmax를 적용하기 전 클래스별 원시 점수)</span></span>s가 <code>[2, 1, -1]</code>이면 softmax 확률은 대략
+<code>[0.705, 0.259, 0.035]</code>입니다. 첫 클래스가 정답이라면
+cross-entropy는 <code>-log(0.705) ≈ 0.350</code>입니다. 같은 score에 대해서도
+SVM의 multiclass hinge loss는 “정답 점수가 다른 클래스보다 margin만큼 높은가?”를
+봅니다. 두 loss는 목적은 분류지만 벌점을 주는 방식이 다릅니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+p_k &= \frac{e^{s_k}}{\sum_j e^{s_j}} \\
+\mathcal{L}_{\mathrm{CE}} &= -\log p_y \\
+\mathcal{L}^{(i)}_{\mathrm{hinge}}
+&= \sum_{j\ne y_i}\max(0,s_j-s_{y_i}+\Delta)
+\end{aligned}\]</div></div>
+<p>전체 목적함수에는 데이터 loss뿐 아니라 regularization이 들어갈 수 있습니다.
+L2 regularization은 큰 가중치에 비용을 주어 특정 입력 차원에 지나치게 의존하는
+해를 억제합니다. <strong>loss가 낮다</strong>와 <strong>test에서 잘 일반화한다</strong>는
+같은 문장이 아닙니다.</p>
+<div class="callout"><span class="label">기존 자료와 연결</span><p>softmax·cross-entropy를 실제 네트워크 학습과 연결해서 보고 싶다면 <a href="training.html">학습과 평가</a> 문서와 함께 보세요.</p></div><div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-linear-score.svg" alt="Linear classifier" loading="lazy" decoding="async"><figcaption><strong>Linear classifier</strong> — A single affine transformation maps an input vector to K class scores. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-softmax-loss.svg" alt="Softmax and classification losses" loading="lazy" decoding="async"><figcaption><strong>Softmax and classification losses</strong> — Scores become probabilities, then the loss converts confidence or margin into a penalty. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-decision-boundary.svg" alt="Decision boundaries" loading="lazy" decoding="async"><figcaption><strong>Decision boundaries</strong> — Linear models split feature space with hyperplanes; nonlinear models bend that boundary. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-regularization-objective.svg" alt="Regularized learning objective" loading="lazy" decoding="async"><figcaption><strong>Regularized learning objective</strong> — Objective = data loss + weighted regularization. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="optimization"><h2>3. Optimization과 Backpropagation: W를 어떻게 바꿀까?</h2>
+<p>모델 구조와 loss를 정해도 파라미터 값을 찾는 문제가 남습니다. 최적화는
+loss surface에서 더 작은 값을 만드는 방향을 찾는 과정입니다. 수치 미분은 파라미터를
+조금 움직여 loss 차이를 직접 측정하고, 해석적 gradient는 미분 규칙과 chain rule을
+이용합니다. 학습에는 해석적 gradient를 사용하고 수치 미분은 주로 <span class="term-inline"><span class="term-name">gradient</span><span class="term-explain"> (파라미터를 조금 바꿨을 때 loss가 어느 방향으로 변하는지 나타내는 값)</span></span> check에
+사용합니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+\frac{df}{dx} &\approx \frac{f(x+h)-f(x-h)}{2h} \\
+W &\leftarrow W-\eta\frac{\partial\mathcal{L}}{\partial W}
+\end{aligned}\]</div></div>
+<p>간단히 <code>f(w)=(2w−4)²</code>라면
+<code>df/dw = 4(2w−4)</code>입니다. <code>w=1</code>에서 gradient는 -8이고,
+learning rate가 0.1이면 <code>w ← 1 - 0.1×(-8) = 1.8</code>로 이동합니다.
+최솟값 <code>w=2</code> 쪽으로 움직인 것입니다.</p>
+<p>역전파는 “오차를 뒤로 보낸다”는 추상적인 표현보다
+<strong>계산 그래프의 각 local derivative를 chain rule로 곱해 입력과 파라미터의
+gradient를 구한다</strong>고 이해하는 편이 정확합니다. 덧셈 노드는 gradient를
+그대로 분배하고, 곱셈 노드는 반대쪽 입력을 곱하며, max 계열 연산은 선택된 경로로
+gradient가 흐릅니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-computational-chain.svg" alt="Computational graph and chain rule" loading="lazy" decoding="async"><figcaption><strong>Computational graph and chain rule</strong> — Backpropagation is repeated local differentiation through a graph. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-optimizers.svg" alt="SGD, Momentum and Adam" loading="lazy" decoding="async"><figcaption><strong><span class="term-inline"><span class="term-name">SGD</span><span class="term-explain"> (Stochastic Gradient Descent, 미니배치 gradient로 파라미터를 갱신하는 최적화 방법)</span></span>, Momentum and Adam</strong> — Illustrative trajectories; exact paths depend on the objective and hyperparameters. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-lr-saddle.svg" alt="Learning rate, minima and saddle points" loading="lazy" decoding="async"><figcaption><strong>Learning rate, minima and saddle points</strong> — Step size changes convergence behavior; nonconvex landscapes also contain flat and saddle regions. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-gradient-stability.svg" alt="Gradient stability across depth" loading="lazy" decoding="async"><figcaption><strong>Gradient stability across depth</strong> — Repeated Jacobian factors can shrink or amplify gradients as depth grows. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="nn"><h2>4. Neural Network: 선형 변환 사이에 비선형성을 넣는 이유</h2>
+<p>다층 신경망은 <code>Linear → activation → Linear → ...</code> 형태로
+여러 표현 단계를 만듭니다. 활성함수가 없다면 여러 선형층을 곱해 하나의 선형 변환으로
+합칠 수 있으므로 깊게 쌓는 의미가 크게 줄어듭니다.</p>
+<div class="table-wrap"><table><thead><tr><th>요소</th><th>핵심 역할</th><th>실무에서 확인할 것</th></tr></thead><tbody><tr><td>ReLU</td><td>max(0, x) 비선형성</td><td>dead activation과 초기화</td></tr><tr><td>Sigmoid / tanh</td><td>값을 제한된 범위로 압축</td><td>포화 영역의 작은 gradient</td></tr><tr><td>Weight initialization</td><td>초기 signal/gradient 규모 결정</td><td>fan-in/out에 맞는 초기화</td></tr><tr><td>Batch Normalization</td><td>미니배치 통계로 중간 활성 정규화</td><td>train/eval 동작 차이</td></tr><tr><td>Dropout</td><td>학습 시 일부 활성 무작위 제거</td><td>추론 시 비활성화되는 방식</td></tr></tbody></table></div>
+<p>데이터 전처리도 모델의 일부입니다. 평균 제거, 스케일 조정, 이미지 증강은
+입력 분포를 바꿉니다. 학습과 추론에서 채널 순서·값 범위·정규화가 달라지면 네트워크
+파라미터가 같아도 다른 문제를 풀게 됩니다.</p>
+<div class="callout"><span class="label">정규화 용어 주의</span><p>입력 값을 0~1로 바꾸는 scaling, 데이터 평균·표준편차를 쓰는 standardization, 네트워크 내부의 BatchNorm은 서로 다른 연산입니다.</p></div><div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-activations.svg" alt="Activation functions" loading="lazy" decoding="async"><figcaption><strong>Activation functions</strong> — Activation shape and derivative shape jointly control information and gradient flow. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-init-bn.svg" alt="Initialization and Batch Normalization" loading="lazy" decoding="async"><figcaption><strong>Initialization and Batch Normalization</strong> — Initialization controls signal scale; BatchNorm changes statistics by mode. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-reg-dropout.svg" alt="Regularization and dropout" loading="lazy" decoding="async"><figcaption><strong>Regularization and dropout</strong> — Regularization constrains the solution; dropout injects stochastic masking during training. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-dropout-fit.svg" alt="Dropout modes and fitting regimes" loading="lazy" decoding="async"><figcaption><strong>Dropout modes and fitting regimes</strong> — Dropout changes behavior between training and evaluation; train/validation curves reveal fit quality. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="training"><h2>5. Learning & Evaluation: 학습이 되는지 먼저 진단하기</h2>
+<p>CS231n의 실전적인 장점 중 하나는 모델을 크게 돌리기 전에 sanity check를
+강조한다는 점입니다. 작은 데이터에 과적합 가능한지, 초기 loss가 기대 범위인지,
+gradient가 수치 미분과 맞는지 확인하면 데이터·loss·backprop 구현 오류를 일찍
+찾을 수 있습니다.</p>
+<div class="table-wrap"><table><thead><tr><th>관찰</th><th>가능한 원인</th><th>다음 확인</th></tr></thead><tbody><tr><td>Train loss가 거의 안 감소</td><td>learning rate 부적절, gradient 문제</td><td>작은 batch 과적합·gradient norm</td></tr><tr><td>Train↑ / Val 정체</td><td>과적합</td><td>증강·regularization·데이터 분리</td></tr><tr><td>둘 다 낮은 성능</td><td>underfitting 또는 입력 정보 부족</td><td>모델 용량·해상도·라벨 정의</td></tr><tr><td>Val 변동이 매우 큼</td><td>validation이 작거나 그룹 편향</td><td>그룹 split·여러 seed/fold</td></tr></tbody></table></div>
+<p>Momentum은 이전 업데이트 방향을 누적하고, RMSProp/Adam 계열은 파라미터별
+gradient 통계를 이용해 update scale을 조정합니다. optimizer 이름만 바꾸는 것보다
+learning rate와 scheduler, batch size, weight decay가 함께 만들어 내는 실제 update
+규모를 보는 것이 중요합니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+v_t &= \mu v_{t-1}-\eta\nabla\mathcal{L}(W_t) \\
+W_{t+1} &= W_t+v_t
+\end{aligned}\]</div></div>
+<p>하이퍼파라미터 탐색은 선형 간격보다 log scale이 적합한 값이 많습니다.
+예를 들어 learning rate 후보를 0.001, 0.002, 0.003만 보는 것보다
+10⁻⁵~10⁻² 같은 범위를 로그 공간에서 탐색하는 편이 합리적입니다. 최종 선택은
+validation에서 하고 test는 마지막까지 격리합니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-training-diagnostics.svg" alt="Training diagnostics" loading="lazy" decoding="async"><figcaption><strong>Training diagnostics</strong> — Loss curves and confusion patterns tell you what to inspect next. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-augmentation.svg" alt="Data augmentation" loading="lazy" decoding="async"><figcaption><strong>Data augmentation</strong> — An augmentation is valid only when it preserves the target semantics for the specific task. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="cnn"><h2>6. Convolutional Network: 공간 구조를 보존한 채 특징을 계산하기</h2>
+<p>완전연결층은 이미지를 펼치지만 Conv는 높이·너비 구조를 유지하며 지역 수용영역을
+공유 커널로 계산합니다. 출력 채널 하나는 일반적인 <code>groups=1</code> Conv에서
+모든 입력 채널을 함께 사용합니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+H_{\mathrm{out}}
+&=
+\left\lfloor\frac{H+2P-D(K-1)-1}{S}+1\right\rfloor \\
+N_{\mathrm{params}}
+&=
+C_{\mathrm{out}}C_{\mathrm{in}}K_hK_w+C_{\mathrm{out}}
+\end{aligned}\]</div></div>
+<p>입력이 <code>[B,3,224,224]</code>이고 3×3, stride 1, padding 1,
+출력 64채널 Conv라면 출력은 <code>[B,64,224,224]</code>이고 bias를 포함한
+파라미터 수는 <code>64×3×3×3+64 = 1,792</code>입니다. stride 2라면 공간 크기는
+112×112로 줄어듭니다.</p>
+<p>Pooling과 stride convolution은 공간 해상도를 줄이면서 더 넓은 문맥을
+효율적으로 다루게 하지만 작은 물체·미세 결함 정보를 잃을 수 있습니다.
+따라서 제조 Vision에서는 “표준 backbone이 원래 그렇게 한다”보다 실제 결함 크기가
+downsampling 후 몇 cell로 남는지 계산하는 것이 중요합니다.</p>
+<div class="callout"><span class="label">더 자세히</span><p><a href="cnn.html">CNN의 원리</a>에서 커널 한 칸 계산과 채널 shape를, <a href="cnn.html#resnet_problem">CNN 문서의 ResNet 섹션</a>에서 residual 연결을 수치 예시로 확인할 수 있습니다.</p></div><div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-conv-shape.svg" alt="Convolution, stride and padding" loading="lazy" decoding="async"><figcaption><strong>Convolution, stride and padding</strong> — Stride, padding and dilation change how local dot products are sampled. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-conv-sliding-response.svg" alt="Kernel sliding and synthetic feature responses" loading="lazy" decoding="async"><figcaption><strong>Kernel sliding and synthetic feature responses</strong> — A shared local kernel produces one response per window; different filters emphasize different local patterns. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-conv-channels-rf.svg" alt="Multi-channel convolution and receptive field" loading="lazy" decoding="async"><figcaption><strong>Multi-channel convolution and receptive field</strong> — Filters span input channels; stacked kernels expand receptive fields. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-pooling-hierarchy.svg" alt="Pooling and feature hierarchy" loading="lazy" decoding="async"><figcaption><strong>Pooling and feature hierarchy</strong> — Spatial summarization and depth transform low-level responses into more task-specific features. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-fc-conv.svg" alt="Fully connected vs convolutional connectivity" loading="lazy" decoding="async"><figcaption><strong>Fully connected vs convolutional connectivity</strong> — Fully connected layers connect everything; convolution reuses local weights over space. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="architectures"><h2>7. CNN Architecture: 블록 이름보다 계산과 정보 흐름을 보기</h2>
+<p>CS231n 노트는 AlexNet, ZFNet, VGG 같은 대표 구조를 통해 작은 커널의 반복,
+공간 downsampling, 채널 증가, 계산량을 설명합니다. 이후의 ResNet은 shortcut을
+도입해 매우 깊은 네트워크의 최적화를 개선했습니다. 역사적 구조를 외우는 것보다
+<strong>해상도·채널·수용영역·파라미터·FLOPs가 단계마다 어떻게 바뀌는지</strong>
+읽는 능력이 더 중요합니다.</p>
+<div class="table-wrap"><table><thead><tr><th>관점</th><th>질문</th><th>예시</th></tr></thead><tbody><tr><td>Spatial</td><td>H×W가 언제 줄어드는가?</td><td>224→112→56</td></tr><tr><td>Channel</td><td>C가 왜 늘어나는가?</td><td>64→128→256</td></tr><tr><td>Block</td><td>skip/add/concat이 있는가?</td><td>ResNet add, U-Net concat</td></tr><tr><td>Head</td><td>최종 출력 단위는?</td><td>K logits, boxes, masks</td></tr><tr><td>Compute</td><td>병목 연산은 어디인가?</td><td>고해상도 3×3 Conv</td></tr></tbody></table></div>
+<p>분류 backbone의 마지막 특징을 detection·segmentation head에 재사용하면
+같은 backbone이라도 출력 구조와 loss가 달라집니다. 따라서 “YOLO는 CNN이다”처럼
+하나의 이름으로 끝내지 말고 backbone, neck, task head를 분리해서 읽는 습관이
+필요합니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-architectures-residual.svg" alt="Architecture motifs and residual learning" loading="lazy" decoding="async"><figcaption><strong>Architecture motifs and residual learning</strong> — High-level motifs only: these blocks summarize design ideas, not exact layer-by-layer architectures. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-vgg-transfer.svg" alt="VGG-style stacks and transfer strategy" loading="lazy" decoding="async"><figcaption><strong>VGG-style stacks and transfer strategy</strong> — Stacked 3x3 convolutions grow receptive field; transfer strategy depends on data and domain gap. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="visualization"><h2>8. Understanding CNN: 모델이 무엇을 봤는지 확인하는 도구</h2>
+<p>특징 시각화는 모델 설명의 보조 도구이지 “채널 17은 눈을 본다”처럼 의미를
+확정하는 증명은 아닙니다. 최근접 이미지, 임베딩 시각화, saliency gradient,
+feature activation maximization 등은 서로 다른 질문에 답합니다.</p>
+<div class="table-wrap"><table><thead><tr><th>방법</th><th>보는 것</th><th>주의점</th></tr></thead><tbody><tr><td>Nearest neighbors</td><td>특징 공간에서 가까운 샘플</td><td>거리 metric과 feature layer 의존</td></tr><tr><td>t-SNE</td><td>고차원 특징의 2D 배치</td><td>전역 거리·cluster 크기 과해석 금지</td></tr><tr><td>Input gradient</td><td>출력에 민감한 입력 방향</td><td>gradient 크기 = 인과적 중요도는 아님</td></tr><tr><td>Activation maximization</td><td>특정 뉴런을 크게 만드는 입력</td><td>regularization·초기값에 따라 형태 변화</td></tr></tbody></table></div>
+<p>모델이 배경, 날짜 watermark, 특정 설비 색상 같은 shortcut을 사용하면 test
+환경 변화에서 성능이 무너질 수 있습니다. 시각화는 이런 가설을 만드는 데 유용하지만
+최종 판단은 controlled ablation과 분리된 test 데이터로 검증해야 합니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-visualization.svg" alt="Model visualization" loading="lazy" decoding="async"><figcaption><strong>Model visualization</strong> — Attribution tools are diagnostics, not guaranteed causal explanations. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-interpretability.svg" alt="Feature visualization and Grad-CAM-style diagnostics" loading="lazy" decoding="async"><figcaption><strong>Feature visualization and Grad-CAM-style diagnostics</strong> — Feature visualization and localization maps probe different model behaviors. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="transfer"><h2>9. Transfer Learning: 처음부터 학습할지, 어디까지 풀지</h2>
+<p>사전학습 모델은 이미 일반적인 시각 특징을 학습한 상태이므로 데이터가 적을 때
+유용한 출발점이 됩니다. 하지만 원 데이터와 대상 데이터의 차이가 크면 마지막 head만
+바꾸는 것으로 충분하지 않을 수 있습니다.</p>
+<div class="table-wrap"><table><thead><tr><th>대상 데이터</th><th>일반적 시작점</th><th>확인할 실험</th></tr></thead><tbody><tr><td>작고 원 데이터와 유사</td><td>backbone freeze + 새 head</td><td>linear probe vs 일부 fine-tune</td></tr><tr><td>중간 규모</td><td>상위 block부터 점진적 fine-tune</td><td>layer별 lr·overfitting</td></tr><tr><td>크고 도메인 차이 큼</td><td>전체 fine-tune 또는 scratch 비교</td><td>사전학습 이득이 실제 있는지</td></tr></tbody></table></div>
+<p>fine-tuning할 때 backbone에는 작은 learning rate, 새 head에는 더 큰 learning
+rate를 주는 방식도 사용할 수 있습니다. BatchNorm 통계를 고정할지 업데이트할지도
+작은 batch에서는 중요한 선택입니다. 어떤 전략이 항상 정답인 것은 아니므로
+동일 split에서 비교해야 합니다.</p>
+<div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-transfer.svg" alt="Transfer learning and fine-tuning" loading="lazy" decoding="async"><figcaption><strong>Transfer learning and fine-tuning</strong> — Reuse pretrained representations, then decide how much of the backbone to update. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="modern"><h2>10. 2026 확장: Transformer · SSL · Diffusion · CLIP · DINO</h2>
+<p>현재 CS231n 공개 페이지의 Spring 2026 과제에는 고전 CNN 노트 이후의 주제가
+추가되어 있습니다. 이 부분은 오래된 공개 note 본문과 구분해서 보는 것이 정확합니다.</p>
+<div class="table-wrap"><table><thead><tr><th>주제</th><th>핵심 아이디어</th><th>Vision AI에서의 의미</th></tr></thead><tbody><tr><td>Transformer</td><td>token 관계를 attention으로 계산</td><td>ViT·captioning·multimodal의 기반</td></tr><tr><td>Self-supervised learning</td><td>라벨 없이 representation 학습</td><td>대규모 비라벨 이미지 활용</td></tr><tr><td><span class="term-inline"><span class="term-name">CLIP</span><span class="term-explain"> (Contrastive Language–Image Pre-training, 이미지와 텍스트 표현을 함께 학습하는 모델)</span></span></td><td>image-text 대응을 contrastive하게 학습</td><td>zero-shot·검색·멀티모달 표현</td></tr><tr><td><span class="term-inline"><span class="term-name">DINO</span><span class="term-explain"> (self-DIstillation with NO labels, 라벨 없이 teacher–student 방식으로 표현을 학습하는 방법)</span></span></td><td>teacher-student self-distillation</td><td>라벨 없이 강한 시각 특징 학습</td></tr><tr><td>Diffusion</td><td>노이즈가 섞인 샘플의 복원 과정을 학습</td><td>생성·조건부 생성·representation 연결</td></tr></tbody></table></div>
+<p>DINO류에서는 같은 이미지의 서로 다른 view를 teacher와 student에 넣고,
+student가 teacher의 target distribution을 맞추도록 학습합니다. teacher는 보통
+student parameter의 EMA로 갱신됩니다. CLIP은 이미지와 텍스트 표현을 같은 embedding
+공간에서 대응시키는 contrastive objective를 사용합니다. 두 방법 모두 “라벨이 없다”는
+공통점만으로 같은 알고리즘은 아닙니다.</p>
+<div class="equation" aria-label="수학 수식"><div class="math-display">\[\begin{aligned}
+\theta_{\mathrm{teacher}}
+&\leftarrow
+\tau\theta_{\mathrm{teacher}}
++(1-\tau)\theta_{\mathrm{student}} \\
+\operatorname{sim}(I_i,T_i)&\uparrow,\qquad
+\operatorname{sim}(I_i,T_j)&\downarrow\quad(i\ne j)
+\end{aligned}\]</div></div>
+<p>Diffusion은 forward 과정에서 점차 noise를 추가하고, 모델이 reverse 방향의
+denoising 정보를 예측하도록 학습합니다. Transformer를 denoiser로 쓰는 DiT처럼
+CNN 이후의 시각 모델은 서로 결합되기도 합니다. 이 주제들은 별도의 심화 문서로
+확장할 가치가 있으며, 여기서는 CS231n 전체 흐름에서의 위치를 잡는 데 집중합니다.</p>
+<div class="callout"><span class="label">ViT 문서 연결</span><p>패치 임베딩·CLS·Q/K/V·attention 계산은 <a href="vit.html">Vision Transformer</a> 문서에서 단계별로 설명합니다.</p></div><div class="paper-visuals reference-visuals"><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-task-suite.svg" alt="Classification, detection and segmentation" loading="lazy" decoding="async"><figcaption><strong>Classification, detection and segmentation</strong> — Vision tasks differ mainly in the spatial precision required from the output. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-iou-nms-instance.svg" alt="IoU, semantic/instance masks and NMS" loading="lazy" decoding="async"><figcaption><strong>IoU, semantic/instance masks and NMS</strong> — IoU measures overlap; masks encode regions; NMS suppresses duplicate detections. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-attention.svg" alt="Vision Transformer attention mechanics" loading="lazy" decoding="async"><figcaption><strong>Vision Transformer attention mechanics</strong> — ViT converts patches to tokens; attention uses Q/K/V scores, then combines several attention heads. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure><figure class="paper-figure reference-figure"><img src="../assets/diagrams/reference/cs-modern.svg" alt="Modern CS231n topics" loading="lazy" decoding="async"><figcaption><strong>Modern CS231n topics</strong> — Attention, self-distillation, vision-language and denoising learn representations differently. <span class="figure-note">개념 설명용 합성·재구성 figure입니다.</span></figcaption></figure></div></section><section class="article-section" id="study-path"><h2>11. 이 사이트에서 어떤 순서로 다시 보면 좋을까?</h2><div class="table-wrap"><table><thead><tr><th>CS231n 개념</th><th>이 사이트의 상세 문서</th><th>핵심 확인</th></tr></thead><tbody><tr><td>입력·전처리</td><td><a href="pixels.html">이미지와 텐서</a></td><td>[B,C,H,W], RGB, normalization</td></tr><tr><td>Conv·CNN</td><td><a href="cnn.html">CNN의 원리</a></td><td>kernel, channel, receptive field</td></tr><tr><td>학습·검증</td><td><a href="training.html">학습과 평가</a></td><td>split, CV, threshold, metrics</td></tr><tr><td>CNN architecture · ResNet</td><td><a href="cnn.html#resnet_problem">CNN · ResNet</a></td><td>identity/projection shortcut</td></tr><tr><td>Transformer</td><td><a href="vit.html">Vision Transformer</a></td><td>patch, Q/K/V, MSA, encoder</td></tr><tr><td>Segmentation · U-Net</td><td><a href="tasks.html#unet_architecture">Vision Tasks · U-Net</a></td><td>encoder-decoder, skip concat</td></tr></tbody></table></div>
+<p>CS231n을 한 번 읽고 끝내기보다, 위 문서에서 shape와 숫자를 직접 계산한 뒤
+다시 원 강의 노트를 보면 용어가 훨씬 구체적으로 보입니다. 특히 모델을 바꿀 때마다
+<strong>입력 → score/logit → loss → gradient → update → validation</strong> 흐름을
+같은 틀로 적어 보는 것이 좋습니다.</p>
+</section><section class="article-section" id="sources"><h2>출처와 더 확인할 자료</h2><p class="small">본문은 이해를 위한 한국어 해설입니다. 도식은 직접 재구성했으며, 가상 수치와 단순화한 구조는 해당 위치에 표시했습니다.</p><ol class="references"><li><a href="https://cs231n.github.io/" target="_blank" rel="noopener noreferrer">Stanford CS231n · 공개 노트 ↗</a><small>Image classification, linear classifier, optimization, backpropagation, neural networks, CNN, visualization, transfer learning으로 이어지는 공식 공개 노트의 기준입니다.</small></li><li><a href="https://cs231n.github.io/classification/" target="_blank" rel="noopener noreferrer">CS231n · Image Classification ↗</a><small>kNN, 거리 함수, train/validation/test와 hyperparameter 선택.</small></li><li><a href="https://cs231n.github.io/linear-classify/" target="_blank" rel="noopener noreferrer">CS231n · Linear Classification ↗</a><small>score function, <span class="term-inline"><span class="term-name">SVM</span><span class="term-explain"> (Support Vector Machine, margin을 이용해 분류 경계를 학습하는 모델)</span></span>/Softmax loss, regularization.</small></li><li><a href="https://cs231n.github.io/convolutional-networks/" target="_blank" rel="noopener noreferrer">CS231n · Convolutional Networks ↗</a><small>Conv/Pooling layer의 공간 구조와 대표 CNN architecture.</small></li><li><a href="https://cs231n.stanford.edu/slides/2026/" target="_blank" rel="noopener noreferrer">CS231n · 2026 강의 슬라이드 ↗</a><small>최근 강의의 Transformer, self-supervised learning, DINO, diffusion 등 확장 범위를 확인하는 공식 자료.</small></li></ol></section><nav class="pager" aria-label="이전 다음 자료"><a href="patchcore.html">← Anomaly Detection</a><a href="prml.html">PRML →</a></nav><footer class="footer">Vision AI Notes · 개인 학습 자료 · 최초 작성 2026.09.22</footer></main><aside class="toc" aria-label="이 페이지 목차"><p>이 페이지에서</p><a href="#map">CS231n을 하나의 데이터 흐름으로 보기</a><a href="#classification">1. Image Classification: 데이터가 곧 경험이다</a><a href="#linear">2. Linear Classifier: 점수와 loss를 분리해서 보기</a><a href="#optimization">3. Optimization과 Backpropagation: W를 어떻게 바꿀까?</a><a href="#nn">4. Neural Network: 선형 변환 사이에 비선형성을 넣는 이유</a><a href="#training">5. Learning & Evaluation: 학습이 되는지 먼저 진단하기</a><a href="#cnn">6. Convolutional Network: 공간 구조를 보존한 채 특징을 계산하기</a><a href="#architectures">7. CNN Architecture: 블록 이름보다 계산과 정보 흐름을 보기</a><a href="#visualization">8. Understanding CNN: 모델이 무엇을 봤는지 확인하는 도구</a><a href="#transfer">9. Transfer Learning: 처음부터 학습할지, 어디까지 풀지</a><a href="#modern">10. 2026 확장: Transformer · SSL · Diffusion · CLIP · DINO</a><a href="#study-path">11. 이 사이트에서 어떤 순서로 다시 보면 좋을까?</a><a href="#sources">출처와 더 확인할 자료</a></aside></div></div></body></html>
