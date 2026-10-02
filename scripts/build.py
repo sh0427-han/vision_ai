@@ -931,7 +931,7 @@ def topic_for(slug):
 
 
 def topic_tabs(current, prefix):
-    active = topic_for(current) if current != 'home' else 'vision'
+    active = topic_for(current) if current != 'home' else 'overview'
     return '<nav class="topic-tabs" aria-label="학습 분야">' + ''.join(
         f'<a href="{prefix}index.html?topic={topic}" data-topic-tab="{topic}" '
         f'{"aria-current=page" if topic == active else ""}>{label}</a>'
@@ -946,8 +946,8 @@ def nav(current, prefix):
         'training': '학습과 평가', 'patchcore': 'Anomaly Detection',
         'cs231n': 'CS231n 전체 정리', 'prml': 'PRML 전체 정리',
     }
-    active = topic_for(current) if current != 'home' else 'vision'
-    content = ''
+    active = topic_for(current) if current != 'home' else 'overview'
+    content = '<div data-topic-nav="overview" ' + ('' if current == 'home' else 'hidden') + '><a href="' + prefix + 'index.html">전체 목차</a>' + ''.join(f'<a href="{prefix}index.html?topic={topic}">{label}</a>' for topic, label in TOPIC_LABELS.items()) + '</div>'
     for topic, label in TOPIC_LABELS.items():
         content += f'<div data-topic-nav="{topic}" {"hidden" if topic != active else ""}>'
         content += f'<a href="{prefix}index.html?topic={topic}">{label} 자료 전체</a>'
@@ -965,8 +965,8 @@ def nav(current, prefix):
 
 def page(title, description, current, body, prefix='', toc=''):
     return f'''<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="{escape(description)}"><meta name="theme-color" content="#14213b"><title>{escape(title)} · Vision AI Notes</title><link rel="icon" href="{prefix}assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="{prefix}assets/site.css?v=20261002-topics"><script src="{prefix}assets/site.js?v=20261002-topics" defer></script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script></head>
-<body data-page="{current}"><a class="skip" href="#main">본문으로 이동</a><aside id="sidebar" class="sidebar"><a class="brand" href="{prefix}index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Study Notes</a><p class="sub">이해하고, 연결하고, 쌓아가기.</p><nav aria-label="학습 주제">{nav(current, prefix)}</nav><div class="sidebar-foot">Personal study notebook<br><a href="https://github.com/sh0427-han/vision_ai">GitHub 저장소 ↗</a></div></aside><div class="shell"><header class="topbar"><button class="menu" type="button" aria-label="목차 열기" aria-controls="sidebar" aria-expanded="false">목차</button>{topic_tabs(current, prefix)}<a href="{prefix}index.html">전체 자료 보기</a></header><div class="layout{' home' if current == 'home' else ''}"><main id="main">{body}</main>{toc}</div></div></body></html>'''
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="{escape(description)}"><meta name="theme-color" content="#14213b"><title>{escape(title)} · Vision AI Notes</title><link rel="icon" href="{prefix}assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="{prefix}assets/site.css?v=20261002-contents"><script src="{prefix}assets/site.js?v=20261002-contents" defer></script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script></head>
+<body data-page="{current}"><a class="skip" href="#main">본문으로 이동</a><aside id="sidebar" class="sidebar"><a class="brand" href="{prefix}index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Study Notes</a><p class="sub">이해하고, 연결하고, 쌓아가기.</p><nav aria-label="학습 주제">{nav(current, prefix)}</nav><div class="sidebar-foot">Personal study notebook<br><a href="https://github.com/sh0427-han/vision_ai">GitHub 저장소 ↗</a></div></aside><div class="shell"><header class="topbar"><button class="menu" type="button" aria-label="목차 열기" aria-controls="sidebar" aria-expanded="false">목차</button>{topic_tabs(current, prefix)}<a href="{prefix}index.html">전체 목차</a></header><div class="layout{' home' if current == 'home' else ''}"><main id="main">{body}</main>{toc}</div></div></body></html>'''
 
 
 def miniature(slug):
@@ -1046,7 +1046,7 @@ def render():
             encoding='utf-8',
         )
 
-    home = '<div class="home-intro"><p class="eyebrow" id="topic-eyebrow">VISION AI · STUDY NOTEBOOK</p><h1 id="topic-heading">이미지에서 시작해, 모델의 동작까지.</h1><p class="lead" id="topic-description">이미지·모델·평가를 연결해 이해하는 학습 자료입니다.</p></div>'
+    home = '<div class="home-intro"><p class="eyebrow" id="topic-eyebrow">STUDY NOTEBOOK · CONTENTS</p><h1 id="topic-heading">학습 자료 목차</h1><p class="lead" id="topic-description">반도체 · AI · Vision AI 자료를 분야별로 찾아보세요.</p></div>'
     summaries = {
         '이미지·CNN': '픽셀 · 텐서 · 합성곱 · ResNet',
         'Transformer·Attention': 'token · Q/K/V · ViT',
@@ -1055,15 +1055,36 @@ def render():
         'Anomaly Detection': 'normal feature · memory bank · PatchCore',
         '종합 이론': '강의 · 교과서의 개념 연결',
     }
+    home += '<nav class="contents-grid" data-topic-panel="overview" aria-label="전체 학습 자료 목차">'
+    short_names = {
+        'pixels': '이미지와 텐서', 'cnn': 'CNN · ResNet',
+        'vit': 'Transformer · ViT', 'tasks': '분류 · 탐지 · 분할 · U-Net',
+        'training': '학습과 평가', 'patchcore': '이상 탐지 · PatchCore',
+        'cs231n': 'CS231n 전체 정리', 'prml': 'PRML 전체 정리',
+    }
     for topic, label in TOPIC_LABELS.items():
-        home += f'<div data-topic-panel="{topic}" {"hidden" if topic != "vision" else ""}>'
+        home += f'<section class="contents-section"><h2><a href="index.html?topic={topic}">{label}</a></h2><ol class="contents-list">'
+        if topic == 'semiconductor':
+            for name, url, domain in [
+                ('Memory Book', 'https://memorybook.euiyun.com/index.html', 'memorybook.euiyun.com'),
+                ('Process Book', 'https://processbook.euiyun.com/', 'processbook.euiyun.com'),
+            ]:
+                home += f'<li><a href="{url}" target="_blank" rel="noopener noreferrer">{name} ↗</a><small>출처: {name} · {domain}</small></li>'
+        else:
+            for item in NOTES:
+                if topic_for(item['slug']) == topic:
+                    home += f'<li><a href="notes/{item["slug"]}.html">{short_names[item["slug"]]}</a></li>'
+        home += '</ol></section>'
+    home += '</nav>'
+    for topic, label in TOPIC_LABELS.items():
+        home += f'<div data-topic-panel="{topic}" hidden>'
         if topic == 'semiconductor':
             home += '<div class="section-label"><h2>반도체 학습 자료</h2><span>외부 자료 2개</span></div><p>Memory Book과 Process Book을 함께 보는 반도체 학습 공간입니다. 각 카드를 누르면 원본 자료가 새 탭에서 열립니다.</p><div class="note-grid">'
             for name, url, description in [
                 ('Memory Book', 'https://memorybook.euiyun.com/index.html', '메모리 분야 공부를 위한 외부 자료'),
                 ('Process Book', 'https://processbook.euiyun.com/', '반도체 공정 공부를 위한 외부 자료'),
             ]:
-                home += f'<a class="note-card" href="{url}" target="_blank" rel="noopener noreferrer"><div class="card-body"><div class="card-meta"><span>반도체 · 외부 자료</span><span>새 탭 ↗</span></div><h3>{name}</h3><p>{description}</p></div></a>'
+                home += f'<a class="note-card" href="{url}" target="_blank" rel="noopener noreferrer"><div class="card-body"><div class="card-meta"><span>반도체 · 외부 자료</span><span>새 탭 ↗</span></div><h3>{name}</h3><p>{description}</p><small class="resource-source">출처: {name} · {url.split("/")[2]}</small></div></a>'
             home += '</div>'
         else:
             groups = list(dict.fromkeys(item['group'] for item in NOTES if topic_for(item['slug']) == topic))
@@ -1084,4 +1105,5 @@ def render():
 
 if __name__ == '__main__':
     render()
+
 

@@ -35,3 +35,12 @@
 .topic-tabs a:hover{background:var(--blue-soft);color:var(--blue)}
 .topic-tabs a[aria-current=page]{background:var(--blue);color:white}
 @media(max-width:520px){.topbar{padding:0 10px;gap:8px}.topic-tabs{gap:2px}.topic-tabs a{padding:7px 9px;font-size:.83rem}.topbar>a{font-size:.72rem}.menu{padding:5px 8px}}
+
+
+.contents-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;align-items:start}
+.contents-section{background:white;border:1px solid var(--line);border-radius:12px;padding:25px}
+.contents-section h2{font-size:1.4rem;margin-bottom:20px}.contents-section h2 a{text-decoration:none}
+.contents-list{margin:0;padding-left:22px}.contents-list li{padding:10px 0;border-bottom:1px solid var(--line)}.contents-list li:last-child{border:0}.contents-list a{text-decoration:none;font-weight:650}.contents-list small{display:block;color:var(--muted);font-size:.75rem;overflow-wrap:anywhere;margin-top:4px}
+.resource-source{display:block;color:var(--muted);margin-top:14px;overflow-wrap:anywhere}
+.sidebar .nav-label{overflow-wrap:anywhere;letter-spacing:.05em}
+@media(max-width:1050px){.contents-grid{grid-template-columns:1fr}}

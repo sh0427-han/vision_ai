@@ -2,13 +2,14 @@
 // The URL keeps the chosen field shareable and supports back/forward navigation.
 if (document.body.dataset.page === 'home') {
   const topic_copy = {
+    overview: ['STUDY NOTEBOOK · CONTENTS', '학습 자료 목차', '반도체 · AI · Vision AI 자료를 분야별로 찾아보세요.'],
     semiconductor: ['SEMICONDUCTOR · STUDY NOTEBOOK', '반도체의 원리와 공정을 함께 공부하기.', 'Memory Book과 Process Book으로 이어지는 반도체 학습 자료입니다.'],
     ai: ['AI · STUDY NOTEBOOK', '데이터에서 시작해, 학습의 원리까지.', '머신러닝·확률·학습·평가의 기본 개념을 연결해 이해합니다.'],
     vision: ['VISION AI · STUDY NOTEBOOK', '이미지에서 시작해, 모델의 동작까지.', '이미지·모델·평가를 연결해 이해하는 학습 자료입니다.'],
   };
   function select_topic() {
     const requested = new URLSearchParams(location.search).get('topic');
-    const selected = Object.hasOwn(topic_copy, requested) ? requested : 'vision';
+    const selected = Object.hasOwn(topic_copy, requested) ? requested : 'overview';
     document.querySelectorAll('[data-topic-panel]').forEach((panel) => {
       panel.hidden = panel.dataset.topicPanel !== selected;
     });
@@ -22,7 +23,7 @@ if (document.body.dataset.page === 'home') {
     ['topic-eyebrow', 'topic-heading', 'topic-description'].forEach((id, index) => {
       document.getElementById(id).textContent = topic_copy[selected][index];
     });
-    document.title = `${document.querySelector('[data-topic-tab][aria-current]').textContent} · Study Notes`;
+    document.title = selected === 'overview' ? '전체 목차 · Study Notes' : `${document.querySelector('[data-topic-tab][aria-current]').textContent} · Study Notes`;
   }
   document.querySelectorAll('[data-topic-tab]').forEach((tab) => {
     tab.addEventListener('click', (event) => {
@@ -138,3 +139,4 @@ if (threshold) {
   }
   threshold.addEventListener('input', render_metrics); render_metrics();
 }
+
